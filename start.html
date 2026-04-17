@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeighborlyWork | HVAC Quotes</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Outfit:wght@700;800&display=swap');
+
+    :root {
+      --green: #1a5c3a;
+      --orange: #c8401a;
+      --bg: #ffffff;
+      --card: #f5f5f7;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --radius: 16px;
+      --radius-lg: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+
+    .container {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      gap: 16px;
+    }
+
+    .brand {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.03em;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .nav-link {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .pill-btn {
+      border: none;
+      border-radius: 100px;
+      padding: 14px 22px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      font-weight: 500;
+    }
+
+    .pill-btn:hover { transform: translateY(-1px); }
+    .pill-btn.green {
+      background: var(--green);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .pill-btn.orange {
+      background: var(--orange);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .section {
+      padding: 104px 0;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 96px 0 110px;
+    }
+
+    .hero h1,
+    .section-title,
+    .final-title,
+    .contractor-title {
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+      margin: 0;
+    }
+
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 800;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .subtext {
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 400;
+      max-width: 520px;
+    }
+
+    .hero-form {
+      margin: 34px auto 16px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      max-width: 680px;
+    }
+
+    .hero-form input,
+    .inline-form input,
+    .modal input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: var(--card);
+      color: var(--text);
+      border-radius: 16px;
+      height: 56px;
+      padding: 0 18px;
+      font-size: 16px;
+      transition: box-shadow 0.2s ease, outline 0.2s ease;
+    }
+
+    .hero-form input:focus,
+    .inline-form input:focus,
+    .modal input:focus {
+      box-shadow: 0 0 0 3px rgba(26, 92, 58, 0.18);
+      outline: 2px solid rgba(26, 92, 58, 0.35);
+    }
+
+    .hero-form .pill-btn,
+    .final-cta .pill-btn {
+      height: 56px;
+      padding-inline: 26px;
+      white-space: nowrap;
+    }
+
+    .trust-pills {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .trust-pill,
+    .tag,
+    .service-tag {
+      background: var(--card);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .eyebrow {
+      text-align: center;
+      color: var(--green);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 40px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .narrow { max-width: 680px; }
+
+    .steps,
+    .services-grid,
+    .testimonials {
+      display: grid;
+      gap: 22px;
+    }
+
+    .steps {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card,
+    .service-tile,
+    .testimonial,
+    .step-card {
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .step-card {
+      background: white;
+      padding: 28px;
+    }
+
+    .step-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .step-icon {
+      font-size: 32px;
+      margin: 18px 0 14px;
+    }
+
+    .step-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      margin: 0 0 10px;
+      letter-spacing: -0.03em;
+    }
+
+    .step-copy,
+    .testimonial-copy,
+    .contractor-copy,
+    .final-copy,
+    .footer,
+    .modal-copy {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .services-wrap {
+      background: var(--card);
+    }
+
+    .services-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .service-tile {
+      background: white;
+      padding: 28px 18px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .service-tile:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+    }
+
+    .service-emoji {
+      font-size: 48px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .service-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .testimonials {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .testimonial {
+      background: var(--card);
+      padding: 26px;
+    }
+
+    .stars {
+      color: var(--green);
+      font-size: 18px;
+      margin-bottom: 14px;
+      letter-spacing: 0.05em;
+    }
+
+    .testimonial-copy {
+      color: var(--text);
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    .testimonial-meta {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .contractor-band {
+      background: var(--green);
+      color: white;
+    }
+
+    .contractor-box {
+      text-align: center;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .contractor-title {
+      color: white;
+      font-size: 40px;
+      margin-bottom: 16px;
+    }
+
+    .contractor-copy {
+      color: rgba(255,255,255,0.78);
+      font-size: 16px;
+      margin-bottom: 22px;
+    }
+
+    .checks {
+      display: grid;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 26px;
+      color: white;
+      font-size: 15px;
+    }
+
+    .checks span { color: rgba(255,255,255,0.92); }
+
+    .white-btn {
+      background: white;
+      color: var(--green);
+    }
+
+    .inline-form {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .inline-form input {
+      background: white;
+    }
+
+    .final-cta {
+      text-align: center;
+      padding-top: 92px;
+      padding-bottom: 92px;
+    }
+
+    .final-title {
+      font-size: 52px;
+      margin-bottom: 18px;
+    }
+
+    .final-copy {
+      font-size: 17px;
+      margin-bottom: 28px;
+    }
+
+    footer {
+      border-top: 1px solid #f0f0f0;
+      padding: 28px 0 34px;
+      background: white;
+    }
+
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      flex-wrap: wrap;
+    }
+
+    .footer-copy {
+      text-align: right;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.28);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+    }
+
+    .modal-backdrop.active { display: flex; }
+
+    .modal {
+      width: min(100%, 440px);
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+      padding: 28px;
+    }
+
+    .modal h3 {
+      margin: 0 0 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .modal-copy { font-size: 15px; margin-bottom: 18px; }
+
+    .modal form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .text-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 8px 0;
+    }
+
+    @media (max-width: 767px) {
+      .container { width: min(100% - 28px, 1120px); }
+      .nav-link { display: none; }
+      .hero { padding: 72px 0 88px; }
+      .hero h1 { font-size: 38px; max-width: 340px; }
+      .subtext { font-size: 16px; max-width: 320px; }
+      .hero-form,
+      .inline-form,
+      .steps,
+      .services-grid,
+      .testimonials,
+      .footer-inner {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+      .hero-form { max-width: 100%; }
+      .hero-form .pill-btn,
+      .inline-form .pill-btn,
+      .final-cta .pill-btn { width: 100%; }
+      .section { padding: 76px 0; }
+      .section-title,
+      .contractor-title { font-size: 32px; }
+      .final-title { font-size: 40px; }
+      .testimonials {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 4px;
+      }
+      .testimonial {
+        min-width: 85%;
+        scroll-snap-align: start;
+      }
+      .footer-inner { text-align: center; }
+      .footer-copy { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="#top" class="brand">NeighborlyWork</a>
+      <div class="nav-actions">
+        <a href="#" class="nav-link">Sign In</a>
+        <button class="pill-btn green" data-modal="waitlist">Get Quotes</button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container">
+        <h1>HVAC quotes.<br />Compare and save.</h1>
+        <p class="subtext">3 vetted contractors. Blind bids. You choose.</p>
+        <form class="hero-form" id="quote-form">
+          <input type="text" placeholder="Enter your ZIP code" aria-label="ZIP code" />
+          <button type="submit" class="pill-btn green">Get Quotes →</button>
+        </form>
+        <div class="trust-pills">
+          <span class="trust-pill">✓ Free</span>
+          <span class="trust-pill">✓ Takes 2 min</span>
+          <span class="trust-pill">✓ No spam</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container narrow">
+        <div class="eyebrow">How It Works</div>
+        <h2 class="section-title">Three steps.</h2>
+      </div>
+      <div class="container steps">
+        <article class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-icon">🏠</div>
+          <h3 class="step-title">Tell us about your home</h3>
+          <p class="step-copy">A few quick details. That’s it.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-icon">💬</div>
+          <h3 class="step-title">Get 3 competing quotes</h3>
+          <p class="step-copy">Contractors bid blind. Prices stay honest.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-icon">✅</div>
+          <h3 class="step-title">Choose the best price</h3>
+          <p class="step-copy">Compare and pick what fits best.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section services-wrap" id="services">
+      <div class="container">
+        <div class="eyebrow">What We Cover</div>
+        <h2 class="section-title">Every HVAC job.</h2>
+        <div class="services-grid">
+          <div class="service-tile"><div class="service-emoji">❄️</div><div class="service-label">AC Install</div></div>
+          <div class="service-tile"><div class="service-emoji">🔥</div><div class="service-label">Furnace</div></div>
+          <div class="service-tile"><div class="service-emoji">🌀</div><div class="service-label">Mini-Split</div></div>
+          <div class="service-tile"><div class="service-emoji">🏠</div><div class="service-label">Full System</div></div>
+          <div class="service-tile"><div class="service-emoji">🔧</div><div class="service-label">Repair</div></div>
+          <div class="service-tile"><div class="service-emoji">📋</div><div class="service-label">Tune-Up</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="testimonials">
+      <div class="container">
+        <div class="eyebrow">Trusted by Homeowners</div>
+        <h2 class="section-title">Real savings.</h2>
+        <div class="testimonials">
+          <article class="testimonial">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-copy">Saved $2,400 comparing 3 quotes side by side.</p>
+            <div class="testimonial-meta">Maria T. — Orlando, FL</div>
+            <span class="service-tag">AC Installation</span>
+          </article>
+          <article class="testimonial">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-copy">The lowest bid was still from a vetted local pro.</p>
+            <div class="testimonial-meta">James R. — Phoenix, AZ</div>
+            <span class="service-tag">Full System</span>
+          </article>
+          <article class="testimonial">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-copy">Fast, simple, and way less pressure than calling around.</p>
+            <div class="testimonial-meta">Alicia P. — Tampa, FL</div>
+            <span class="service-tag">Furnace</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section contractor-band" id="contractors">
+      <div class="container contractor-box">
+        <h2 class="contractor-title">Are you a contractor?</h2>
+        <p class="contractor-copy">Free to join. Pay $350 only when you close a job.</p>
+        <div class="checks">
+          <span>✓ No monthly fees</span>
+          <span>✓ Leads in your zip codes only</span>
+        </div>
+        <button class="pill-btn white-btn" data-modal="waitlist">Apply to Join →</button>
+        <form class="inline-form" id="apply-form">
+          <input type="text" placeholder="Name" aria-label="Name" />
+          <input type="text" placeholder="Business" aria-label="Business" />
+          <input type="tel" placeholder="Phone" aria-label="Phone" />
+          <input type="text" placeholder="ZIP" aria-label="ZIP" />
+          <button type="submit" class="pill-btn orange">Apply</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="final-cta" id="quotes">
+      <div class="container">
+        <h2 class="final-title">Your quotes are waiting.</h2>
+        <p class="final-copy">Free. Fast. No pressure.</p>
+        <button class="pill-btn green" data-modal="waitlist">Get My Free Quotes →</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div class="brand">NeighborlyWork</div>
+      <div class="footer-links">
+        <a href="#top">How It Works</a>
+        <a href="#contractors">Contractors</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+      <div class="footer-copy">© 2026 NeighborlyWork</div>
+    </div>
+  </footer>
+
+  <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h3 id="modal-title">Coming soon</h3>
+      <p class="modal-copy">Enter your email to join the waitlist.</p>
+      <form id="waitlist-form">
+        <input type="email" placeholder="Email address" aria-label="Email address" required />
+        <div class="modal-actions">
+          <button type="button" class="text-btn" id="close-modal">Close</button>
+          <button type="submit" class="pill-btn green">Join Waitlist</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const openers = document.querySelectorAll('[data-modal="waitlist"]');
+    const closeModal = document.getElementById('close-modal');
+    const forms = ['quote-form', 'apply-form', 'waitlist-form']
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+
+    function showModal() {
+      modalBackdrop.classList.add('active');
+      modalBackdrop.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideModal() {
+      modalBackdrop.classList.remove('active');
+      modalBackdrop.setAttribute('aria-hidden', 'true');
+    }
+
+    openers.forEach(btn => btn.addEventListener('click', showModal));
+    closeModal.addEventListener('click', hideModal);
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) hideModal();
+    });
+
+    forms.forEach(form => form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      showModal();
+    }));
+  </script>
+</body>
+</html>

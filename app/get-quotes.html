@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Get HVAC Quotes - NeighborlyWork</title>
+    <meta name="description" content="Get up to 3 free HVAC quotes from qualified Sacramento area contractors. No spam, no obligation." />
+    <style>
+      :root { --bg:#07111a; --text:#eef5fb; --muted:#9fb5c7; --accent:#58c7ff; --card:#0d1a26; }
+      * { box-sizing: border-box; }
+      body { margin:0; font-family: Inter, system-ui, sans-serif; background: linear-gradient(180deg,#061019,#0a1622); color:var(--text); min-height:100vh; }
+      .wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 64px; }
+      .nav { display:flex; justify-content:space-between; align-items:center; padding-bottom: 28px; }
+      .brand { font-weight:800; }
+      .nav a { color:var(--muted); text-decoration:none; font-size:.95rem; }
+      .panel { background: rgba(13,26,38,.95); border:1px solid rgba(88,199,255,.14); border-radius:22px; padding:36px; box-shadow:0 18px 50px rgba(0,0,0,.3); }
+      .eyebrow { color:var(--accent); text-transform:uppercase; letter-spacing:.14em; font-size:.78rem; font-weight:800; }
+      h1 { font-size:clamp(1.8rem,4vw,2.8rem); margin:10px 0 6px; line-height:1.1; }
+      .sub { color:var(--muted); margin:0 0 28px; }
+      .step { display:flex; gap:12px; align-items:flex-start; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+      .step:last-child { border-bottom:none; }
+      .step-num { background:var(--accent); color:#061019; border-radius:999px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.85rem; flex-shrink:0; margin-top:2px; }
+      .form { display:grid; gap:13px; margin-top:24px; }
+      .row { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+      input, select, textarea { width:100%; padding:13px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:#08131d; color:var(--text); font:inherit; }
+      input::placeholder, textarea::placeholder { color:var(--muted); }
+      textarea { min-height:100px; resize:vertical; }
+      .cta { display:block; width:100%; padding:15px; border-radius:14px; background:linear-gradient(90deg,#58c7ff,#7aa8ff); color:#061019; font-weight:800; font-size:1.05rem; text-align:center; text-decoration:none; margin-top:6px; border:none; cursor:pointer; }
+      .trust { display:flex; gap:18px; margin-top:20px; flex-wrap:wrap; }
+      .badge { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:.88rem; }
+      .badge span { font-size:1.1rem; }
+      @media(max-width:600px){ .row { grid-template-columns:1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand">NeighborlyWork</div>
+        <a href="index.html">← Home</a>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Free, no obligation</div>
+        <h1>Get up to 3 HVAC quotes from local contractors.</h1>
+        <p class="sub">Takes 2 minutes. We match you with qualified Sacramento area pros.</p>
+
+        <div class="step"><div class="step-num">1</div><div><strong>Fill out this form</strong><br><span style="color:var(--muted);font-size:.95rem">Tell us about your home and what you need.</span></div></div>
+        <div class="step"><div class="step-num">2</div><div><strong>We match you</strong><br><span style="color:var(--muted);font-size:.95rem">We send your request to up to 3 qualified contractors.</span></div></div>
+        <div class="step"><div class="step-num">3</div><div><strong>Contractors contact you</strong><br><span style="color:var(--muted);font-size:.95rem">They reach out within 24 hours with quotes.</span></div></div>
+
+        <form class="form" action="mailto:mxjarvis.builds@gmail.com" method="post" enctype="text/plain">
+          <input name="name" placeholder="Your full name" required />
+          <div class="row">
+            <input name="phone" type="tel" placeholder="Phone number" required />
+            <input name="email" type="email" placeholder="Email address" required />
+          </div>
+          <select name="job_type" required>
+            <option value="">What do you need?</option>
+            <option>AC Repair</option>
+            <option>Heater Repair</option>
+            <option>AC Replacement</option>
+            <option>Heater Replacement</option>
+            <option>New System Installation</option>
+            <option>Annual Maintenance / Tune-up</option>
+            <option>Duct Cleaning or Repair</option>
+            <option>Other</option>
+          </select>
+          <div class="row">
+            <input name="zip" placeholder="Zip code" required />
+            <select name="urgency">
+              <option value="">How urgent?</option>
+              <option>Emergency (today)</option>
+              <option>This week</option>
+              <option>Within a month</option>
+              <option>Just getting quotes</option>
+            </select>
+          </div>
+          <div class="row">
+            <select name="home_type">
+              <option value="">Home type</option>
+              <option>Single family home</option>
+              <option>Condo / townhouse</option>
+              <option>Mobile home</option>
+              <option>Commercial</option>
+            </select>
+            <input name="system_age" placeholder="System age (if known)" />
+          </div>
+          <textarea name="details" placeholder="Describe the issue or what you're looking for. Any details help the contractor prepare."></textarea>
+          <a class="cta" href="mailto:mxjarvis.builds@gmail.com?subject=HVAC%20Quote%20Request%20-%20Sacramento&body=Please%20contact%20me%20about%20an%20HVAC%20quote.">Submit quote request</a>
+        </form>
+
+        <div class="trust">
+          <div class="badge"><span>✅</span> Free for homeowners</div>
+          <div class="badge"><span>🔒</span> No spam, ever</div>
+          <div class="badge"><span>📍</span> Sacramento area only</div>
+          <div class="badge"><span>⚡</span> Response within 24h</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

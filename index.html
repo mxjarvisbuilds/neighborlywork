@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeighborlyWork — Get 3 Free HVAC Quotes</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+ --green: #1a5c3a;
+ --green-light: #e8f2ec;
+ --green-mid: #6fcf4a;
+ --orange: #c8401a;
+ --ink: #1d1d1f;
+ --muted: #6e6e73;
+ --bg: #ffffff;
+ --card: #f5f5f7;
+ --border: rgba(0,0,0,0.08);
+ --radius: 18px;
+ --radius-sm: 12px;
+ --radius-pill: 100px;
+}
+
+body {
+ font-family: 'DM Sans', -apple-system, sans-serif;
+ color: var(--ink);
+ background: var(--bg);
+ font-size: 16px;
+ line-height: 1.6;
+ -webkit-font-smoothing: antialiased;
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+nav {
+ position: sticky;
+ top: 0;
+ z-index: 100;
+ background: rgba(255,255,255,0.92);
+ backdrop-filter: blur(16px);
+ -webkit-backdrop-filter: blur(16px);
+ border-bottom: 0.5px solid var(--border);
+ padding: 0 28px;
+ height: 60px;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+}
+
+.logo {
+ font-family: 'Outfit', sans-serif;
+ font-size: 19px;
+ font-weight: 700;
+ color: var(--green);
+ letter-spacing: -0.4px;
+ text-decoration: none;
+}
+
+.logo span { color: var(--orange); }
+
+.nav-links {
+ display: flex;
+ align-items: center;
+ gap: 24px;
+}
+
+.nav-links a {
+ font-size: 14px;
+ font-weight: 400;
+ color: var(--muted);
+ text-decoration: none;
+ transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--ink); }
+
+.btn-nav {
+ background: var(--green);
+ color: white;
+ border: none;
+ padding: 9px 20px;
+ border-radius: var(--radius-pill);
+ font-size: 14px;
+ font-weight: 600;
+ font-family: 'DM Sans', sans-serif;
+ cursor: pointer;
+ transition: opacity 0.15s;
+}
+
+.btn-nav:hover { opacity: 0.88; }
+
+.nav-hamburger {
+ display: none;
+ flex-direction: column;
+ gap: 5px;
+ cursor: pointer;
+ padding: 4px;
+}
+
+.nav-hamburger span {
+ display: block;
+ width: 22px;
+ height: 2px;
+ background: var(--ink);
+ border-radius: 2px;
+}
+
+.hero {
+ padding: 88px 28px 80px;
+ text-align: center;
+ background: #fff;
+}
+
+.hero h1 {
+ font-family: 'Outfit', sans-serif;
+ font-size: clamp(36px, 5.5vw, 60px);
+ font-weight: 800;
+ letter-spacing: -2px;
+ line-height: 1.06;
+ color: var(--ink);
+ margin-bottom: 16px;
+}
+
+.hero h1 em {
+ font-style: normal;
+ color: var(--green);
+}
+
+.hero-sub {
+ font-size: 18px;
+ color: var(--muted);
+ font-weight: 300;
+ max-width: 440px;
+ margin: 0 auto 36px;
+ line-height: 1.55;
+}
+
+.zip-row {
+ display: flex;
+ gap: 10px;
+ max-width: 420px;
+ margin: 0 auto 18px;
+}
+
+.zip-input {
+ flex: 1;
+ padding: 15px 20px;
+ background: var(--card);
+ border: none;
+ border-radius: var(--radius-sm);
+ font-size: 16px;
+ font-family: 'DM Sans', sans-serif;
+ color: var(--ink);
+ outline: none;
+ transition: box-shadow 0.2s;
+}
+
+.zip-input:focus {
+ box-shadow: 0 0 0 3px rgba(26,92,58,0.18);
+}
+
+.zip-input::placeholder { color: #aeaeb2; }
+
+.btn-primary {
+ background: var(--green);
+ color: white;
+ border: none;
+ padding: 15px 24px;
+ border-radius: var(--radius-sm);
+ font-size: 15px;
+ font-weight: 600;
+ font-family: 'DM Sans', sans-serif;
+ cursor: pointer;
+ white-space: nowrap;
+ transition: opacity 0.15s;
+}
+
+.btn-primary:hover { opacity: 0.88; }
+
+.trust-pills {
+ display: flex;
+ gap: 8px;
+ justify-content: center;
+ flex-wrap: wrap;
+}
+
+.pill {
+ background: var(--card);
+ color: var(--muted);
+ font-size: 12px;
+ font-weight: 500;
+ padding: 6px 14px;
+ border-radius: var(--radius-pill);
+}
+
+section { padding: 72px 28px; }
+
+.section-label {
+ font-size: 11px;
+ font-weight: 600;
+ letter-spacing: 1.8px;
+ text-transform: uppercase;
+ color: var(--green);
+ text-align: center;
+ margin-bottom: 8px;
+}
+
+.section-title {
+ font-family: 'Outfit', sans-serif;
+ font-size: clamp(28px, 4vw, 42px);
+ font-weight: 700;
+ letter-spacing: -1px;
+ text-align: center;
+ color: var(--ink);
+ margin-bottom: 44px;
+}
+
+.how-section { background: var(--card); }
+
+.steps-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 14px;
+ max-width: 760px;
+ margin: 0 auto 40px;
+}
+
+.step-card {
+ background: #fff;
+ border-radius: var(--radius);
+ padding: 30px 24px;
+ text-align: center;
+ box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.step-num {
+ width: 32px;
+ height: 32px;
+ background: var(--green-light);
+ color: var(--green);
+ font-size: 13px;
+ font-weight: 700;
+ border-radius: 50%;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ margin-bottom: 16px;
+}
+
+.step-card h3 {
+ font-family: 'Outfit', sans-serif;
+ font-size: 16px;
+ font-weight: 600;
+ color: var(--ink);
+ margin-bottom: 8px;
+ letter-spacing: -0.2px;
+}
+
+.step-card p {
+ font-size: 13px;
+ color: var(--muted);
+ line-height: 1.55;
+ font-weight: 300;
+}
+
+.center-btn {
+ text-align: center;
+ margin-top: 8px;
+}
+
+.services-section { background: #fff; }
+
+.service-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 12px;
+ max-width: 640px;
+ margin: 0 auto;
+}
+
+.service-tile {
+ background: var(--card);
+ border-radius: var(--radius);
+ padding: 28px 16px;
+ text-align: center;
+ cursor: pointer;
+ transition: transform 0.18s, box-shadow 0.18s;
+}
+
+.service-tile:hover {
+ transform: scale(1.04);
+ box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.service-icon {
+ font-size: 32px;
+ display: block;
+ margin-bottom: 10px;
+ line-height: 1;
+}
+
+.service-tile span:last-child {
+ font-size: 13px;
+ font-weight: 600;
+ color: var(--ink);
+ display: block;
+ letter-spacing: -0.1px;
+}
+
+.reviews-section { background: var(--card); }
+
+.review-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 14px;
+ max-width: 760px;
+ margin: 0 auto;
+}
+
+.review-card {
+ background: #fff;
+ border-radius: var(--radius);
+ padding: 24px;
+ box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.stars {
+ color: var(--green);
+ font-size: 14px;
+ margin-bottom: 12px;
+ letter-spacing: 1px;
+}
+
+.review-card blockquote {
+ font-size: 14px;
+ color: var(--ink);
+ line-height: 1.6;
+ margin-bottom: 14px;
+ font-style: normal;
+ font-weight: 400;
+}
+
+.reviewer-name {
+ font-size: 12px;
+ color: var(--muted);
+ font-weight: 400;
+}
+
+.service-badge {
+ display: inline-block;
+ background: var(--green-light);
+ color: var(--green);
+ font-size: 11px;
+ font-weight: 600;
+ padding: 4px 10px;
+ border-radius: var(--radius-pill);
+ margin-top: 10px;
+}
+
+.contractor-section {
+ background: var(--green);
+ text-align: center;
+}
+
+.contractor-section .section-label {
+ color: rgba(255,255,255,0.6);
+}
+
+.contractor-section .section-title {
+ color: #fff;
+ margin-bottom: 12px;
+}
+
+.contractor-sub {
+ font-size: 17px;
+ color: rgba(255,255,255,0.7);
+ margin-bottom: 28px;
+ font-weight: 300;
+}
+
+.contractor-checks {
+ display: flex;
+ gap: 28px;
+ justify-content: center;
+ flex-wrap: wrap;
+ margin-bottom: 36px;
+}
+
+.check-item {
+ font-size: 14px;
+ color: rgba(255,255,255,0.88);
+ font-weight: 400;
+}
+
+.check-item::before {
+ content: "✓ ";
+ color: var(--green-mid);
+ font-weight: 700;
+}
+
+.contractor-form {
+ display: flex;
+ gap: 10px;
+ max-width: 580px;
+ margin: 0 auto;
+ flex-wrap: wrap;
+ justify-content: center;
+}
+
+.contractor-form input {
+ flex: 1;
+ min-width: 130px;
+ padding: 13px 16px;
+ background: rgba(255,255,255,0.12);
+ border: 0.5px solid rgba(255,255,255,0.25);
+ border-radius: var(--radius-sm);
+ font-size: 14px;
+ font-family: 'DM Sans', sans-serif;
+ color: #fff;
+ outline: none;
+ transition: background 0.2s;
+}
+
+.contractor-form input:focus {
+ background: rgba(255,255,255,0.2);
+}
+
+.contractor-form input::placeholder {
+ color: rgba(255,255,255,0.45);
+}
+
+.btn-white {
+ background: #fff;
+ color: var(--green);
+ border: none;
+ padding: 13px 24px;
+ border-radius: var(--radius-sm);
+ font-size: 14px;
+ font-weight: 700;
+ font-family: 'DM Sans', sans-serif;
+ cursor: pointer;
+ transition: opacity 0.15s;
+ white-space: nowrap;
+}
+
+.btn-white:hover { opacity: 0.9; }
+
+.final-cta {
+ background: #fff;
+ text-align: center;
+ padding: 96px 28px;
+}
+
+.final-cta h2 {
+ font-family: 'Outfit', sans-serif;
+ font-size: clamp(32px, 5vw, 52px);
+ font-weight: 800;
+ letter-spacing: -1.5px;
+ color: var(--ink);
+ margin-bottom: 10px;
+ line-height: 1.1;
+}
+
+.final-cta p {
+ font-size: 17px;
+ color: var(--muted);
+ margin-bottom: 32px;
+ font-weight: 300;
+}
+
+.btn-final {
+ background: var(--green);
+ color: white;
+ border: none;
+ padding: 17px 40px;
+ border-radius: var(--radius-pill);
+ font-size: 17px;
+ font-weight: 600;
+ font-family: 'DM Sans', sans-serif;
+ cursor: pointer;
+ transition: opacity 0.15s, transform 0.15s;
+}
+
+.btn-final:hover {
+ opacity: 0.9;
+ transform: scale(1.02);
+}
+
+footer {
+ border-top: 0.5px solid var(--border);
+ padding: 24px 28px;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: 12px;
+}
+
+.footer-links {
+ display: flex;
+ gap: 20px;
+}
+
+.footer-links a {
+ font-size: 13px;
+ color: var(--muted);
+ text-decoration: none;
+}
+
+.footer-copy {
+ font-size: 12px;
+ color: #aeaeb2;
+}
+
+.modal-overlay {
+ display: none;
+ position: fixed;
+ inset: 0;
+ background: rgba(0,0,0,0.4);
+ backdrop-filter: blur(4px);
+ z-index: 200;
+ align-items: center;
+ justify-content: center;
+ padding: 20px;
+}
+
+.modal-overlay.open {
+ display: flex;
+}
+
+.modal {
+ background: #fff;
+ border-radius: 24px;
+ padding: 36px 32px;
+ max-width: 480px;
+ width: 100%;
+ position: relative;
+ box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.modal-close {
+ position: absolute;
+ top: 16px;
+ right: 16px;
+ background: var(--card);
+ border: none;
+ width: 30px;
+ height: 30px;
+ border-radius: 50%;
+ font-size: 16px;
+ cursor: pointer;
+ color: var(--muted);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+
+.modal h2 {
+ font-family: 'Outfit', sans-serif;
+ font-size: 24px;
+ font-weight: 700;
+ letter-spacing: -0.5px;
+ color: var(--ink);
+ margin-bottom: 6px;
+}
+
+.modal-sub {
+ font-size: 14px;
+ color: var(--muted);
+ margin-bottom: 24px;
+ font-weight: 300;
+}
+
+.progress-bar {
+ background: var(--card);
+ border-radius: var(--radius-pill);
+ height: 4px;
+ margin-bottom: 28px;
+ overflow: hidden;
+}
+
+.progress-fill {
+ height: 100%;
+ background: var(--green);
+ border-radius: var(--radius-pill);
+ transition: width 0.3s ease;
+}
+
+.form-group {
+ margin-bottom: 16px;
+}
+
+.form-label {
+ font-size: 13px;
+ font-weight: 500;
+ color: var(--ink);
+ display: block;
+ margin-bottom: 7px;
+}
+
+.form-input {
+ width: 100%;
+ padding: 13px 16px;
+ background: var(--card);
+ border: none;
+ border-radius: var(--radius-sm);
+ font-size: 15px;
+ font-family: 'DM Sans', sans-serif;
+ color: var(--ink);
+ outline: none;
+ transition: box-shadow 0.2s;
+}
+
+.form-input:focus {
+ box-shadow: 0 0 0 3px rgba(26,92,58,0.18);
+}
+
+.form-input::placeholder { color: #aeaeb2; }
+
+.form-select {
+ width: 100%;
+ padding: 13px 16px;
+ background: var(--card);
+ border: none;
+ border-radius: var(--radius-sm);
+ font-size: 15px;
+ font-family: 'DM Sans', sans-serif;
+ color: var(--ink);
+ outline: none;
+ appearance: none;
+ cursor: pointer;
+ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236e6e73' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+ background-repeat: no-repeat;
+ background-position: right 14px center;
+ padding-right: 36px;
+}
+
+.radio-group {
+ display: flex;
+ flex-direction: column;
+ gap: 8px;
+}
+
+.radio-option {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ padding: 13px 16px;
+ background: var(--card);
+ border-radius: var(--radius-sm);
+ cursor: pointer;
+ transition: background 0.15s;
+ border: 2px solid transparent;
+}
+
+.radio-option:hover { background: #ebebed; }
+
+.radio-option.selected {
+ background: var(--green-light);
+ border-color: var(--green);
+}
+
+.radio-option input[type="radio"] { display: none; }
+
+.radio-label {
+ font-size: 14px;
+ font-weight: 500;
+ color: var(--ink);
+}
+
+.radio-icon { font-size: 20px; line-height: 1; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+
+.modal-footer {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-top: 24px;
+ gap: 12px;
+}
+
+.btn-back {
+ background: none;
+ border: none;
+ font-size: 14px;
+ color: var(--muted);
+ cursor: pointer;
+ font-family: 'DM Sans', sans-serif;
+ padding: 12px 0;
+}
+
+.btn-next {
+ background: var(--green);
+ color: white;
+ border: none;
+ padding: 13px 28px;
+ border-radius: var(--radius-pill);
+ font-size: 15px;
+ font-weight: 600;
+ font-family: 'DM Sans', sans-serif;
+ cursor: pointer;
+ flex: 1;
+ transition: opacity 0.15s;
+}
+
+.btn-next:hover { opacity: 0.88; }
+
+.step-counter {
+ font-size: 12px;
+ color: var(--muted);
+ text-align: center;
+ margin-bottom: 20px;
+}
+
+.success-screen {
+ text-align: center;
+ padding: 16px 0;
+}
+
+.success-icon {
+ width: 64px;
+ height: 64px;
+ background: var(--green-light);
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ margin: 0 auto 20px;
+ font-size: 28px;
+}
+
+.success-screen h2 {
+ font-family: 'Outfit', sans-serif;
+ font-size: 24px;
+ font-weight: 700;
+ color: var(--ink);
+ margin-bottom: 10px;
+ letter-spacing: -0.5px;
+}
+
+.success-screen p {
+ font-size: 14px;
+ color: var(--muted);
+ line-height: 1.6;
+ margin-bottom: 8px;
+}
+
+.summary-card {
+ background: var(--card);
+ border-radius: var(--radius-sm);
+ padding: 16px;
+ margin: 20px 0;
+ text-align: left;
+}
+
+.summary-row {
+ display: flex;
+ justify-content: space-between;
+ font-size: 13px;
+ padding: 5px 0;
+ border-bottom: 0.5px solid var(--border);
+}
+
+.summary-row:last-child { border-bottom: none; }
+
+.summary-row span:first-child { color: var(--muted); }
+.summary-row span:last-child { font-weight: 500; color: var(--ink); }
+
+.btn-google {
+ width: 100%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 10px;
+ background: #fff;
+ border: 1px solid #dadce0;
+ border-radius: var(--radius-sm);
+ padding: 12px;
+ font-size: 14px;
+ font-family: 'DM Sans', sans-serif;
+ font-weight: 500;
+ color: #3c4043;
+ cursor: pointer;
+ transition: background 0.15s;
+ margin-bottom: 16px;
+}
+
+.btn-google:hover { background: #f8f9fa; }
+
+.divider-or {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ margin: 16px 0;
+ color: var(--muted);
+ font-size: 13px;
+}
+
+.divider-or::before,
+.divider-or::after {
+ content: '';
+ flex: 1;
+ height: 0.5px;
+ background: var(--border);
+}
+
+.auth-switch {
+ text-align: center;
+ font-size: 13px;
+ color: var(--muted);
+ margin-top: 16px;
+}
+
+.auth-switch a {
+ color: var(--green);
+ text-decoration: none;
+ font-weight: 500;
+}
+
+.password-wrap { position: relative; }
+.password-wrap .form-input { padding-right: 44px; }
+.toggle-pw {
+ position: absolute;
+ right: 14px;
+ top: 50%;
+ transform: translateY(-50%);
+ background: none;
+ border: none;
+ cursor: pointer;
+ font-size: 13px;
+ color: var(--muted);
+}
+
+@media (max-width: 700px) {
+ .steps-grid,
+ .service-grid,
+ .review-grid { grid-template-columns: 1fr 1fr; }
+
+ .nav-links a:not(.btn-nav) { display: none; }
+
+ .nav-hamburger { display: flex; }
+
+ .zip-row { flex-direction: column; }
+ .btn-primary { width: 100%; }
+
+ .two-col { grid-template-columns: 1fr; }
+
+ .modal { padding: 28px 20px; }
+
+ footer { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+ .steps-grid { grid-template-columns: 1fr; }
+ .review-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="screen-home">
+
+ <nav>
+ <a href="#" class="logo">Neighborly<span>Work</span></a>
+ <div class="nav-links">
+ <a href="#how">How it works</a>
+ <a href="#contractor">For contractors</a>
+ <a href="/app/homeowner-auth.html">Sign in</a>
+ <button class="btn-nav" onclick="goToHomeownerAuth()">Get quotes</button>
+ </div>
+ <div class="nav-hamburger" onclick="toggleMenu()">
+ <span></span><span></span><span></span>
+ </div>
+ </nav>
+
+ <section class="hero">
+ <h1>Get 3 free HVAC quotes.<br><em>Compare and save.</em></h1>
+ <p class="hero-sub">Submit once. Three vetted local contractors compete for your job. You pick the best price.</p>
+ <div class="zip-row">
+ <input class="zip-input" type="text" placeholder="Enter your ZIP code" maxlength="5" id="hero-zip" oninput="this.value=this.value.replace(/\D/g,'')">
+ <button class="btn-primary" onclick="startWithZip()">Get quotes →</button>
+ </div>
+ <div class="trust-pills">
+ <span class="pill">✓ Free for homeowners</span>
+ <span class="pill">✓ Takes 2 minutes</span>
+ <span class="pill">✓ No spam calls</span>
+ </div>
+ </section>
+
+ <section class="how-section" id="how">
+ <div class="section-label">How it works</div>
+ <div class="section-title">Three steps.</div>
+ <div class="steps-grid">
+ <div class="step-card">
+ <div class="step-num">1</div>
+ <h3>Tell us about your home</h3>
+ <p>Fill out a quick 2-minute form. ZIP code, system type, and home size.</p>
+ </div>
+ <div class="step-card">
+ <div class="step-num">2</div>
+ <h3>Get 3 competing quotes</h3>
+ <p>Vetted local contractors submit blind bids. They never see each other's price.</p>
+ </div>
+ <div class="step-card">
+ <div class="step-num">3</div>
+ <h3>Choose the best price</h3>
+ <p>See all 3 quotes side by side. Pick the one you want. No obligation.</p>
+ </div>
+ </div>
+ <div class="center-btn">
+ <button class="btn-primary" onclick="goToHomeownerAuth()">Get my free quotes →</button>
+ </div>
+ </section>
+
+ <section class="services-section">
+ <div class="section-label">What we cover</div>
+ <div class="section-title">Every HVAC job.</div>
+ <div class="service-grid">
+ <div class="service-tile" onclick="openModal('modal-signup')">
+ <span class="service-icon">❄️</span>
+ <span>AC Install</span>
+ </div>
+ <div class="service-tile" onclick="openModal('modal-signup')">
+ <span class="service-icon">🔥</span>
+ <span>Furnace</span>
+ </div>
+ <div class="service-tile" onclick="openModal('modal-signup')">
+ <span class="service-icon">🌀</span>
+ <span>Mini-Split</span>
+ </div>
+ <div class="service-tile" onclick="openModal('modal-signup')">
+ <span class="service-icon">🏠</span>
+ <span>Full System</span>
+ </div>
+ <div class="service-tile" onclick="openModal('modal-signup')">
+ <span class="service-icon">🔧</span>
+ <span>Repair</span>
+ </div>
+ <div class="service-tile" onclick="openModal('modal-signup')">
+ <span class="service-icon">📋</span>
+ <span>Tune-Up</span>
+ </div>
+ </div>
+ </section>
+
+ <section class="reviews-section">
+ <div class="section-label">Homeowners say</div>
+ <div class="section-title">Real savings.</div>
+ <div class="review-grid">
+ <div class="review-card">
+ <div class="stars">★★★★★</div>
+ <blockquote>"Saved $2,400 seeing all three quotes side by side. Never would have known without comparing."</blockquote>
+ <div class="reviewer-name">Maria T. — Orlando, FL</div>
+ <div class="service-badge">AC Installation</div>
+ </div>
+ <div class="review-card">
+ <div class="stars">★★★★★</div>
+ <blockquote>"No pressure calls. Just three clean quotes in my inbox. Picked the one I liked best."</blockquote>
+ <div class="reviewer-name">James R. — Tampa, FL</div>
+ <div class="service-badge">Furnace Replace</div>
+ </div>
+ <div class="review-card">
+ <div class="stars">★★★★★</div>
+ <blockquote>"System died in July. Had quotes by morning. Installed by the weekend. Incredible."</blockquote>
+ <div class="reviewer-name">Patricia M. — Houston, TX</div>
+ <div class="service-badge">Full HVAC System</div>
+ </div>
+ </div>
+ </section>
+
+ <section class="contractor-section" id="contractor">
+ <div class="section-label">For professionals</div>
+ <div class="section-title">Are you an HVAC contractor?</div>
+ <p class="contractor-sub">Free to join. Pay $350 only when you close and install a job.</p>
+ <div class="contractor-checks">
+ <span class="check-item">No monthly fees</span>
+ <span class="check-item">Leads in your zip codes</span>
+ <span class="check-item">Only pay when you win</span>
+ </div>
+ <div class="contractor-form">
+ <input type="text" placeholder="Your name">
+ <input type="text" placeholder="Business name">
+ <input type="text" placeholder="ZIP code">
+ <button class="btn-white" onclick="openModal('modal-contractor')">Apply →</button>
+ </div>
+ </section>
+
+ <section class="final-cta">
+ <h2>Your quotes are waiting.</h2>
+ <p>Free. Fast. No pressure.</p>
+ <button class="btn-final" onclick="goToHomeownerAuth()">Get my free quotes →</button>
+ </section>
+
+ <footer>
+ <a href="#" class="logo" style="font-size:16px">NeighborlyWork</a>
+ <div class="footer-links">
+ <a href="#how">How it works</a>
+ <a href="#contractor">For contractors</a>
+ <a href="#">Privacy</a>
+ <a href="#">Terms</a>
+ </div>
+ <div class="footer-copy">© 2026 NeighborlyWork</div>
+ </footer>
+
+</div>
+
+<div class="modal-overlay" id="modal-signup">
+ <div class="modal">
+ <button class="modal-close" onclick="closeModal('modal-signup')">✕</button>
+
+ <div id="hw-step-1">
+ <div class="step-counter">Step 1 of 4</div>
+ <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+ <h2>Create your account</h2>
+ <p class="modal-sub">Save your quotes and track your requests.</p>
+ <button class="btn-google">
+ <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+ Continue with Google
+ </button>
+ <div class="divider-or">or</div>
+ <div class="form-row">
+ <div class="form-group">
+ <label class="form-label">First name</label>
+ <input class="form-input" type="text" placeholder="Maria" id="hw-fname">
+ </div>
+ <div class="form-group">
+ <label class="form-label">Last name</label>
+ <input class="form-input" type="text" placeholder="Torres">
+ </div>
+ </div>
+ <div class="form-group">
+ <label class="form-label">Email address</label>
+ <input class="form-input" type="email" placeholder="maria@email.com" id="hw-email">
+ </div>
+ <div class="form-group">
+ <label class="form-label">Password</label>
+ <div class="password-wrap">
+ <input class="form-input" type="password" placeholder="Create a password" id="hw-pw">
+ <button class="toggle-pw" onclick="togglePassword('hw-pw', this)">Show</button>
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button class="btn-next" onclick="hwNext(1)">Continue →</button>
+ </div>
+ <p class="auth-switch">Already have an account? <a href="#" onclick="switchModal('modal-signup','modal-signin'); return false;">Sign in</a></p>
+ </div>
+
+ <div id="hw-step-2" style="display:none">
+ <div class="step-counter">Step 2 of 4</div>
+ <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+ <h2>What do you need?</h2>
+ <p class="modal-sub">Select the service you're looking for.</p>
+ <div class="radio-group">
+ <label class="radio-option" onclick="selectRadio(this)">
+ <input type="radio" name="service">
+ <span class="radio-icon">❄️</span>
+ <span class="radio-label">AC Installation</span>
+ </label>
+ <label class="radio-option" onclick="selectRadio(this)">
+ <input type="radio" name="service">
+ <span class="radio-icon">🔥</span>
+ <span class="radio-label">Furnace / Heat Pump</span>
+ </label>
+ <label class="radio-option" onclick="selectRadio(this)">
+ <input type="radio" name="service">
+ <span class="radio-icon">🌀</span>
+ <span class="radio-label">Mini-Split System</span>
+ </label>
+ <label class="radio-option" onclick="selectRadio(this)">
+ <input type="radio" name="service">
+ <span class="radio-icon">🏠</span>
+ <span class="radio-label">Full HVAC System</span>
+ </label>
+ <label class="radio-option" onclick="selectRadio(this)">
+ <input type="radio" name="service">
+ <span class="radio-icon">🔧</span>
+ <span class="radio-label">Repair or Tune-Up</span>
+ </label>
+ </div>
+ <div class="modal-footer">
+ <button class="btn-back" onclick="hwBack(2)">← Back</button>
+ <button class="btn-next" onclick="hwNext(2)">Continue →</button>
+ </div>
+ </div>
+
+ <div id="hw-step-3" style="display:none">
+ <div class="step-counter">Step 3 of 4</div>
+ <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+ <h2>About your home</h2>
+ <p class="modal-sub">Helps contractors give you an accurate quote.</p>
+ <div class="form-group">
+ <label class="form-label">ZIP code</label>
+ <input class="form-input" type="text" placeholder="33614" id="hw-zip-modal" maxlength="5" oninput="this.value=this.value.replace(/\D/g,'')">
+ </div>
+ <div class="form-group">
+ <label class="form-label">Home size</label>
+ <select class="form-select form-input">
+ <option value="">Select size</option>
+ <option>Under 1,000 sq ft</option>
+ <option>1,000 – 1,500 sq ft</option>
+ <option>1,500 – 2,000 sq ft</option>
+ <option>2,000 – 3,000 sq ft</option>
+ <option>Over 3,000 sq ft</option>
+ </select>
+ </div>
+ <div class="form-group">
+ <label class="form-label">Home type</label>
+ <select class="form-select form-input">
+ <option value="">Select type</option>
+ <option>Single family home</option>
+ <option>Condo / Apartment</option>
+ <option>Townhome</option>
+ <option>Multi-unit building</option>
+ </select>
+ </div>
+ <div class="form-group">
+ <label class="form-label">Is this urgent?</label>
+ <select class="form-select form-input">
+ <option value="">Select urgency</option>
+ <option>Yes — system is down now</option>
+ <option>No — planning ahead</option>
+ <option>Within the next 30 days</option>
+ </select>
+ </div>
+ <div class="modal-footer">
+ <button class="btn-back" onclick="hwBack(3)">← Back</button>
+ <button class="btn-next" onclick="hwNext(3)">Get my quotes →</button>
+ </div>
+ </div>
+
+ <div id="hw-step-4" style="display:none">
+ <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+ <div class="success-screen">
+ <div class="success-icon">✓</div>
+ <h2>You're matched!</h2>
+ <p>3 vetted HVAC contractors in your area will contact you within 48 hours with their quotes.</p>
+ <div class="summary-card">
+ <div class="summary-row"><span>Service</span><span>AC Installation</span></div>
+ <div class="summary-row"><span>ZIP code</span><span>33614</span></div>
+ <div class="summary-row"><span>Home size</span><span>1,500 – 2,000 sq ft</span></div>
+ <div class="summary-row"><span>Quotes expected</span><span>Within 48 hours</span></div>
+ </div>
+ <p style="font-size:13px; color:var(--muted)">Each contractor submits a blind quote — equipment, price, and timeline. You compare all three and choose. No pressure, no obligation.</p>
+ <button class="btn-next" style="margin-top:20px; width:100%" onclick="closeModal('modal-signup')">Done</button>
+ </div>
+ </div>
+
+ </div>
+</div>
+
+<div class="modal-overlay" id="modal-signin">
+ <div class="modal">
+ <button class="modal-close" onclick="closeModal('modal-signin')">✕</button>
+ <h2>Welcome back</h2>
+ <p class="modal-sub">Sign in to see your quotes and contractor matches.</p>
+ <button class="btn-google">
+ <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+ Continue with Google
+ </button>
+ <div class="divider-or">or</div>
+ <div class="form-group">
+ <label class="form-label">Email address</label>
+ <input class="form-input" type="email" placeholder="your@email.com">
+ </div>
+ <div class="form-group">
+ <label class="form-label">Password</label>
+ <div class="password-wrap">
+ <input class="form-input" type="password" placeholder="Your password" id="si-pw">
+ <button class="toggle-pw" onclick="togglePassword('si-pw', this)">Show</button>
+ </div>
+ </div>
+ <div style="text-align:right; margin-bottom:16px">
+ <a href="#" style="font-size:13px; color:var(--green); text-decoration:none">Forgot password?</a>
+ </div>
+ <button class="btn-next" style="width:100%" onclick="closeModal('modal-signin')">Sign in</button>
+ <p class="auth-switch">Don't have an account? <a href="#" onclick="switchModal('modal-signin','modal-signup'); return false;">Sign up free</a></p>
+ </div>
+</div>
+
+<div class="modal-overlay" id="modal-contractor">
+ <div class="modal">
+ <button class="modal-close" onclick="closeModal('modal-contractor')">✕</button>
+
+ <div id="ct-step-1">
+ <div class="step-counter">Step 1 of 2</div>
+ <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+ <h2>Apply to join</h2>
+ <p class="modal-sub">Free to join. Pay $350 only when you close a job.</p>
+ <button class="btn-google">
+ <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+ Continue with Google
+ </button>
+ <div class="divider-or">or</div>
+ <div class="form-row">
+ <div class="form-group">
+ <label class="form-label">First name</label>
+ <input class="form-input" type="text" placeholder="Carlos">
+ </div>
+ <div class="form-group">
+ <label class="form-label">Last name</label>
+ <input class="form-input" type="text" placeholder="Mendez">
+ </div>
+ </div>
+ <div class="form-group">
+ <label class="form-label">Business name</label>
+ <input class="form-input" type="text" placeholder="Arctic Air HVAC">
+ </div>
+ <div class="form-group">
+ <label class="form-label">Email address</label>
+ <input class="form-input" type="email" placeholder="carlos@arcticair.com">
+ </div>
+ <div class="form-group">
+ <label class="form-label">Password</label>
+ <div class="password-wrap">
+ <input class="form-input" type="password" placeholder="Create a password" id="ct-pw">
+ <button class="toggle-pw" onclick="togglePassword('ct-pw', this)">Show</button>
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button class="btn-next" onclick="ctNext()">Continue →</button>
+ </div>
+ </div>
+
+ <div id="ct-step-2" style="display:none">
+ <div class="step-counter">Step 2 of 2</div>
+ <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+ <h2>Your business</h2>
+ <p class="modal-sub">Almost done — just a few more details.</p>
+ <div class="form-row">
+ <div class="form-group">
+ <label class="form-label">Phone</label>
+ <input class="form-input" type="tel" placeholder="(813) 555-0100">
+ </div>
+ <div class="form-group">
+ <label class="form-label">License number</label>
+ <input class="form-input" type="text" placeholder="CAC123456">
+ </div>
+ </div>
+ <div class="form-group">
+ <label class="form-label">Service ZIP codes (up to 5)</label>
+ <div style="display:flex; gap:8px; flex-wrap:wrap">
+ <input class="form-input" type="text" placeholder="33614" maxlength="5" style="width:80px">
+ <input class="form-input" type="text" placeholder="33615" maxlength="5" style="width:80px">
+ <input class="form-input" type="text" placeholder="33616" maxlength="5" style="width:80px">
+ <input class="form-input" type="text" placeholder="33617" maxlength="5" style="width:80px">
+ <input class="form-input" type="text" placeholder="33618" maxlength="5" style="width:80px">
+ </div>
+ </div>
+ <div class="form-group">
+ <label class="form-label" style="margin-bottom:10px">Services you offer</label>
+ <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+ <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> AC Installation</label>
+ <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> AC Repair</label>
+ <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> Furnace / Heat Pump</label>
+ <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> Mini-Split</label>
+ <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> Full System</label>
+ <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> Maintenance</label>
+ </div>
+ </div>
+ <div class="form-group" style="margin-top:4px">
+ <label style="display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--muted); cursor:pointer">
+ <input type="checkbox" style="accent-color:var(--green); margin-top:2px">
+ I confirm I am licensed and insured. I understand NeighborlyWork may verify this.
+ </label>
+ </div>
+ <div class="modal-footer">
+ <button class="btn-back" onclick="ctBack()">← Back</button>
+ <button class="btn-next" onclick="ctSubmit()">Submit application</button>
+ </div>
+ </div>
+
+ <div id="ct-step-3" style="display:none">
+ <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+ <div class="success-screen">
+ <div class="success-icon">✓</div>
+ <h2>Application received!</h2>
+ <p>We'll review your application within 24 hours and send you an email once approved.</p>
+ <div class="summary-card">
+ <div class="summary-row"><span>Cost to join</span><span style="color:var(--green); font-weight:600">Free</span></div>
+ <div class="summary-row"><span>Fee per closed job</span><span>$350 flat</span></div>
+ <div class="summary-row"><span>Monthly fees</span><span>None</span></div>
+ <div class="summary-row"><span>Review time</span><span>Within 24 hours</span></div>
+ </div>
+ <button class="btn-next" style="margin-top:20px; width:100%" onclick="closeModal('modal-contractor')">Done</button>
+ </div>
+ </div>
+
+ </div>
+</div>
+
+<script>
+function openModal(id) {
+ document.getElementById(id).classList.add('open');
+ document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+ document.getElementById(id).classList.remove('open');
+ document.body.style.overflow = '';
+}
+
+function switchModal(from, to) {
+ closeModal(from);
+ setTimeout(() => openModal(to), 150);
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+ overlay.addEventListener('click', function(e) {
+ if (e.target === this) {
+ this.classList.remove('open');
+ document.body.style.overflow = '';
+ }
+ });
+});
+
+function goToHomeownerAuth() {
+ const zip = document.getElementById('hero-zip')?.value?.trim() || '';
+ const url = new URL('/app/homeowner-auth.html', window.location.origin);
+ if (/^\d{5}$/.test(zip)) {
+  url.searchParams.set('zip', zip);
+ }
+ window.location.href = url.toString();
+}
+
+function startWithZip() {
+ goToHomeownerAuth();
+}
+
+function hwNext(step) {
+ document.getElementById('hw-step-' + step).style.display = 'none';
+ document.getElementById('hw-step-' + (step + 1)).style.display = 'block';
+}
+
+function hwBack(step) {
+ document.getElementById('hw-step-' + step).style.display = 'none';
+ document.getElementById('hw-step-' + (step - 1)).style.display = 'block';
+}
+
+function ctNext() {
+ document.getElementById('ct-step-1').style.display = 'none';
+ document.getElementById('ct-step-2').style.display = 'block';
+}
+
+function ctBack() {
+ document.getElementById('ct-step-2').style.display = 'none';
+ document.getElementById('ct-step-1').style.display = 'block';
+}
+
+function ctSubmit() {
+ document.getElementById('ct-step-2').style.display = 'none';
+ document.getElementById('ct-step-3').style.display = 'block';
+}
+
+function selectRadio(el) {
+ document.querySelectorAll('.radio-option').forEach(r => r.classList.remove('selected'));
+ el.classList.add('selected');
+}
+
+function togglePassword(id, btn) {
+ const input = document.getElementById(id);
+ if (input.type === 'password') {
+ input.type = 'text';
+ btn.textContent = 'Hide';
+ } else {
+ input.type = 'password';
+ btn.textContent = 'Show';
+ }
+}
+
+function toggleMenu() {
+ const links = document.querySelector('.nav-links');
+ links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+ a.addEventListener('click', function(e) {
+ const target = document.querySelector(this.getAttribute('href'));
+ if (target) {
+ e.preventDefault();
+ target.scrollIntoView({ behavior: 'smooth' });
+ }
+ });
+});
+</script>
+
+</body>
+</html>

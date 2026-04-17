@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Messages | NeighborlyWork</title>
+  <meta name="description" content="Real-time messaging between homeowner and contractor after contractor selection." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+    :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:var(--off);color:var(--text)}
+    .app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}.sidebar,.chat{padding:20px}.sidebar{background:#fff;border-right:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1.15rem;color:var(--green);margin-bottom:18px}.mark{width:13px;height:13px;border-radius:4px;background:var(--green);box-shadow:0 0 0 4px rgba(26,92,58,.10)}
+    .search{margin-bottom:14px}.search input{width:100%;padding:12px 14px;border:none;border-radius:14px;background:#f5f5f7;font:inherit}.conversation-list{display:grid;gap:10px}.conversation{background:#fafbf9;border:1px solid var(--line);border-radius:18px;padding:14px;cursor:pointer;display:grid;gap:6px}.conversation.active{border-color:rgba(26,92,58,.25);box-shadow:0 8px 22px rgba(0,0,0,.06)}.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.avatar{width:36px;height:36px;border-radius:999px;background:#eef5ef;color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-weight:800}.name{font-weight:700}.preview,.meta{color:var(--muted);font-size:.88rem}.unread{min-width:22px;height:22px;border-radius:999px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;padding:0 6px}
+    .chat{display:grid;grid-template-rows:auto 1fr auto;gap:14px}.panel{background:#fff;border:none;border-radius:24px;box-shadow:var(--shadow)}.chat-header{padding:18px 20px;border-bottom:1px solid var(--line)}.chat-header h1{margin:0;font-family:'Outfit',sans-serif;font-size:1.4rem;letter-spacing:-.03em}.chat-header p{margin:6px 0 0;color:var(--muted)}.messages{padding:18px;overflow:auto;display:grid;gap:12px;align-content:start}.bubble-wrap{display:flex}.bubble-wrap.sent{justify-content:flex-end}.bubble{max-width:min(70%,520px);padding:12px 14px;border-radius:18px;line-height:1.5}.bubble.sent{background:var(--green);color:#fff;border-bottom-right-radius:6px}.bubble.received{background:#edf1f6;color:var(--text);border-bottom-left-radius:6px}.time{font-size:.75rem;margin-top:6px;opacity:.75}.composer{padding:16px;border-top:1px solid var(--line);display:flex;gap:10px}.composer input{flex:1;padding:13px 14px;border:none;border-radius:14px;background:#f5f5f7;font:inherit}.btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:13px 16px;font-weight:800;cursor:pointer;font-size:.95rem}.btn-green{background:var(--green);color:#fff}.empty,.message{padding:18px;border-radius:18px}.empty{background:#fafbf9;border:1px dashed var(--line);text-align:center}.message{display:none}.message.show{display:block}.message.error{background:#fff1ed;color:#8a2e18}
+    @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--line)}.bubble{max-width:85%}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="mark"></span>NeighborlyWork</div>
+      <div style="margin-bottom:14px;"><a href="/app/homeowner-dashboard.html" id="backLink" style="color:var(--green);font-weight:800;text-decoration:none;">← Back</a></div>
+      <div class="search"><input id="searchInput" type="text" placeholder="Search conversations"></div>
+      <div class="conversation-list" id="conversationList"></div>
+    </aside>
+    <section class="chat">
+      <div class="message error" id="messagesError"></div>
+      <div class="panel chat-header">
+        <h1 id="chatName">Messages</h1>
+        <p id="chatMeta">Select a conversation to view messages.</p>
+      </div>
+      <div class="panel messages" id="messageThread">
+        <div class="empty">Only leads with a selected contractor can be messaged.</div>
+      </div>
+      <form class="panel composer" id="composerForm">
+        <input id="messageInput" type="text" placeholder="Write a message" maxlength="1000" />
+        <button class="btn btn-green" type="submit">Send</button>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    const state = { user: null, role: null, conversations: [], active: null, realtime: null };
+
+    function setError(text) {
+      const el = document.getElementById('messagesError');
+      el.textContent = text;
+      el.classList.add('show');
+    }
+
+    function initials(name) {
+      return (name || '?').split(' ').map(part => part[0]).join('').slice(0,2).toUpperCase();
+    }
+
+    function formatTime(value) {
+      if (!value) return '';
+      return new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    async function loadConversations() {
+      const user = await getCurrentUser();
+      if (!user) {
+        window.location.href = '/app/homeowner-auth.html';
+        return;
+      }
+      state.user = user;
+      state.role = await getUserRole();
+      if (!['homeowner', 'contractor'].includes(state.role)) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      const { data: leads, error: leadError } = await db
+        .from('leads')
+        .select('id, homeowner_id, selected_contractor_id, service_type')
+        .eq(state.role === 'homeowner' ? 'homeowner_id' : 'selected_contractor_id', user.id)
+        .not('selected_contractor_id', 'is', null);
+      if (leadError) throw leadError;
+
+      const filtered = (leads || []).filter(lead => lead.selected_contractor_id);
+      if (!filtered.length) {
+        renderConversationList([]);
+        return;
+      }
+
+      const otherIds = [...new Set(filtered.map(lead => state.role === 'homeowner' ? lead.selected_contractor_id : lead.homeowner_id).filter(Boolean))];
+      const { data: users, error: userError } = await db.from('users').select('id, full_name').in('id', otherIds);
+      if (userError) throw userError;
+      const nameMap = new Map((users || []).map(u => [u.id, u.full_name]));
+
+      const leadIds = filtered.map(l => l.id);
+      const { data: messages, error: msgError } = await db.from('messages').select('*').in('lead_id', leadIds).order('sent_at', { ascending: true });
+      if (msgError) throw msgError;
+
+      state.conversations = filtered.map(lead => {
+        const msgs = (messages || []).filter(m => m.lead_id === lead.id);
+        const otherId = state.role === 'homeowner' ? lead.selected_contractor_id : lead.homeowner_id;
+        const unread = msgs.filter(m => m.receiver_id === state.user.id && !m.read).length;
+        return {
+          leadId: lead.id,
+          serviceType: lead.service_type,
+          otherId,
+          otherName: nameMap.get(otherId) || 'Conversation',
+          messages: msgs,
+          unread,
+          last: msgs[msgs.length - 1] || null
+        };
+      });
+
+      renderConversationList(state.conversations);
+      if (state.conversations.length) openConversation(state.conversations[0].leadId);
+      subscribeRealtime();
+    }
+
+    function renderConversationList(items) {
+      const list = document.getElementById('conversationList');
+      if (!items.length) {
+        state.active = null;
+      }
+      if (!items.length) {
+        list.innerHTML = '<div class="empty">No active conversations yet.</div>';
+        return;
+      }
+      list.innerHTML = items.map(conv => `
+        <article class="conversation ${state.active?.leadId === conv.leadId ? 'active' : ''}" data-lead="${conv.leadId}">
+          <div class="row">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+              <span class="avatar">${initials(conv.otherName)}</span>
+              <div style="min-width:0;">
+                <div class="name">${conv.otherName}</div>
+                <div class="meta">${conv.serviceType || 'HVAC'}</div>
+              </div>
+            </div>
+            ${conv.unread ? `<span class="unread">${conv.unread}</span>` : ''}
+          </div>
+          <div class="preview">${conv.last ? conv.last.message_text.slice(0, 72) : 'No messages yet'}</div>
+        </article>`).join('');
+      list.querySelectorAll('.conversation').forEach(el => el.addEventListener('click', () => openConversation(el.dataset.lead)));
+    }
+
+    async function markRead(leadId) {
+      await db.from('messages').update({ read: true }).eq('receiver_id', state.user.id).eq('lead_id', leadId).eq('read', false);
+    }
+
+    async function openConversation(leadId) {
+      const conv = state.conversations.find(c => c.leadId === leadId);
+      if (!conv) return;
+      state.active = conv;
+      document.getElementById('chatName').textContent = conv.otherName;
+      document.getElementById('chatMeta').textContent = conv.serviceType || 'HVAC conversation';
+      renderConversationList(state.conversations);
+      renderMessages(conv.messages);
+      await markRead(leadId);
+      conv.unread = 0;
+      renderConversationList(state.conversations);
+    }
+
+    function renderMessages(messages) {
+      const thread = document.getElementById('messageThread');
+      if (!messages.length) {
+        thread.innerHTML = '<div class="empty">No messages yet. Start the conversation below.</div>';
+        return;
+      }
+      thread.innerHTML = messages.map(msg => {
+        const sent = msg.sender_id === state.user.id;
+        return `
+          <div class="bubble-wrap ${sent ? 'sent' : 'received'}">
+            <div class="bubble ${sent ? 'sent' : 'received'}">
+              <div>${msg.message_text}</div>
+              <div class="time">${formatTime(msg.sent_at)}</div>
+            </div>
+          </div>`;
+      }).join('');
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    function subscribeRealtime() {
+      if (state.realtime) return;
+      state.realtime = db.channel('messages').on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${state.user.id}`
+      }, handleNewMessage).subscribe();
+    }
+
+    function handleNewMessage(payload) {
+      const msg = payload.new;
+      const conv = state.conversations.find(c => c.leadId === msg.lead_id);
+      if (!conv) return;
+      conv.messages.push(msg);
+      conv.last = msg;
+      if (state.active?.leadId === msg.lead_id) {
+        renderMessages(conv.messages);
+        markRead(msg.lead_id);
+      } else {
+        conv.unread += 1;
+      }
+      renderConversationList(state.conversations);
+    }
+
+    document.getElementById('composerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!state.active) return;
+      const input = document.getElementById('messageInput');
+      const messageText = input.value.trim();
+      if (!messageText) return;
+      const receiverId = state.active.otherId;
+      try {
+        const { error } = await db.from('messages').insert({
+          lead_id: state.active.leadId,
+          sender_id: state.user.id,
+          receiver_id: receiverId,
+          message_text: messageText,
+          read: false
+        });
+        if (error) throw error;
+        state.active.messages.push({
+          lead_id: state.active.leadId,
+          sender_id: state.user.id,
+          receiver_id: receiverId,
+          message_text: messageText,
+          sent_at: new Date().toISOString()
+        });
+        renderMessages(state.active.messages);
+        input.value = '';
+      } catch (err) {
+        setError(err.message || 'Could not send message.');
+      }
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      const filtered = state.conversations.filter(conv => conv.otherName.toLowerCase().includes(q) || (conv.serviceType || '').toLowerCase().includes(q));
+      renderConversationList(filtered);
+    });
+
+    (async function init() {
+      try {
+        await loadConversations();
+        const backLink = document.getElementById('backLink');
+        backLink.setAttribute('href', state.role === 'contractor' ? '/app/contractor-portal.html' : '/app/homeowner-dashboard.html');
+      } catch (err) {
+        setError(err.message || 'Could not load messages.');
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NeighborlyWork — Contractor Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --navy: #0b1320;
+      --navy-2: #101a2d;
+      --panel: #ffffff;
+      --text: #102033;
+      --muted: #6b7788;
+      --line: rgba(16,32,51,.10);
+      --green: #22a35a;
+      --green-soft: rgba(34,163,90,.12);
+      --blue: #2f80ed;
+      --blue-soft: rgba(47,128,237,.12);
+      --yellow: #d9a400;
+      --yellow-soft: rgba(217,164,0,.12);
+      --gray: #9aa5b5;
+      --gray-soft: rgba(154,165,181,.12);
+      --shadow: 0 16px 40px rgba(12,19,32,.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      min-height: 100vh;
+    }
+    aside {
+      background: linear-gradient(180deg, var(--navy), var(--navy-2));
+      color: #fff;
+      padding: 24px 18px;
+    }
+    .brand {
+      display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:-.04em; font-size:1.05rem;
+      margin-bottom: 24px;
+    }
+    .mark { width: 14px; height: 14px; border-radius: 4px; background: linear-gradient(135deg, #22a35a, #43d17c); }
+    .navtitle { color: rgba(255,255,255,.55); font-size: .78rem; text-transform: uppercase; letter-spacing:.12em; margin: 18px 0 12px; }
+    .tabs { display:grid; gap:10px; }
+    .tab {
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      color: #dfe7f3;
+      padding: 14px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      text-align: left;
+      transition: .15s ease;
+    }
+    .tab:hover, .tab.active { background: rgba(34,163,90,.16); border-color: rgba(34,163,90,.25); }
+    .side-note {
+      margin-top: 24px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      color: rgba(255,255,255,.78);
+      line-height: 1.55;
+      font-size: .92rem;
+    }
+
+    main { padding: 24px; }
+    .topbar {
+      display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0; font-size: clamp(1.6rem, 2.5vw, 2.2rem); letter-spacing:-.04em; }
+    .sub { color: var(--muted); margin-top: 6px; line-height: 1.55; }
+    .screen { display:none; }
+    .screen.active { display:block; }
+
+    .stats { display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+    .stat {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow);
+    }
+    .stat .label { color: var(--muted); font-size: .82rem; margin-bottom: 10px; }
+    .stat .value { font-size: clamp(1.7rem, 2.5vw, 2.35rem); font-weight: 900; letter-spacing:-.05em; }
+
+    .panel {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid rgba(16,32,51,.08); text-align:left; font-size:.93rem; vertical-align: middle; }
+    th { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing:.08em; background: #fbfcfe; }
+    tr:hover td { background: rgba(47,128,237,.02); }
+    .badge {
+      display:inline-flex; align-items:center; justify-content:center; padding: 7px 10px; border-radius: 999px; font-size:.78rem; font-weight:800;
+    }
+    .new { background: var(--yellow-soft); color: #a77b00; }
+    .submitted { background: var(--blue-soft); color: #1f69cf; }
+    .won { background: var(--green-soft); color: #17763f; }
+    .lost { background: var(--gray-soft); color: #6f7b8b; }
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; padding: 10px 14px; border-radius: 12px; text-decoration:none; font-weight:800; font-size:.9rem;
+      border: none; cursor: pointer;
+    }
+    .btn.green { background: var(--green); color: #fff; }
+    .btn.gray { background: #edf1f6; color: var(--text); }
+    .btn.blue { background: var(--blue); color: #fff; }
+
+    .quote-layout {
+      display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px;
+    }
+    .quote-card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 18px; position:relative;
+    }
+    .quote-card.best { border-color: rgba(34,163,90,.28); box-shadow: 0 16px 40px rgba(34,163,90,.12); }
+    .best-badge {
+      position:absolute; top: 14px; right: 14px; background: var(--green-soft); color: var(--green); padding: 7px 10px; border-radius: 999px; font-size:.75rem; font-weight:900; text-transform: uppercase; letter-spacing:.08em;
+    }
+    .quote-head { display:flex; justify-content:space-between; align-items:start; gap:12px; margin-bottom: 12px; }
+    .quote-head h3 { margin:0; font-size: 1.05rem; }
+    .rating { color: #f3b400; font-size: .92rem; margin-top: 4px; }
+    .quote-meta { color: var(--muted); font-size:.9rem; line-height:1.55; }
+    .price { font-size: clamp(2rem, 4vw, 2.6rem); font-weight:900; letter-spacing:-.05em; margin: 16px 0 8px; }
+    .spec { margin: 8px 0; color: var(--muted); font-size:.92rem; line-height:1.55; }
+    .quote-btn { width:100%; margin-top: 16px; }
+    .small-note { color: var(--muted); font-size:.84rem; margin-top: 14px; line-height:1.5; }
+
+    .form-panel {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;
+    }
+    .summary {
+      background: #f7fafc; border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 16px;
+    }
+    .summary strong { display:block; margin-bottom: 6px; }
+    .fields { display:grid; gap: 14px; }
+    .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+    label { font-weight:700; font-size:.88rem; display:block; margin-bottom: 8px; }
+    input, select, textarea {
+      width:100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fbfcfe; font: inherit; color: var(--text);
+      outline:none;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    .calc {
+      display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; margin-top: 14px;
+      padding-top: 14px; border-top: 1px solid var(--line);
+    }
+    .money {
+      background: #f7fafc; border: 1px solid var(--line); border-radius: 16px; padding: 14px;
+    }
+    .money .k { color: var(--muted); font-size:.8rem; text-transform: uppercase; letter-spacing:.07em; margin-bottom: 6px; }
+    .money .v { font-size: 1.45rem; font-weight:900; letter-spacing:-.04em; }
+    .footer-note { color: var(--muted); font-size:.84rem; line-height:1.55; margin-top: 12px; }
+
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+      aside { position: static; }
+    }
+    @media (max-width: 920px) {
+      .stats, .quote-layout, .grid-2, .calc { grid-template-columns: 1fr; }
+      table, thead, tbody, th, td, tr { display:block; }
+      thead { display:none; }
+      tr { border-bottom: 1px solid rgba(16,32,51,.08); padding: 8px 0; }
+      td { border: none; padding: 8px 16px; }
+      td::before { content: attr(data-label); display:block; font-size:.74rem; color: var(--muted); text-transform: uppercase; letter-spacing:.08em; margin-bottom: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand"><span class="mark"></span>NeighborlyWork</div>
+      <div class="navtitle">Portal</div>
+      <div class="tabs">
+        <button class="tab active" data-screen="dashboard">Contractor Dashboard</button>
+        <button class="tab" data-screen="quote">Quote Submission</button>
+        <button class="tab" data-screen="chat">Chat</button>
+        <button class="tab" data-screen="comparison">Homeowner Comparison</button>
+      </div>
+      <div class="side-note">
+        Private contractor portal demo.
+        <br><br>
+        Screen 1 shows leads.
+        Screen 2 is the blind quote form.
+        Screen 3 shows what the homeowner sees.
+        <br><br>
+        Secure chat is private pre-match. Contractors can ask clarifying questions, but homeowner contact details stay hidden until the homeowner selects a contractor.
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <h1 id="pageTitle">Contractor Dashboard</h1>
+          <div class="sub" id="pageSub">Active leads, quote performance, and jobs won this month.</div>
+        </div>
+        <a class="btn gray" href="index.html">Back to Home</a>
+      </div>
+
+      <section class="screen active" id="dashboardScreen">
+        <div class="stats">
+          <div class="stat"><div class="label">Leads This Month</div><div class="value">42</div></div>
+          <div class="stat"><div class="label">Quotes Submitted</div><div class="value">31</div></div>
+          <div class="stat"><div class="label">Jobs Won</div><div class="value">11</div></div>
+        </div>
+        <div class="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Homeowner</th><th>Service Type</th><th>City / Zip</th><th>Home Size</th><th>Urgency</th><th>Date Received</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="Homeowner">Mia</td>
+                <td data-label="Service Type">AC Install</td>
+                <td data-label="City / Zip">Sacramento / 95825</td>
+                <td data-label="Home Size">1,500–2,000 sq ft</td>
+                <td data-label="Urgency">Planning Ahead</td>
+                <td data-label="Date Received">2026-04-06</td>
+                <td data-label="Status"><span class="badge new">New</span></td>
+                <td data-label="Action"><button class="btn green" onclick="showScreen('quote')">Submit Quote</button></td>
+              </tr>
+              <tr>
+                <td data-label="Homeowner">Ethan</td>
+                <td data-label="Service Type">Furnace Replace</td>
+                <td data-label="City / Zip">Roseville / 95661</td>
+                <td data-label="Home Size">2,000–3,000 sq ft</td>
+                <td data-label="Urgency">Emergency</td>
+                <td data-label="Date Received">2026-04-05</td>
+                <td data-label="Status"><span class="badge submitted">Quote Submitted</span></td>
+                <td data-label="Action"><button class="btn gray">View</button></td>
+              </tr>
+              <tr>
+                <td data-label="Homeowner">Sophia</td>
+                <td data-label="Service Type">Mini-Split</td>
+                <td data-label="City / Zip">Folsom / 95630</td>
+                <td data-label="Home Size">Under 1,000 sq ft</td>
+                <td data-label="Urgency">Planning Ahead</td>
+                <td data-label="Date Received">2026-04-05</td>
+                <td data-label="Status"><span class="badge won">Won</span></td>
+                <td data-label="Action"><button class="btn gray">Details</button></td>
+              </tr>
+              <tr>
+                <td data-label="Homeowner">Noah</td>
+                <td data-label="Service Type">Full HVAC System</td>
+                <td data-label="City / Zip">Sacramento / 95818</td>
+                <td data-label="Home Size">2,000–3,000 sq ft</td>
+                <td data-label="Urgency">Emergency</td>
+                <td data-label="Date Received">2026-04-04</td>
+                <td data-label="Status"><span class="badge submitted">Quote Submitted</span></td>
+                <td data-label="Action"><button class="btn gray">View</button></td>
+              </tr>
+              <tr>
+                <td data-label="Homeowner">Ava</td>
+                <td data-label="Service Type">Repair or Tune-Up</td>
+                <td data-label="City / Zip">Citrus Heights / 95621</td>
+                <td data-label="Home Size">1,000–1,500 sq ft</td>
+                <td data-label="Urgency">Planning Ahead</td>
+                <td data-label="Date Received">2026-04-03</td>
+                <td data-label="Status"><span class="badge lost">Lost</span></td>
+                <td data-label="Action"><button class="btn gray">Archive</button></td>
+              </tr>
+              <tr>
+                <td data-label="Homeowner">James</td>
+                <td data-label="Service Type">AC Install</td>
+                <td data-label="City / Zip">Sacramento / 95823</td>
+                <td data-label="Home Size">3,000+ sq ft</td>
+                <td data-label="Urgency">Planning Ahead</td>
+                <td data-label="Date Received">2026-04-02</td>
+                <td data-label="Status"><span class="badge new">New</span></td>
+                <td data-label="Action"><button class="btn green" onclick="showScreen('quote')">Submit Quote</button></td>
+              </tr>
+              <tr>
+                <td data-label="Homeowner">Isabella</td>
+                <td data-label="Service Type">Furnace Replace</td>
+                <td data-label="City / Zip">Roseville / 95678</td>
+                <td data-label="Home Size">1,500–2,000 sq ft</td>
+                <td data-label="Urgency">Emergency</td>
+                <td data-label="Date Received">2026-04-02</td>
+                <td data-label="Status"><span class="badge submitted">Quote Submitted</span></td>
+                <td data-label="Action"><button class="btn gray">View</button></td>
+              </tr>
+              <tr>
+                <td data-label="Homeowner">Lucas</td>
+                <td data-label="Service Type">AC Install</td>
+                <td data-label="City / Zip">Sacramento / 95828</td>
+                <td data-label="Home Size">2,000–3,000 sq ft</td>
+                <td data-label="Urgency">Planning Ahead</td>
+                <td data-label="Date Received">2026-04-01</td>
+                <td data-label="Status"><span class="badge won">Won</span></td>
+                <td data-label="Action"><button class="btn gray">Details</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="screen" id="quoteScreen">
+        <div class="form-panel">
+          <div class="summary">
+            <strong>Homeowner Summary</strong>
+            Mia, AC Install, 1,500–2,000 sq ft, Sacramento
+          </div>
+          <div class="summary" style="background:#f4f8fe; border-color: rgba(47,128,237,.14);">
+            <strong>Secure Chat</strong>
+            Ask clarifying questions here. The homeowner’s contact info stays hidden until they choose your quote.
+          </div>
+          <div class="fields">
+            <div class="grid-2">
+              <div>
+                <label>Brand</label>
+                <select><option>Carrier</option><option>Trane</option><option>Lennox</option><option>Rheem</option><option>Daikin</option><option>Goodman</option><option>Other</option></select>
+              </div>
+              <div>
+                <label>Model / Series</label>
+                <input type="text" placeholder="Infinity 19VS" />
+              </div>
+              <div>
+                <label>SEER Rating</label>
+                <select><option>14 SEER</option><option>15 SEER</option><option>16 SEER</option><option>17 SEER</option><option>18 SEER</option><option>20+ SEER</option></select>
+              </div>
+              <div>
+                <label>Warranty</label>
+                <select><option>5yr</option><option>10yr</option><option>Lifetime</option></select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Estimated install time</label>
+                <select><option>1 day</option><option>1–2 days</option><option>2–3 days</option><option>3+ days</option></select>
+              </div>
+              <div>
+                <label>Includes removal of old unit?</label>
+                <select><option>Yes</option><option>No</option></select>
+              </div>
+              <div>
+                <label>Permit handling</label>
+                <select><option>Included in price</option><option>Yes</option><option>No</option></select>
+              </div>
+            </div>
+            <div class="calc">
+              <div>
+                <label>Equipment cost ($)</label>
+                <input type="number" value="5400" id="equipCost" />
+              </div>
+              <div>
+                <label>Labor cost ($)</label>
+                <input type="number" value="1800" id="laborCost" />
+              </div>
+              <div class="money">
+                <div class="k">Total price</div>
+                <div class="v" id="totalPrice">$7,200</div>
+              </div>
+              <div>
+                <label>Financing available</label>
+                <select><option>Yes</option><option>No</option></select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Available start date</label>
+                <input type="date" value="2026-04-10" />
+              </div>
+              <div>
+                <label>Estimated completion</label>
+                <select><option>Same day</option><option>1 day</option><option>2 days</option><option>3+ days</option></select>
+              </div>
+            </div>
+            <div>
+              <label>Notes to homeowner</label>
+              <textarea placeholder="Optional personal message to the homeowner"></textarea>
+            </div>
+            <button class="btn green" style="width:100%; padding: 14px 18px;">Submit Quote</button>
+            <div class="footer-note">Your quote is blind — the homeowner sees all 3 quotes but contractors do not see each other's pricing.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="chatScreen">
+        <div class="panel" style="padding:18px; max-width: 920px;">
+          <div class="summary" style="background:#f4f8fe; border-color: rgba(47,128,237,.14);">
+            <strong>Secure Chat Bot</strong>
+            Homeowner contact details stay hidden until they choose you. Ask clarifying questions here.
+          </div>
+          <div style="display:grid; gap:12px; margin-top:14px;">
+            <div style="justify-self:start; max-width: 72%; background:#f7fafc; border:1px solid var(--line); padding:12px 14px; border-radius:16px;">Bot: Hi, I’m the NeighborlyWork assistant. Ask your question about the job.</div>
+            <div style="justify-self:end; max-width: 72%; background: var(--blue-soft); border:1px solid rgba(47,128,237,.18); padding:12px 14px; border-radius:16px;">Contractor: Does the current system use existing ductwork?</div>
+            <div style="justify-self:start; max-width: 72%; background:#f7fafc; border:1px solid var(--line); padding:12px 14px; border-radius:16px;">Bot: The homeowner hasn’t shared contact info yet. You can still ask clarifying questions through the secure thread.</div>
+            <div style="justify-self:end; max-width: 72%; background: var(--green-soft); border:1px solid rgba(34,163,90,.18); padding:12px 14px; border-radius:16px;">Contractor: Great. I’ll submit the quote with a 1–2 day install window.</div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+            <input type="text" placeholder="Type a message to the homeowner..." style="flex:1; min-width:240px; padding:13px 14px; border-radius:14px; border:1px solid var(--line); background:#fbfcfe;" />
+            <button class="btn blue">Send</button>
+          </div>
+          <div class="small-note">This is a pre-match secure chat. The homeowner’s personal details stay hidden until they choose your quote.</div>
+        </div>
+      </section>
+
+      <section class="screen" id="comparisonScreen">
+        <div class="topbar" style="margin-bottom:14px;">
+          <div>
+            <h1 style="font-size:clamp(1.4rem,2.5vw,2rem);">Homeowner Quote Comparison</h1>
+            <div class="sub">Good / Better / Best layout for a 3-quote HVAC comparison.</div>
+          </div>
+        </div>
+        <div class="quote-layout">
+          <div class="quote-card">
+            <div class="quote-head">
+              <div>
+                <h3>Top Rank Heating</h3>
+                <div class="rating">★★★★★ 4.8</div>
+              </div>
+            </div>
+            <div class="quote-meta">Carrier · Comfort 16 · 16 SEER</div>
+            <div class="spec">Warranty: 10yr</div>
+            <div class="spec">Timeline: 2 days</div>
+            <div class="price">$7,200</div>
+            <div class="spec">Financing available: Yes</div>
+            <button class="btn green quote-btn">Choose This Contractor</button>
+          </div>
+          <div class="quote-card best">
+            <div class="best-badge">Best Value</div>
+            <div class="quote-head">
+              <div>
+                <h3>Aire Serv</h3>
+                <div class="rating">★★★★★ 4.9</div>
+              </div>
+            </div>
+            <div class="quote-meta">Trane · XR17 · 17 SEER</div>
+            <div class="spec">Warranty: Lifetime</div>
+            <div class="spec">Timeline: 1–2 days</div>
+            <div class="price">$8,900</div>
+            <div class="spec">Financing available: Yes</div>
+            <button class="btn green quote-btn">Choose This Contractor</button>
+          </div>
+          <div class="quote-card">
+            <div class="quote-head">
+              <div>
+                <h3>Bell Brothers</h3>
+                <div class="rating">★★★★★ 4.7</div>
+              </div>
+            </div>
+            <div class="quote-meta">Lennox · Elite Series · 18 SEER</div>
+            <div class="spec">Warranty: 10yr</div>
+            <div class="spec">Timeline: 1 day</div>
+            <div class="price">$11,400</div>
+            <div class="spec">Financing available: No</div>
+            <button class="btn green quote-btn">Choose This Contractor</button>
+          </div>
+        </div>
+        <div class="small-note" style="margin-top:14px;">All contractors are licensed, insured, and verified by NeighborlyWork.</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const screens = {
+      dashboard: document.getElementById('dashboardScreen'),
+      quote: document.getElementById('quoteScreen'),
+      chat: document.getElementById('chatScreen'),
+      comparison: document.getElementById('comparisonScreen')
+    };
+    const titles = {
+      dashboard: ['Contractor Dashboard', 'Active leads, quote performance, and jobs won this month.'],
+      quote: ['Quote Submission Form', 'Submit a blind quote without seeing competitor pricing.'],
+      chat: ['Secure Chat', 'Ask clarifying questions while homeowner contact details stay hidden.'],
+      comparison: ['Homeowner Quote Comparison', 'What the homeowner sees after three quotes arrive.']
+    };
+
+    function showScreen(name) {
+      Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === name));
+      document.getElementById('pageTitle').textContent = titles[name][0];
+      document.getElementById('pageSub').textContent = titles[name][1];
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => showScreen(tab.dataset.screen)));
+
+    const equip = document.getElementById('equipCost');
+    const labor = document.getElementById('laborCost');
+    const total = document.getElementById('totalPrice');
+    function updateTotal() {
+      const n1 = Number(equip.value || 0);
+      const n2 = Number(labor.value || 0);
+      total.textContent = '$' + (n1 + n2).toLocaleString();
+    }
+    equip.addEventListener('input', updateTotal);
+    labor.addEventListener('input', updateTotal);
+    updateTotal();
+
+    window.showScreen = showScreen;
+  </script>
+</body>
+</html>

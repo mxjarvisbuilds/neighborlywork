@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NeighborlyWork — Get 3 Free HVAC Quotes</title>
+  <meta name="description" content="NeighborlyWork is an HVAC quote marketplace. Homeowners get 3 free competing quotes from vetted local contractors." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f8f4;
+      --panel: #ffffff;
+      --text: #102018;
+      --muted: #5f6e64;
+      --line: rgba(16,32,24,.10);
+      --green: #1f8f4d;
+      --green-dark: #146536;
+      --green-soft: rgba(31,143,77,.10);
+      --shadow: 0 14px 40px rgba(16,32,24,.08);
+      --radius: 22px;
+      --max: 1160px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 50% -20%, rgba(31,143,77,.10), transparent 55%), var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .wrap { width: min(var(--max), calc(100% - 32px)); margin: 0 auto; }
+    header {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(245,248,244,.86);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; }
+    .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.04em; text-decoration: none; color: var(--text); }
+    .mark { width: 13px; height: 13px; border-radius: 4px; background: var(--green); box-shadow: 0 0 0 4px rgba(31,143,77,.10); }
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+    .nav-right a { color: var(--muted); text-decoration: none; font-size: .95rem; font-weight: 600; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border-radius: 999px; padding: 12px 18px; text-decoration: none; font-weight: 800;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-green { background: var(--green); color: #fff; box-shadow: 0 10px 24px rgba(31,143,77,.18); }
+    .btn-outline { border: 1px solid var(--line); color: var(--text); background: rgba(255,255,255,.55); }
+
+    .hero { padding: 62px 0 34px; }
+    h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(3rem, 7vw, 5.8rem);
+      line-height: .95;
+      letter-spacing: -.05em;
+      margin: 0;
+      max-width: 12ch;
+    }
+    .sub {
+      margin: 18px 0 0;
+      max-width: 62ch;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 1.8vw, 1.18rem);
+      line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+    .hero-actions .btn { min-width: 210px; }
+
+    .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 30px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      min-height: 280px;
+    }
+    .card h2 {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      line-height: 1;
+      margin: 10px 0 12px;
+    }
+    .card p { color: var(--muted); line-height: 1.65; margin: 0 0 18px; max-width: 34ch; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px; font-size: .78rem; font-weight: 800;
+      letter-spacing: .08em; text-transform: uppercase; padding: 8px 12px; border-radius: 999px;
+    }
+    .chip.green { background: var(--green-soft); color: var(--green-dark); }
+    .chip.gray { background: rgba(16,32,24,.05); color: var(--muted); }
+    .trust { margin-top: 12px; color: var(--muted); font-size: .9rem; }
+    .card.green { border-top: 4px solid var(--green); }
+
+    .section { padding: 46px 0 0; }
+    .section-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:16px; }
+    .section-head h3 { margin: 0; font-size: clamp(1.55rem, 2.5vw, 2rem); letter-spacing: -.04em; }
+    .section-head p { margin:0; color: var(--muted); max-width: 60ch; line-height: 1.6; }
+    .three { display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .step {
+      background: rgba(255,255,255,.75);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    .num { width: 30px; height: 30px; border-radius: 999px; background: var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; margin-bottom: 12px; }
+    .step h4 { margin: 0 0 8px; font-size: 1rem; }
+    .step p { margin: 0; color: var(--muted); line-height: 1.6; }
+
+    .bar {
+      display:flex; flex-wrap:wrap; gap: 10px; margin-top: 14px;
+    }
+    .bar span {
+      border: 1px solid var(--line); background: rgba(255,255,255,.65); color: var(--text);
+      padding: 10px 14px; border-radius: 999px; font-size: .92rem; font-weight: 600;
+    }
+
+    .why { display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .why .card { min-height: 190px; }
+
+    .need { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+    .need ul { display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px 18px; list-style:none; padding:0; margin:18px 0 0; }
+    .need li { padding: 12px 14px; border-radius: 14px; background: #f7faf8; border: 1px solid rgba(16,32,24,.06); }
+
+    .footer-cta {
+      margin-top: 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+      padding-top: 20px; border-top: 1px solid var(--line);
+    }
+    footer {
+      margin-top: 54px; padding: 24px 0 34px; border-top: 1px solid var(--line); color: var(--muted);
+    }
+    .footer-inner { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:center; }
+    .links { display:flex; gap: 16px; flex-wrap:wrap; }
+    .links a { color: var(--muted); text-decoration:none; }
+
+    @media (max-width: 900px) {
+      .paths, .three, .why, .need ul { grid-template-columns: 1fr; }
+      .section-head, .footer-cta { align-items:start; flex-direction:column; }
+      h1 { max-width: 100%; }
+    }
+    @media (max-width: 640px) {
+      .nav-right a { display:none; }
+      .hero { padding-top: 42px; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="logo" href="#"><span class="mark"></span>NeighborlyWork</a>
+      <div class="nav-right">
+        <a href="#contractors">For Contractors</a>
+        <a class="btn btn-green" href="#hero-cta">Get Free Quotes</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero" id="hero-cta">
+      <h1>Get 3 Free HVAC Quotes. Compare and Save.</h1>
+      <p class="sub">Submit once. Three vetted local contractors compete for your job. You pick the best price.</p>
+      <div class="hero-actions">
+        <a class="btn btn-green" href="#quote-form">Get My Free Quotes</a>
+        <a class="btn btn-outline" href="#contractors">Are you a contractor?</a>
+      </div>
+
+      <div class="paths">
+        <article class="card green">
+          <div class="chip green">Homeowner flow</div>
+          <h2>Free quotes. Real competition.</h2>
+          <p>Get matched with three vetted HVAC contractors in Sacramento, Roseville, or Folsom. Compare their prices, warranties, and timelines before choosing.</p>
+          <a class="btn btn-green" href="#quote-form">Get My Free Quotes</a>
+          <div class="trust">Free for homeowners · Vetted contractors only · No pressure calls · Takes 2 minutes</div>
+        </article>
+
+        <article class="card">
+          <div class="chip gray">Contractor flow</div>
+          <h2>Grow your HVAC business.</h2>
+          <p>Join the NeighborlyWork network to receive homeowner quote requests in your service area. Free to join, pay only when you close a job.</p>
+          <a class="btn btn-outline" href="#contractors">Apply as a Contractor</a>
+          <div class="trust">Free to join · Pay on close · Local Sacramento leads</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h3>How It Works</h3>
+        <p>Simple, fast, and built to get homeowners from request to quote without friction.</p>
+      </div>
+      <div class="three">
+        <div class="step"><div class="num">1</div><h4>Submit your info</h4><p>Tell us what HVAC work you need, your zip code, and a few details about the job.</p></div>
+        <div class="step"><div class="num">2</div><h4>Get 3 competing quotes</h4><p>We send your request to vetted local contractors who compete for the job.</p></div>
+        <div class="step"><div class="num">3</div><h4>Choose the best</h4><p>Compare prices and pick the contractor that makes the most sense for you.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h3>Trust Bar</h3>
+        <p>Everything here is designed to feel safe, direct, and low pressure.</p>
+      </div>
+      <div class="bar">
+        <span>Free for homeowners</span>
+        <span>Vetted contractors only</span>
+        <span>No pressure calls</span>
+        <span>Takes 2 minutes</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h3>Why NeighborlyWork</h3>
+        <p>Three reasons homeowners trust the system.</p>
+      </div>
+      <div class="why">
+        <div class="card"><h2>Save money through competition</h2><p>Three contractors compete for the same job, which pushes pricing down and gives homeowners a better deal.</p></div>
+        <div class="card"><h2>Vetted pros only</h2><p>We focus on licensed, local HVAC contractors so homeowners aren’t dealing with random spam or unqualified leads.</p></div>
+        <div class="card"><h2>One form, no spam</h2><p>Homeowners submit once and get a clean quote process instead of repeated calls from multiple companies.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h3>What you'll need to tell us</h3>
+        <p>Keep it short. We only need the basics to match you correctly.</p>
+      </div>
+      <div class="need">
+        <ul>
+          <li>AC install</li>
+          <li>Furnace replacement</li>
+          <li>Mini-split</li>
+          <li>Repair</li>
+          <li>Full system</li>
+        </ul>
+        <div class="footer-cta" id="quote-form">
+          <div>
+            <strong>Ready to get your free quotes?</strong>
+            <div style="color:var(--muted);margin-top:6px;">Get started now and we’ll match you with up to three local HVAC contractors.</div>
+          </div>
+          <a class="btn btn-green" href="mailto:mxjarvis.builds@gmail.com?subject=HVAC%20Quote%20Request%20-%20NeighborlyWork">Get My Free Quotes</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contractors">
+      <div class="section-head">
+        <h3>Are you an HVAC contractor?</h3>
+        <p>Join our network. Free to join. Pay only when you close a job.</p>
+      </div>
+      <div class="card" style="background:#fff;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+          <div>
+            <strong style="font-size:1.2rem;">Join the NeighborlyWork network</strong>
+            <div style="color:var(--muted);margin-top:6px;">Receive Sacramento-area quote requests from homeowners looking for HVAC work.</div>
+          </div>
+          <a class="btn btn-green" href="mailto:mxjarvis.builds@gmail.com?subject=Contractor%20Application%20-%20NeighborlyWork">Apply as a Contractor</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-inner">
+        <div>
+          <a class="logo" href="#"><span class="mark"></span>NeighborlyWork</a>
+          <div style="margin-top:8px;max-width:44ch;">HVAC quote marketplace for Sacramento, Roseville, and Folsom.</div>
+        </div>
+        <div class="links">
+          <a href="#hero-cta">Home</a>
+          <a href="#contractors">For Contractors</a>
+          <a href="#quote-form">Get Free Quotes</a>
+          <a href="mailto:mxjarvis.builds@gmail.com">Contact</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

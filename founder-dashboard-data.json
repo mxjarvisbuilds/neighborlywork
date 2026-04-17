@@ -1,0 +1,228 @@
+{
+  "lastUpdated": "2026-04-10",
+  "summary": {
+    "totalLeads": 286,
+    "contractorsSigned": 42,
+    "jobsClosed": 39,
+    "revenueThisMonth": "$13,650",
+    "visitorsThisMonth": "8,420",
+    "conversionRate": "13.6%"
+  },
+  "leads": [
+    {
+      "date": "2026-04-01",
+      "name": "Mia",
+      "service": "HVAC",
+      "city": "Sacramento",
+      "zip": "95825",
+      "status": "New",
+      "contractor": "Top Rank Heating",
+      "revenue": ""
+    },
+    {
+      "date": "2026-04-02",
+      "name": "Ethan",
+      "service": "Handyman",
+      "city": "Roseville",
+      "zip": "95678",
+      "status": "Quoted",
+      "contractor": "Local Handyman Pro",
+      "revenue": ""
+    },
+    {
+      "date": "2026-04-02",
+      "name": "Ava",
+      "service": "Plumbing",
+      "city": "Folsom",
+      "zip": "95630",
+      "status": "Scheduled",
+      "contractor": "Apex Plumbing",
+      "revenue": ""
+    },
+    {
+      "date": "2026-04-03",
+      "name": "Noah",
+      "service": "HVAC",
+      "city": "Elk Grove",
+      "zip": "95758",
+      "status": "Closed",
+      "contractor": "All Year Heating",
+      "revenue": "$350"
+    },
+    {
+      "date": "2026-04-03",
+      "name": "Sophia",
+      "service": "Roofing",
+      "city": "Sacramento",
+      "zip": "95818",
+      "status": "Closed",
+      "contractor": "Capital Roofing Co.",
+      "revenue": "$350"
+    },
+    {
+      "date": "2026-04-04",
+      "name": "Liam",
+      "service": "Lawn",
+      "city": "Citrus Heights",
+      "zip": "95621",
+      "status": "Lost",
+      "contractor": "Green Thumb Crew",
+      "revenue": ""
+    },
+    {
+      "date": "2026-04-05",
+      "name": "Olivia",
+      "service": "Cleaning",
+      "city": "Sacramento",
+      "zip": "95816",
+      "status": "Quoted",
+      "contractor": "Sparkle Home",
+      "revenue": ""
+    },
+    {
+      "date": "2026-04-05",
+      "name": "James",
+      "service": "HVAC",
+      "city": "Roseville",
+      "zip": "95661",
+      "status": "Closed",
+      "contractor": "Bell Brothers",
+      "revenue": "$350"
+    },
+    {
+      "date": "2026-04-06",
+      "name": "Isabella",
+      "service": "Painting",
+      "city": "Sacramento",
+      "zip": "95822",
+      "status": "New",
+      "contractor": "Paint Now",
+      "revenue": ""
+    },
+    {
+      "date": "2026-04-06",
+      "name": "Lucas",
+      "service": "Pool",
+      "city": "Folsom",
+      "zip": "95630",
+      "status": "Quoted",
+      "contractor": "Blue Water Pool",
+      "revenue": ""
+    },
+    {
+      "date": "2026-04-07",
+      "name": "Mason",
+      "service": "Electrical",
+      "city": "Sacramento",
+      "zip": "95823",
+      "status": "Scheduled",
+      "contractor": "Amped Electric",
+      "revenue": ""
+    },
+    {
+      "date": "2026-04-07",
+      "name": "Amelia",
+      "service": "HVAC",
+      "city": "Sacramento",
+      "zip": "95828",
+      "status": "Closed",
+      "contractor": "Aire Serv",
+      "revenue": "$350"
+    },
+    {
+      "date": "2026-04-09",
+      "name": "Zayith Test",
+      "service": "HVAC",
+      "city": "Sacramento",
+      "zip": "95814",
+      "status": "New",
+      "contractor": "Unassigned",
+      "revenue": ""
+    }
+  ],
+  "contractors": [
+    {
+      "name": "Bell Brothers",
+      "trade": "HVAC",
+      "zip": "95661, 95825",
+      "leads": 34,
+      "closed": 17,
+      "fees": "$5,950",
+      "last": "2026-04-07",
+      "status": "Active"
+    },
+    {
+      "name": "Aire Serv",
+      "trade": "HVAC",
+      "zip": "95814, 95828",
+      "leads": 29,
+      "closed": 13,
+      "fees": "$4,550",
+      "last": "2026-04-07",
+      "status": "Active"
+    },
+    {
+      "name": "Top Rank Heating",
+      "trade": "HVAC",
+      "zip": "95758, 95759",
+      "leads": 21,
+      "closed": 9,
+      "fees": "$3,150",
+      "last": "2026-04-06",
+      "status": "Active"
+    },
+    {
+      "name": "Capital Roofing Co.",
+      "trade": "Roofing",
+      "zip": "95818, 95819",
+      "leads": 13,
+      "closed": 5,
+      "fees": "$1,750",
+      "last": "2026-04-05",
+      "status": "Inactive"
+    },
+    {
+      "name": "Apex Plumbing",
+      "trade": "Plumbing",
+      "zip": "95630, 95762",
+      "leads": 15,
+      "closed": 6,
+      "fees": "$2,100",
+      "last": "2026-04-04",
+      "status": "Overdue Payment"
+    },
+    {
+      "name": "Amped Electric",
+      "trade": "Electrical",
+      "zip": "95823, 95824",
+      "leads": 11,
+      "closed": 4,
+      "fees": "$1,400",
+      "last": "2026-04-06",
+      "status": "Active"
+    }
+  ],
+  "campaigns": [
+    {
+      "name": "HVAC Search Ads",
+      "status": "Live",
+      "spend": "$0.00",
+      "budget": "$200 cap",
+      "notes": "Running in Sacramento/Roseville/Folsom. Local spend data was stale; billing UI showed $0.00."
+    },
+    {
+      "name": "Performance Max",
+      "status": "Live",
+      "spend": "$0.00",
+      "budget": "$10/day",
+      "notes": "Awaiting final optimization."
+    }
+  ],
+  "funnel": [
+    8420,
+    286,
+    248,
+    181,
+    39
+  ]
+}

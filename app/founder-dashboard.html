@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Founder Dashboard | NeighborlyWork</title>
+  <meta name="description" content="Admin dashboard for leads, contractors, approvals, and revenue." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+    :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:var(--off);color:var(--text)}
+    .wrap{width:min(1380px,calc(100% - 28px));margin:0 auto}.nav{padding:20px 0 10px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;color:var(--green)}.mark{width:13px;height:13px;border-radius:4px;background:var(--green);box-shadow:0 0 0 4px rgba(26,92,58,.10)}
+    .hero{padding:18px 0 20px}.hero h1{margin:0;font-family:'Outfit',sans-serif;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.04em}.sub{margin-top:10px;color:var(--muted);line-height:1.6;max-width:70ch}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:13px 16px;font-weight:800;cursor:pointer;font-size:.95rem;text-decoration:none}.btn-green{background:var(--green);color:#fff}.btn-light{background:#fff;color:var(--text);border:1px solid var(--line)}.btn-orange{background:var(--orange);color:#fff}
+    .grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(5,minmax(0,1fr));margin-bottom:18px}.card{background:#fff;border:none;border-radius:24px;box-shadow:var(--shadow);padding:20px}.stat-value{font-family:'Outfit',sans-serif;font-size:2rem;letter-spacing:-.05em;color:var(--green);line-height:1}.stat-label{margin-top:8px;color:var(--muted);font-size:.92rem}
+    .message{display:none;border-radius:16px;padding:14px 16px;margin-bottom:16px;font-size:.95rem;line-height:1.5}.message.show{display:block}.message.error{background:#fff1ed;color:#8a2e18}.message.success{background:#eef7f0;color:#1a5c3a}
+    .section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}.section-title h2{margin:0;font-family:'Outfit',sans-serif;font-size:1.5rem;letter-spacing:-.03em}.section-title p{margin:0;color:var(--muted);font-size:.92rem}
+    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}select{padding:12px 14px;border:none;border-radius:14px;background:#f5f5f7;font:inherit;color:var(--text)}
+    .table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse}.data-table th,.data-table td{text-align:left;padding:14px 16px;border-bottom:1px solid rgba(0,0,0,.06);font-size:.93rem;vertical-align:middle}.data-table th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;background:#fbfcfe}
+    .badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:999px;font-size:.8rem;font-weight:800}.badge-open{background:#fff6dd;color:#9a7500}.badge-quoted{background:#e9f2ff;color:#2f67b8}.badge-selected{background:#eef5ef;color:#1a5c3a}.badge-installed{background:#f4ecff;color:#6d45a8}.badge-closed{background:#edf1f6;color:#5e6a78}.badge-pending{background:#fff1ed;color:#a0372b}.badge-approved{background:#eef7f0;color:#1f6a35}.badge-suspended{background:#edf1f6;color:#5e6a78}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}.action-row{display:flex;gap:8px;flex-wrap:wrap}
+    @media(max-width:1100px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}}@media(max-width:720px){.stats{grid-template-columns:1fr}.nav{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="nav">
+      <div class="brand"><span class="mark"></span>NeighborlyWork</div>
+      <div class="actions">
+        <button class="btn btn-light" id="refreshBtn" type="button">Refresh</button>
+        <button class="btn btn-green" id="logoutBtn" type="button">Log Out</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1>Founder Dashboard</h1>
+      <p class="sub">Real-time admin view of leads, contractor approvals, revenue, and operational activity.</p>
+    </section>
+
+    <div class="message error" id="adminError"></div>
+    <div class="message success" id="adminSuccess"></div>
+
+    <section class="grid stats">
+      <article class="card"><div class="stat-value" id="allLeadsCount">0</div><div class="stat-label">All leads</div></article>
+      <article class="card"><div class="stat-value" id="openLeadsCount">0</div><div class="stat-label">Open leads</div></article>
+      <article class="card"><div class="stat-value" id="approvedContractorsCount">0</div><div class="stat-label">Approved contractors</div></article>
+      <article class="card"><div class="stat-value" id="pendingContractorsCount">0</div><div class="stat-label">Pending applications</div></article>
+      <article class="card"><div class="stat-value" id="revenueCount">$0</div><div class="stat-label">Revenue</div></article>
+    </section>
+
+    <section class="card" style="margin-bottom:18px;">
+      <div class="section-title">
+        <div>
+          <h2>All leads</h2>
+          <p>Filter by status or service type.</p>
+        </div>
+      </div>
+      <div class="filters">
+        <select id="leadStatusFilter">
+          <option value="all">All statuses</option>
+          <option value="open">Open</option>
+          <option value="quoted">Quoted</option>
+          <option value="selected">Selected</option>
+          <option value="installed">Installed</option>
+          <option value="closed">Closed</option>
+        </select>
+        <select id="leadServiceFilter">
+          <option value="all">All services</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Homeowner</th>
+              <th>Service</th>
+              <th>ZIP</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Matched Contractors</th>
+            </tr>
+          </thead>
+          <tbody id="leadRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <div>
+          <h2>Contractors</h2>
+          <p>Approve, review, and manage your contractor network.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Business</th>
+              <th>ZIPs</th>
+              <th>Status</th>
+              <th>Rating</th>
+              <th>Jobs Won</th>
+              <th>Fees Owed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="contractorRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const state = { leads: [], contractors: [], homeowners: new Map() };
+
+    function setMessage(id, text) {
+      ['adminError','adminSuccess'].forEach(mid => {
+        const el = document.getElementById(mid);
+        el.textContent = '';
+        el.classList.remove('show');
+      });
+      const target = document.getElementById(id);
+      target.textContent = text;
+      target.classList.add('show');
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(value || 0));
+    }
+
+    function badge(status) {
+      const s = (status || '').toLowerCase();
+      if (s === 'open') return '<span class="badge badge-open">Open</span>';
+      if (s === 'quoted') return '<span class="badge badge-quoted">Quoted</span>';
+      if (s === 'selected') return '<span class="badge badge-selected">Selected</span>';
+      if (s === 'installed') return '<span class="badge badge-installed">Installed</span>';
+      if (s === 'closed') return '<span class="badge badge-closed">Closed</span>';
+      if (s === 'pending') return '<span class="badge badge-pending">Pending</span>';
+      if (s === 'approved') return '<span class="badge badge-approved">Approved</span>';
+      return '<span class="badge badge-suspended">Suspended</span>';
+    }
+
+    function formatDate(value) {
+      return value ? new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    }
+
+    async function requireAdmin() {
+      const user = await getCurrentUser();
+      if (!user) {
+        window.location.href = '/index.html';
+        return null;
+      }
+      const role = await getUserRole();
+      if (role !== 'admin') {
+        window.location.href = '/index.html';
+        return null;
+      }
+      return user;
+    }
+
+    async function loadDashboard() {
+      const user = await requireAdmin();
+      if (!user) return;
+
+      const [leadsRes, contractorsRes] = await Promise.all([
+        db.from('leads').select('*').order('created_at', { ascending: false }),
+        db.from('contractors').select('*').order('status', { ascending: true })
+      ]);
+      if (leadsRes.error) throw leadsRes.error;
+      if (contractorsRes.error) throw contractorsRes.error;
+
+      state.leads = leadsRes.data || [];
+      state.contractors = contractorsRes.data || [];
+
+      const homeownerIds = [...new Set(state.leads.map(l => l.homeowner_id).filter(Boolean))];
+      if (homeownerIds.length) {
+        const { data: homeowners, error: homeownersError } = await db.from('users').select('id, full_name, email').in('id', homeownerIds);
+        if (homeownersError) throw homeownersError;
+        state.homeowners = new Map((homeowners || []).map(h => [h.id, h]));
+      } else {
+        state.homeowners = new Map();
+      }
+
+      const contractorIds = state.contractors.map(c => c.id);
+      let contractorUsers = new Map();
+      if (contractorIds.length) {
+        const { data: users, error: usersError } = await db.from('users').select('id, full_name, email').in('id', contractorIds);
+        if (usersError) throw usersError;
+        contractorUsers = new Map((users || []).map(u => [u.id, u]));
+      }
+
+      document.getElementById('allLeadsCount').textContent = state.leads.length;
+      document.getElementById('openLeadsCount').textContent = state.leads.filter(l => l.status === 'open').length;
+      document.getElementById('approvedContractorsCount').textContent = state.contractors.filter(c => c.status === 'approved').length;
+      document.getElementById('pendingContractorsCount').textContent = state.contractors.filter(c => c.status === 'pending').length;
+      document.getElementById('revenueCount').textContent = formatCurrency(state.leads.filter(l => l.status === 'closed').length * 350);
+
+      const serviceFilter = document.getElementById('leadServiceFilter');
+      const services = [...new Set(state.leads.map(l => l.service_type).filter(Boolean))].sort();
+      serviceFilter.innerHTML = '<option value="all">All services</option>' + services.map(service => `<option value="${service}">${service}</option>`).join('');
+
+      renderLeads();
+      renderContractors(contractorUsers);
+    }
+
+    function renderLeads() {
+      const status = document.getElementById('leadStatusFilter').value;
+      const service = document.getElementById('leadServiceFilter').value;
+      const rows = state.leads.filter(lead => (status === 'all' || lead.status === status) && (service === 'all' || lead.service_type === service));
+      const tbody = document.getElementById('leadRows');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="6">No leads match the current filters.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(lead => {
+        const homeowner = state.homeowners.get(lead.homeowner_id);
+        return `
+          <tr>
+            <td>${homeowner?.full_name || homeowner?.email || 'Unknown'}</td>
+            <td>${lead.service_type || '—'}</td>
+            <td>${lead.zip_code || '—'}</td>
+            <td>${badge(lead.status)}</td>
+            <td>${formatDate(lead.created_at)}</td>
+            <td>${(lead.matched_contractors || []).length}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    function renderContractors(userMap) {
+      const tbody = document.getElementById('contractorRows');
+      if (!state.contractors.length) {
+        tbody.innerHTML = '<tr><td colspan="8">No contractors yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = state.contractors.map(contractor => {
+        const user = userMap.get(contractor.id);
+        return `
+          <tr>
+            <td>${user?.full_name || user?.email || 'Unknown'}</td>
+            <td>${contractor.business_name || '—'}</td>
+            <td>${(contractor.service_zips || []).join(', ') || '—'}</td>
+            <td>${badge(contractor.status)}</td>
+            <td>${contractor.rating || 0}</td>
+            <td>${contractor.total_jobs_won || 0}</td>
+            <td>${formatCurrency(contractor.total_fees_owed || 0)}</td>
+            <td>
+              <div class="action-row">
+                <button class="btn btn-green" type="button" data-approve="${contractor.id}">Approve</button>
+                <button class="btn btn-light" type="button" data-suspend="${contractor.id}">Reject</button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+      tbody.querySelectorAll('[data-approve]').forEach(btn => btn.addEventListener('click', () => updateContractorStatus(btn.dataset.approve, 'approved')));
+      tbody.querySelectorAll('[data-suspend]').forEach(btn => btn.addEventListener('click', () => updateContractorStatus(btn.dataset.suspend, 'suspended')));
+    }
+
+    async function updateContractorStatus(contractorId, status) {
+      try {
+        const { error } = await db.from('contractors').update({ status }).eq('id', contractorId);
+        if (error) throw error;
+        setMessage('adminSuccess', `Contractor updated to ${status}.`);
+        await loadDashboard();
+      } catch (err) {
+        setMessage('adminError', err.message || 'Could not update contractor.');
+      }
+    }
+
+    document.getElementById('leadStatusFilter').addEventListener('change', renderLeads);
+    document.getElementById('leadServiceFilter').addEventListener('change', renderLeads);
+    document.getElementById('refreshBtn').addEventListener('click', loadDashboard);
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await db.auth.signOut();
+      window.location.href = '/index.html';
+    });
+
+    (async function init() {
+      try {
+        await loadDashboard();
+      } catch (err) {
+        setMessage('adminError', err.message || 'Could not load founder dashboard.');
+      }
+    })();
+  </script>
+</body>
+</html>

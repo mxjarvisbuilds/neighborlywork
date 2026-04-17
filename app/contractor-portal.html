@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contractor Portal | NeighborlyWork</title>
+  <meta name="description" content="Review matched leads, submit blind quotes, and manage your contractor profile." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+    :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:var(--off);color:var(--text)}
+    .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}.sidebar{background:#163d2b;color:#fff;padding:24px 18px}.brand{display:flex;align-items:center;gap:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:22px}.mark{width:14px;height:14px;border-radius:4px;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.12)}
+    .navtitle{color:rgba(255,255,255,.65);font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;margin:18px 0 10px}.tabs{display:grid;gap:10px}.tab{cursor:pointer;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#e6f0ea;padding:14px;border-radius:14px;font-weight:700;text-align:left}.tab.active,.tab:hover{background:rgba(255,255,255,.12)}.side-note{margin-top:22px;padding:14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.82);font-size:.92rem;line-height:1.55}
+    main{padding:24px}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px}h1{margin:0;font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,3vw,2.5rem);letter-spacing:-.04em}.sub{color:var(--muted);margin-top:8px;line-height:1.6;max-width:60ch}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:13px 16px;font-weight:800;cursor:pointer;font-size:.95rem;text-decoration:none}.btn-green{background:var(--green);color:#fff}.btn-orange{background:var(--orange);color:#fff}.btn-light{background:#fff;color:var(--text);border:1px solid var(--line)}.btn.disabled{opacity:.45;pointer-events:none}
+    .screen{display:none}.screen.active{display:block}.grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}.card{background:#fff;border:none;border-radius:24px;box-shadow:var(--shadow);padding:20px}.stat-value{font-family:'Outfit',sans-serif;font-size:2rem;letter-spacing:-.05em;color:var(--green);line-height:1}.stat-label{margin-top:8px;color:var(--muted);font-size:.92rem}
+    .message{display:none;border-radius:16px;padding:14px 16px;margin-bottom:16px;font-size:.95rem;line-height:1.5}.message.show{display:block}.message.error{background:#fff1ed;color:#8a2e18}.message.success{background:#eef7f0;color:#1a5c3a}.message.notice{background:#eef5ef;color:#1a5c3a}
+    .table-wrap{overflow:auto}.lead-table{width:100%;border-collapse:collapse}.lead-table th,.lead-table td{text-align:left;padding:14px 16px;border-bottom:1px solid rgba(0,0,0,.06);font-size:.93rem;vertical-align:middle}.lead-table th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;background:#fbfcfe}
+    .badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:999px;font-size:.8rem;font-weight:800}.badge-open{background:#fff6dd;color:#9a7500}.badge-quoted{background:#e9f2ff;color:#2f67b8}.badge-won{background:#eef7f0;color:#1f6a35}.badge-urgent{background:#fff1ed;color:#a0372b}
+    .section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}.section-title h2{margin:0;font-family:'Outfit',sans-serif;font-size:1.4rem;letter-spacing:-.03em}.section-title p{margin:0;color:var(--muted);font-size:.92rem}
+    .profile-grid,.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:grid;gap:8px}label{font-weight:700;font-size:.9rem}input,textarea,select{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:#fbfcfe;font:inherit;color:var(--text);outline:none}textarea{min-height:110px;resize:vertical}input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(26,92,58,.14)}
+    .checkbox-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.choice{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fafbf9}.choice input{width:auto;margin-top:3px}
+    .quote-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.summary{background:#f8fbf8;border:1px solid rgba(26,92,58,.12);border-radius:18px;padding:16px}.summary strong{display:block;margin-bottom:6px}.small-note{color:var(--muted);font-size:.86rem;line-height:1.6}
+    .money-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.money{background:#f7fafc;border:1px solid var(--line);border-radius:16px;padding:14px}.money .k{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}.money .v{font-size:1.45rem;font-weight:900;letter-spacing:-.04em}
+    .pending-box{text-align:center;padding:28px}.pending-box h2{margin:0 0 10px;font-family:'Outfit',sans-serif;font-size:2rem;letter-spacing:-.04em}.pending-box p{margin:0;color:var(--muted);line-height:1.6;max-width:52ch;margin-inline:auto}
+    @media(max-width:1080px){.app{grid-template-columns:1fr}.sidebar{position:static}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quote-layout{grid-template-columns:1fr}}
+    @media(max-width:760px){.stats,.profile-grid,.form-grid,.checkbox-grid,.money-row{grid-template-columns:1fr}.topbar{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="mark"></span>NeighborlyWork</div>
+      <div class="navtitle">Portal</div>
+      <div class="tabs">
+        <button class="tab active" data-screen="dashboard">Dashboard</button>
+        <button class="tab" data-screen="quote">Submit Quote</button>
+        <button class="tab" data-screen="profile">Profile</button>
+      </div>
+      <div class="side-note">Blind quote system. Homeowners can compare all quotes, but contractors never see each other's pricing. $350 fee only if the homeowner selects you and the job is installed.</div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <h1 id="pageTitle">Contractor Portal</h1>
+          <div class="sub" id="pageSub">Review matched leads, submit blind quotes, and manage your service area.</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-light" id="refreshBtn" type="button">Refresh</button>
+          <button class="btn btn-green" id="logoutBtn" type="button">Log Out</button>
+        </div>
+      </div>
+
+      <div class="message error" id="portalError"></div>
+      <div class="message success" id="portalSuccess"></div>
+      <div class="message notice" id="portalNotice"></div>
+
+      <section class="screen active" id="dashboardScreen">
+        <section class="grid stats">
+          <article class="card"><div class="stat-value" id="newLeadsCount">0</div><div class="stat-label">New leads</div></article>
+          <article class="card"><div class="stat-value" id="quotesSubmittedCount">0</div><div class="stat-label">Quotes submitted</div></article>
+          <article class="card"><div class="stat-value" id="jobsWonCount">0</div><div class="stat-label">Jobs won</div></article>
+          <article class="card"><div class="stat-value" id="feesOwedCount">$0</div><div class="stat-label">Fees owed</div></article>
+        </section>
+
+        <section class="card" id="pendingState" style="display:none;">
+          <div class="pending-box">
+            <h2>Your application is under review.</h2>
+            <p>We will notify you within 24 hours once your contractor account is approved.</p>
+          </div>
+        </section>
+
+        <section class="card" id="approvedState">
+          <div class="section-title">
+            <div>
+              <h2>Matched leads</h2>
+              <p>These leads match your approved ZIP codes and services.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="lead-table">
+              <thead>
+                <tr>
+                  <th>Homeowner</th>
+                  <th>Service</th>
+                  <th>City / ZIP</th>
+                  <th>Home Size</th>
+                  <th>Urgency</th>
+                  <th>Date Received</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="leadRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="screen" id="quoteScreen">
+        <div class="quote-layout">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h2>Submit blind quote</h2>
+                <p>Homeowners compare your quote side by side with others.</p>
+              </div>
+            </div>
+            <div class="summary" id="leadSummary">Select a lead from the dashboard to begin.</div>
+            <form id="quoteForm" class="form-grid">
+              <div class="field"><label>Equipment brand</label><select id="equipmentBrand" required><option value="">Select brand</option><option>Carrier</option><option>Trane</option><option>Lennox</option><option>Rheem</option><option>Goodman</option><option>Daikin</option><option>Other</option></select></div>
+              <div class="field"><label>Equipment model</label><input id="equipmentModel" type="text" placeholder="Model number"></div>
+              <div class="field"><label>SEER rating</label><select id="seerRating" required><option value="">Select</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18+</option></select></div>
+              <div class="field"><label>Warranty</label><select id="warrantyYears" required><option value="">Select</option><option>5 years</option><option>10 years</option><option>12 years</option><option>15 years</option></select></div>
+              <div class="field"><label>Tonnage</label><select id="tonnage"><option value="">Select</option><option>1.5 ton</option><option>2 ton</option><option>2.5 ton</option><option>3 ton</option><option>4 ton</option><option>5 ton</option></select></div>
+              <div class="field"><label>Install time</label><select id="installTime"><option value="">Select</option><option>Same day</option><option>1 day</option><option>2 days</option><option>3+ days</option></select></div>
+              <div class="field"><label>Equipment cost ($)</label><input id="equipmentCost" type="number" min="0" step="0.01" required></div>
+              <div class="field"><label>Labor cost ($)</label><input id="laborCost" type="number" min="0" step="0.01" required></div>
+              <div class="field"><label>Additional cost ($)</label><input id="additionalCost" type="number" min="0" step="0.01" value="0"></div>
+              <div class="field"><label>Available date</label><input id="availableDate" type="date"></div>
+              <div class="field"><label>Includes removal</label><select id="includesRemoval"><option value="true">Yes</option><option value="false">No</option></select></div>
+              <div class="field"><label>Permits included</label><select id="permitsIncluded"><option value="true">Yes</option><option value="false">No</option></select></div>
+              <div class="field"><label>Financing available</label><select id="financingAvailable"><option value="false">No</option><option value="true">Yes</option></select></div>
+              <div class="field"><label>Financing note</label><input id="financingNote" type="text" placeholder="Optional"></div>
+              <div class="field" style="grid-column:1 / -1;"><label>Note to homeowner</label><textarea id="noteToHomeowner" maxlength="300" placeholder="Share anything helpful about your quote."></textarea></div>
+              <div class="money-row" style="grid-column:1 / -1;">
+                <div class="money"><div class="k">Total price</div><div class="v" id="totalPriceDisplay">$0</div></div>
+                <div class="money"><div class="k">Fee reminder</div><div class="v">$350 on won + installed jobs</div></div>
+              </div>
+              <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+                <div class="small-note">Your quote is blind. Homeowner sees all quotes but contractors never see each other's pricing. $350 fee only if homeowner selects you and job is installed.</div>
+                <button class="btn btn-orange" id="submitQuoteBtn" type="submit">Submit Quote</button>
+              </div>
+            </form>
+          </div>
+          <div class="card">
+            <div class="section-title"><div><h2>Your profile</h2><p>Quick contractor summary</p></div></div>
+            <div class="summary" id="contractorSummary">Profile will load here.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="profileScreen">
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h2>Edit profile</h2>
+              <p>Update your contractor details and service area.</p>
+            </div>
+          </div>
+          <form id="profileForm" class="profile-grid">
+            <div class="field"><label>Full name</label><input id="profileName" type="text" required></div>
+            <div class="field"><label>Business name</label><input id="profileBusiness" type="text" required></div>
+            <div class="field"><label>Phone</label><input id="profilePhone" type="tel"></div>
+            <div class="field"><label>Service ZIP codes</label><input id="profileZips" type="text" placeholder="95825, 95661, 95630"></div>
+            <div class="field" style="grid-column:1 / -1;"><label>Bio</label><textarea id="profileBio" placeholder="Tell homeowners about your company."></textarea></div>
+            <div class="field" style="grid-column:1 / -1;">
+              <label>Services</label>
+              <div class="checkbox-grid">
+                <label class="choice"><input type="checkbox" name="profileServices" value="AC Installation"><span>AC Installation</span></label>
+                <label class="choice"><input type="checkbox" name="profileServices" value="Furnace or Heat Pump"><span>Furnace or Heat Pump</span></label>
+                <label class="choice"><input type="checkbox" name="profileServices" value="Mini-Split"><span>Mini-Split</span></label>
+                <label class="choice"><input type="checkbox" name="profileServices" value="Full HVAC System"><span>Full HVAC System</span></label>
+                <label class="choice"><input type="checkbox" name="profileServices" value="Repair or Tune-Up"><span>Repair or Tune-Up</span></label>
+              </div>
+            </div>
+            <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;">
+              <button class="btn btn-green" type="submit">Save Profile</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const screens = {
+      dashboard: document.getElementById('dashboardScreen'),
+      quote: document.getElementById('quoteScreen'),
+      profile: document.getElementById('profileScreen')
+    };
+    const state = {
+      user: null,
+      profile: null,
+      contractor: null,
+      leads: [],
+      leadMap: new Map(),
+      selectedLead: null,
+      quoteLeadIds: new Set()
+    };
+
+    function showScreen(name) {
+      tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.screen === name));
+      Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
+    }
+
+    function setMessage(type, text) {
+      ['portalError','portalSuccess','portalNotice'].forEach(id => {
+        const el = document.getElementById(id);
+        el.textContent = '';
+        el.classList.remove('show');
+      });
+      const target = document.getElementById(type);
+      target.textContent = text;
+      target.classList.add('show');
+    }
+
+    function formatDate(value) {
+      if (!value) return '—';
+      return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(value || 0));
+    }
+
+    function firstName(fullName) {
+      return (fullName || 'Homeowner').split(' ')[0];
+    }
+
+    function extractCity(address) {
+      if (!address) return '—';
+      const parts = address.split(',').map(s => s.trim()).filter(Boolean);
+      if (parts.length >= 2) return parts[1];
+      return parts[0] || '—';
+    }
+
+    function statusBadge(status) {
+      if (status === 'quoted') return '<span class="badge badge-quoted">Quoted</span>';
+      return '<span class="badge badge-open">Open</span>';
+    }
+
+    function getSelectedServices() {
+      return Array.from(document.querySelectorAll('input[name="profileServices"]:checked')).map(i => i.value);
+    }
+
+    function totalPrice() {
+      const equipment = Number(document.getElementById('equipmentCost').value || 0);
+      const labor = Number(document.getElementById('laborCost').value || 0);
+      const additional = Number(document.getElementById('additionalCost').value || 0);
+      return equipment + labor + additional;
+    }
+
+    function updateTotalPrice() {
+      document.getElementById('totalPriceDisplay').textContent = formatCurrency(totalPrice());
+    }
+
+    function populateProfileForm() {
+      document.getElementById('profileName').value = state.profile?.full_name || '';
+      document.getElementById('profileBusiness').value = state.contractor?.business_name || '';
+      document.getElementById('profilePhone').value = state.profile?.phone || '';
+      document.getElementById('profileBio').value = state.contractor?.bio || '';
+      document.getElementById('profileZips').value = (state.contractor?.service_zips || []).join(', ');
+      const serviceSet = new Set(state.contractor?.services || []);
+      document.querySelectorAll('input[name="profileServices"]').forEach(input => {
+        input.checked = serviceSet.has(input.value);
+      });
+    }
+
+    function renderContractorSummary() {
+      const summary = document.getElementById('contractorSummary');
+      summary.innerHTML = `
+        <strong>${state.contractor?.business_name || 'Business name missing'}</strong>
+        Status: ${state.contractor?.status || 'pending'}<br>
+        ZIPs: ${(state.contractor?.service_zips || []).join(', ') || 'None set'}<br>
+        Services: ${(state.contractor?.services || []).join(', ') || 'None set'}
+      `;
+    }
+
+    function selectLead(leadId) {
+      state.selectedLead = state.leadMap.get(leadId) || null;
+      if (!state.selectedLead) return;
+      const lead = state.selectedLead;
+      document.getElementById('leadSummary').innerHTML = `
+        <strong>${firstName(lead.homeowner_name || 'Homeowner')} · ${lead.service_type || 'HVAC Request'}</strong>
+        ${extractCity(lead.address)} · ${lead.zip_code || '—'} · ${lead.home_size_sqft || 'Home size unknown'}
+      `;
+      showScreen('quote');
+    }
+
+    function renderLeadRows() {
+      const tbody = document.getElementById('leadRows');
+      if (!state.leads.length) {
+        tbody.innerHTML = `<tr><td colspan="8">No matched leads yet.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = state.leads.map(lead => {
+        const alreadyQuoted = state.quoteLeadIds.has(lead.id);
+        const won = lead.selected_contractor_id === state.user.id;
+        return `
+          <tr>
+            <td>${firstName(lead.homeowner_name || 'Homeowner')}</td>
+            <td>${lead.service_type || '—'}</td>
+            <td>${extractCity(lead.address)} / ${lead.zip_code || '—'}</td>
+            <td>${lead.home_size_sqft || '—'}</td>
+            <td>${lead.urgency_flag ? '<span class="badge badge-urgent">Urgent</span>' : 'Standard'}</td>
+            <td>${formatDate(lead.created_at)}</td>
+            <td>${won ? '<span class="badge badge-won">Won</span>' : alreadyQuoted ? '<span class="badge badge-quoted">Quoted</span>' : statusBadge(lead.status)}</td>
+            <td>${won ? '<span class="badge badge-won">Won</span>' : alreadyQuoted ? '<span class="badge badge-quoted">Quoted</span>' : `<button class="btn btn-orange" type="button" data-lead="${lead.id}">Submit Quote</button>`}</td>
+          </tr>`;
+      }).join('');
+      tbody.querySelectorAll('button[data-lead]').forEach(btn => {
+        btn.addEventListener('click', () => selectLead(btn.dataset.lead));
+      });
+    }
+
+    async function loadPortal() {
+      const user = await getCurrentUser();
+      if (!user) {
+        window.location.href = '/app/contractor-auth.html';
+        return;
+      }
+      state.user = user;
+
+      const { data: profile, error: profileError } = await db.from('users').select('id, full_name, phone, role').eq('id', user.id).single();
+      if (profileError || profile?.role !== 'contractor') {
+        window.location.href = '/app/contractor-auth.html';
+        return;
+      }
+      state.profile = profile;
+
+      const { data: contractor, error: contractorError } = await db.from('contractors').select('*').eq('id', user.id).single();
+      if (contractorError) throw contractorError;
+      state.contractor = contractor;
+      populateProfileForm();
+      renderContractorSummary();
+
+      if (contractor.status === 'pending') {
+        document.getElementById('pendingState').style.display = 'block';
+        document.getElementById('approvedState').style.display = 'none';
+        setMessage('portalNotice', 'Your application is under review. We will notify you within 24 hours.');
+        return;
+      }
+
+      document.getElementById('pendingState').style.display = 'none';
+      document.getElementById('approvedState').style.display = 'block';
+
+      const serviceZips = contractor.service_zips || [];
+      const services = contractor.services || [];
+
+      const { data: leads, error: leadsError } = await db
+        .from('leads')
+        .select('id, homeowner_id, service_type, zip_code, address, home_size_sqft, urgency_flag, created_at, status, selected_contractor_id')
+        .in('status', ['open', 'quoted'])
+        .in('zip_code', serviceZips)
+        .in('service_type', services)
+        .order('urgency_flag', { ascending: false })
+        .order('created_at', { ascending: false });
+      if (leadsError) throw leadsError;
+
+      const homeownerIds = [...new Set((leads || []).map(l => l.homeowner_id).filter(Boolean))];
+      let homeownerMap = new Map();
+      if (homeownerIds.length) {
+        const { data: homeowners } = await db.from('users').select('id, full_name').in('id', homeownerIds);
+        homeownerMap = new Map((homeowners || []).map(h => [h.id, h.full_name]));
+      }
+
+      state.leads = (leads || []).map(lead => ({ ...lead, homeowner_name: homeownerMap.get(lead.homeowner_id) || 'Homeowner' }));
+      state.leadMap = new Map(state.leads.map(lead => [lead.id, lead]));
+
+      const { data: quotes, error: quotesError } = await db.from('quotes').select('id, lead_id, status').eq('contractor_id', user.id);
+      if (quotesError) throw quotesError;
+      state.quoteLeadIds = new Set((quotes || []).map(q => q.lead_id));
+
+      const jobsWon = contractor.total_jobs_won || 0;
+      document.getElementById('newLeadsCount').textContent = state.leads.filter(l => l.status === 'open' && !state.quoteLeadIds.has(l.id)).length;
+      document.getElementById('quotesSubmittedCount').textContent = state.quoteLeadIds.size;
+      document.getElementById('jobsWonCount').textContent = jobsWon;
+      document.getElementById('feesOwedCount').textContent = formatCurrency(jobsWon * 350);
+
+      renderLeadRows();
+    }
+
+    document.getElementById('quoteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!state.selectedLead) {
+        setMessage('portalError', 'Select a lead first.');
+        return;
+      }
+      try {
+        const total = totalPrice();
+        const payload = {
+          lead_id: state.selectedLead.id,
+          contractor_id: state.user.id,
+          equipment_brand: document.getElementById('equipmentBrand').value,
+          equipment_model: document.getElementById('equipmentModel').value || null,
+          seer_rating: document.getElementById('seerRating').value,
+          warranty_years: document.getElementById('warrantyYears').value,
+          tonnage: document.getElementById('tonnage').value || null,
+          equipment_cost: Number(document.getElementById('equipmentCost').value || 0),
+          labor_cost: Number(document.getElementById('laborCost').value || 0),
+          additional_cost: Number(document.getElementById('additionalCost').value || 0),
+          total_price: total,
+          includes_removal: document.getElementById('includesRemoval').value === 'true',
+          permits_included: document.getElementById('permitsIncluded').value === 'true',
+          install_time: document.getElementById('installTime').value || null,
+          available_date: document.getElementById('availableDate').value || null,
+          financing_available: document.getElementById('financingAvailable').value === 'true',
+          financing_note: document.getElementById('financingNote').value || null,
+          note_to_homeowner: document.getElementById('noteToHomeowner').value || null,
+          status: 'submitted'
+        };
+        const { error: insertError } = await db.from('quotes').insert(payload);
+        if (insertError) throw insertError;
+        const { error: leadError } = await db.from('leads').update({ status: 'quoted' }).eq('id', state.selectedLead.id);
+        if (leadError) throw leadError;
+        setMessage('portalSuccess', 'Quote submitted successfully.');
+        document.getElementById('quoteForm').reset();
+        updateTotalPrice();
+        await loadPortal();
+        showScreen('dashboard');
+      } catch (err) {
+        setMessage('portalError', err.message || 'Could not submit quote.');
+      }
+    });
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const fullName = document.getElementById('profileName').value.trim();
+        const businessName = document.getElementById('profileBusiness').value.trim();
+        const phone = document.getElementById('profilePhone').value.trim();
+        const bio = document.getElementById('profileBio').value.trim();
+        const zips = document.getElementById('profileZips').value.split(',').map(z => z.trim()).filter(Boolean);
+        const services = getSelectedServices();
+
+        const { error: userError } = await db.from('users').update({ full_name: fullName, phone }).eq('id', state.user.id);
+        if (userError) throw userError;
+        const { error: contractorError } = await db.from('contractors').update({ business_name: businessName, bio, service_zips: zips, services }).eq('id', state.user.id);
+        if (contractorError) throw contractorError;
+        setMessage('portalSuccess', 'Profile updated.');
+        await loadPortal();
+      } catch (err) {
+        setMessage('portalError', err.message || 'Could not save profile.');
+      }
+    });
+
+    tabs.forEach(tab => tab.addEventListener('click', () => showScreen(tab.dataset.screen)));
+    ['equipmentCost','laborCost','additionalCost'].forEach(id => document.getElementById(id).addEventListener('input', updateTotalPrice));
+    document.getElementById('refreshBtn').addEventListener('click', loadPortal);
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await db.auth.signOut();
+      window.location.href = '/app/contractor-auth.html';
+    });
+
+    (async function init() {
+      try {
+        updateTotalPrice();
+        await loadPortal();
+      } catch (err) {
+        setMessage('portalError', err.message || 'Could not load contractor portal.');
+      }
+    })();
+  </script>
+</body>
+</html>

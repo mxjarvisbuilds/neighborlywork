@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Concept 2: NW monogram with house roof — modern, bold -->
+  <rect width="400" height="400" fill="white" rx="40"/>
+  <rect width="400" height="400" fill="#f5f2ec" rx="40"/>
+  <!-- Green circle background -->
+  <circle cx="200" cy="200" r="160" fill="#1a5c3a"/>
+  <!-- NW letters -->
+  <text x="200" y="230" font-family="Georgia, serif" font-size="140" font-weight="bold" fill="white" text-anchor="middle">NW</text>
+  <!-- Roof line over letters -->
+  <polyline points="60,160 200,60 340,160" fill="none" stroke="#c8401a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

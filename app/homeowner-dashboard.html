@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Homeowner Dashboard | NeighborlyWork</title>
+  <meta name="description" content="Track your HVAC quote requests and compare contractor responses." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+    :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:var(--off);color:var(--text)}
+    .wrap{width:min(1100px,calc(100% - 28px));margin:0 auto}.nav{padding:22px 0 10px;display:flex;align-items:center;justify-content:space-between;gap:16px}.logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--green);font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem}.mark{width:13px;height:13px;border-radius:4px;background:var(--green);box-shadow:0 0 0 4px rgba(26,92,58,.10)}
+    .nav-actions{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:13px 16px;font-weight:800;cursor:pointer;font-size:.96rem;text-decoration:none}.btn-green{background:var(--green);color:#fff}.btn-light{background:#fff;color:var(--text);border:1px solid var(--line)}.btn.disabled{opacity:.45;pointer-events:none}
+    .hero{padding:18px 0 22px}.eyebrow{color:var(--green);font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}.hero h1{font-family:'Outfit',sans-serif;letter-spacing:-.04em;line-height:.95;margin:0;font-size:clamp(2.1rem,4.8vw,4rem)}.sub{margin:12px 0 0;color:var(--muted);line-height:1.65;max-width:60ch}
+    .message{display:none;border-radius:16px;padding:14px 16px;margin:0 0 16px;font-size:.95rem;line-height:1.5}.message.show{display:block}.message.error{background:#fff1ed;color:#8a2e18}
+    .grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px}.card{background:#fff;border:none;border-radius:24px;box-shadow:var(--shadow);padding:22px}.stat-value{font-family:'Outfit',sans-serif;font-size:2rem;letter-spacing:-.05em;color:var(--green);line-height:1}.stat-label{margin-top:8px;color:var(--muted);font-size:.92rem}
+    .section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}.section-title h2{margin:0;font-family:'Outfit',sans-serif;font-size:1.6rem;letter-spacing:-.03em}.section-title p{margin:0;color:var(--muted);font-size:.94rem}
+    .lead-list{display:grid;gap:14px}.lead-row{background:#fafbf9;border:1px solid var(--line);border-radius:20px;padding:18px;display:grid;gap:12px}.lead-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.lead-title{font-family:'Outfit',sans-serif;font-size:1.15rem;letter-spacing:-.02em}.lead-meta{color:var(--muted);font-size:.92rem;line-height:1.5}.lead-actions{display:flex;gap:10px;flex-wrap:wrap}.badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:999px;font-size:.8rem;font-weight:800}.badge-open{background:#eef5ef;color:var(--green)}.badge-quoted{background:#e9f2ff;color:#2f67b8}.badge-selected{background:#fff3e9;color:#b15b1f}.badge-installed,.badge-closed{background:#edf7ef;color:#1f6a35}
+    .empty{padding:26px;text-align:center;background:#fafbf9;border:1px dashed var(--line);border-radius:20px}.empty h3{margin:0 0 8px;font-family:'Outfit',sans-serif;font-size:1.35rem;letter-spacing:-.03em}.empty p{margin:0 0 16px;color:var(--muted);line-height:1.6}
+    .loading{opacity:.7;pointer-events:none}
+    @media(max-width:780px){.kpis{grid-template-columns:1fr}.nav{flex-direction:column;align-items:flex-start}.lead-actions .btn{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="nav">
+      <a class="logo" href="/index.html"><span class="mark"></span>NeighborlyWork</a>
+      <div class="nav-actions">
+        <a class="btn btn-light" href="/app/homeowner-intake.html">New Request</a>
+        <button class="btn btn-green" id="logoutBtn" type="button">Log Out</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Homeowner Dashboard</div>
+      <h1 id="welcomeHeading">Your quote requests</h1>
+      <p class="sub">Track your HVAC requests, monitor status changes, and compare quotes when contractors respond.</p>
+    </section>
+
+    <div class="message error" id="dashboardError"></div>
+
+    <section class="grid kpis" id="kpiGrid">
+      <article class="card"><div class="stat-value" id="totalRequests">0</div><div class="stat-label">Total requests</div></article>
+      <article class="card"><div class="stat-value" id="openRequests">0</div><div class="stat-label">Open requests</div></article>
+      <article class="card"><div class="stat-value" id="quotedRequests">0</div><div class="stat-label">Requests with quotes</div></article>
+    </section>
+
+    <section class="card" id="leadsSection">
+      <div class="section-title">
+        <div>
+          <h2>Your submissions</h2>
+          <p>Each request shows its current status and whether quotes are available yet.</p>
+        </div>
+      </div>
+      <div class="lead-list" id="leadList"></div>
+    </section>
+  </main>
+
+  <script>
+    function setError(text) {
+      const el = document.getElementById('dashboardError');
+      el.textContent = text;
+      el.classList.add('show');
+    }
+
+    function badgeClass(status) {
+      const normalized = (status || 'open').toLowerCase();
+      if (normalized === 'quoted') return 'badge badge-quoted';
+      if (normalized === 'selected') return 'badge badge-selected';
+      if (normalized === 'installed') return 'badge badge-installed';
+      if (normalized === 'closed') return 'badge badge-closed';
+      return 'badge badge-open';
+    }
+
+    function formatStatus(status) {
+      if (!status) return 'Open';
+      return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+
+    function formatDate(value) {
+      try {
+        return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch {
+        return value || '—';
+      }
+    }
+
+    async function loadDashboard() {
+      const user = await requireAuth('homeowner');
+      if (!user) return;
+
+      const { data: profile } = await db.from('users').select('full_name').eq('id', user.id).single();
+      const firstName = (profile?.full_name || 'Homeowner').split(' ')[0];
+      document.getElementById('welcomeHeading').textContent = `${firstName}, here are your requests`;
+
+      const { data: leads, error } = await db
+        .from('leads')
+        .select('id, service_type, created_at, status')
+        .eq('homeowner_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const leadIds = (leads || []).map(l => l.id);
+      let quoteMap = new Map();
+      if (leadIds.length) {
+        const { data: quotes, error: quoteError } = await db
+          .from('quotes')
+          .select('id, lead_id')
+          .in('lead_id', leadIds);
+        if (quoteError) throw quoteError;
+        quoteMap = new Map();
+        (quotes || []).forEach(q => {
+          quoteMap.set(q.lead_id, (quoteMap.get(q.lead_id) || 0) + 1);
+        });
+      }
+
+      const total = leads?.length || 0;
+      const open = (leads || []).filter(l => l.status === 'open').length;
+      const quoted = (leads || []).filter(l => (quoteMap.get(l.id) || 0) > 0 || l.status === 'quoted').length;
+      document.getElementById('totalRequests').textContent = total;
+      document.getElementById('openRequests').textContent = open;
+      document.getElementById('quotedRequests').textContent = quoted;
+
+      const list = document.getElementById('leadList');
+      if (!total) {
+        list.innerHTML = `
+          <div class="empty">
+            <h3>No requests yet</h3>
+            <p>You have not submitted an HVAC request yet. Start one now and we’ll match you with vetted contractors.</p>
+            <a class="btn btn-green" href="/app/homeowner-intake.html">Start your first request</a>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = (leads || []).map(lead => {
+        const quoteCount = quoteMap.get(lead.id) || 0;
+        const canViewQuotes = quoteCount > 0;
+        return `
+          <article class="lead-row">
+            <div class="lead-top">
+              <div>
+                <div class="lead-title">${lead.service_type || 'HVAC Request'}</div>
+                <div class="lead-meta">Submitted ${formatDate(lead.created_at)}</div>
+              </div>
+              <span class="${badgeClass(lead.status)}">${formatStatus(lead.status)}</span>
+            </div>
+            <div class="lead-actions">
+              <a class="btn ${canViewQuotes ? 'btn-green' : 'btn-light disabled'}" href="${canViewQuotes ? `/app/quotes.html?lead_id=${lead.id}` : '#'}">${canViewQuotes ? `View Quotes (${quoteCount})` : 'Waiting for quotes'}</a>
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await db.auth.signOut();
+      window.location.href = '/app/homeowner-auth.html';
+    });
+
+    (async function init() {
+      try {
+        await loadDashboard();
+      } catch (err) {
+        setError(err.message || 'Could not load your dashboard.');
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#1a5c3a" rx="40"/>
+
+  <!-- House outline -->
+  <!-- Roof -->
+  <polyline points="72,195 200,72 328,195" fill="none" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Walls -->
+  <rect x="100" y="192" width="200" height="145" fill="none" stroke="white" stroke-width="16" rx="4"/>
+
+  <!-- Handshake inside house -->
+  <!-- Left hand/arm coming from left -->
+  <path d="M108,280 C118,268 128,260 142,258 C152,257 160,262 170,265 L185,270" 
+        fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Left fingers -->
+  <path d="M170,265 C175,255 183,252 188,258 L185,270" 
+        fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M178,262 C182,251 191,249 195,256 L192,268" 
+        fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M186,260 C190,250 199,249 202,256 L199,267" 
+        fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Right hand/arm coming from right -->
+  <path d="M292,280 C282,268 272,260 258,258 C248,257 240,262 230,265 L215,270" 
+        fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right fingers -->
+  <path d="M230,265 C225,255 217,252 212,258 L215,270" 
+        fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M222,262 C218,251 209,249 205,256 L208,268" 
+        fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M214,260 C210,250 201,249 198,256 L201,267" 
+        fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Center clasp -->
+  <ellipse cx="200" cy="272" rx="16" ry="10" fill="white" opacity="0.9"/>
+
+  <!-- Orange accent dot at roof peak -->
+  <circle cx="200" cy="72" r="10" fill="#c8401a"/>
+</svg>

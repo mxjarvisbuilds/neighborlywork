@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Concept 1: House with leaf — green, clean, professional -->
+  <rect width="400" height="400" fill="#1a5c3a" rx="40"/>
+  <!-- House shape -->
+  <polygon points="200,80 310,170 310,320 90,320 90,170" fill="none" stroke="white" stroke-width="16" stroke-linejoin="round"/>
+  <!-- Roof peak -->
+  <polyline points="75,185 200,65 325,185" fill="none" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Door -->
+  <rect x="170" y="240" width="60" height="80" rx="30" fill="white"/>
+  <!-- Leaf accent top right -->
+  <ellipse cx="290" cy="105" rx="22" ry="14" fill="#c8401a" transform="rotate(-35 290 105)"/>
+  <line x1="290" y1="105" x2="305" y2="90" stroke="#c8401a" stroke-width="3"/>
+</svg>

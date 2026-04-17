@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NeighborlyWork — Get My Free Quotes</title>
+  <meta name="description" content="Multi-step HVAC quote intake for NeighborlyWork." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f8f4;
+      --panel: #fff;
+      --text: #132118;
+      --muted: #5d6c62;
+      --line: rgba(19,33,24,.12);
+      --green: #1f8f4d;
+      --green-dark: #176539;
+      --green-soft: rgba(31,143,77,.10);
+      --shadow: 0 18px 44px rgba(19,33,24,.08);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: radial-gradient(1000px 500px at 50% -10%, rgba(31,143,77,.09), transparent 55%), var(--bg);
+    }
+    .wrap { width: min(860px, calc(100% - 28px)); margin: 0 auto; }
+    header { padding: 22px 0 12px; }
+    .nav { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .logo { display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); font-weight:800; letter-spacing:-.04em; }
+    .mark { width:13px; height:13px; border-radius:4px; background:var(--green); box-shadow:0 0 0 4px rgba(31,143,77,.10); }
+    .home-link { color: var(--muted); text-decoration:none; font-size:.94rem; font-weight:600; }
+
+    .hero { padding: 26px 0 22px; }
+    h1 { font-family: "Fraunces", Georgia, serif; font-size: clamp(2.2rem, 5vw, 4rem); line-height: .95; letter-spacing:-.05em; margin:0; }
+    .sub { margin: 12px 0 0; color: var(--muted); line-height: 1.65; max-width: 58ch; }
+
+    .progress {
+      background: rgba(255,255,255,.8); border: 1px solid var(--line); border-radius: 999px; padding: 6px;
+      box-shadow: var(--shadow); margin: 18px 0 16px;
+    }
+    .progress-bar { height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--green), #6adf95); width: 20%; transition: width .2s ease; }
+    .progress-meta { display:flex; justify-content:space-between; align-items:center; margin-top:8px; color:var(--muted); font-size:.88rem; }
+
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 24px; min-height: 420px;
+    }
+    .step-label { color: var(--green-dark); font-weight:800; text-transform:uppercase; letter-spacing:.08em; font-size:.78rem; margin-bottom: 10px; }
+    .step-title { font-family: "Fraunces", Georgia, serif; font-size: clamp(1.7rem, 3vw, 2.4rem); letter-spacing:-.04em; margin: 0 0 18px; }
+    .grid { display:grid; gap:12px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0,1fr)); }
+
+    .option-actions { display:flex; justify-content:flex-end; margin: 0 0 12px; }
+    .mode-btn {
+      border: 1px solid var(--line); background: #f4f8f5; color: var(--text);
+      padding: 10px 14px; border-radius: 999px; font: inherit; font-weight:800; cursor:pointer;
+    }
+    .mode-btn.active { background: var(--green); color: #fff; border-color: transparent; }
+
+    label.option, .field label, .radio {
+      display:flex; align-items:flex-start; gap:12px; padding:14px; border:1px solid var(--line); border-radius:16px; background:#fbfcfa;
+    }
+    .radio input { margin-top:4px; accent-color: var(--green); }
+    .radio strong, .field label strong { display:block; }
+    .radio span, .field small { color: var(--muted); display:block; margin-top:3px; line-height:1.45; }
+
+    .field { display:grid; gap:12px; }
+    .input, select {
+      width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: #fbfcfa;
+      font: inherit; color: var(--text); outline:none;
+    }
+    .input:focus, select:focus { border-color: rgba(31,143,77,.4); box-shadow: 0 0 0 4px rgba(31,143,77,.08); }
+
+    .actions { display:flex; justify-content:space-between; gap: 10px; margin-top: 20px; }
+    .legal { margin-top: 14px; font-size: .84rem; color: var(--muted); line-height:1.6; }
+    .legal a { color: var(--green-dark); font-weight:700; text-decoration:none; }
+    .btn {
+      border: 0; border-radius: 999px; padding: 14px 18px; font-weight: 800; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
+    }
+    .btn.primary { background: var(--green); color:#fff; box-shadow: 0 10px 24px rgba(31,143,77,.16); }
+    .btn.secondary { background: #edf3ef; color: var(--text); }
+    .btn.full { width:100%; }
+
+    .summary {
+      background: #f8fbf8; border: 1px solid rgba(31,143,77,.12); border-radius: 18px; padding: 18px; margin-top: 16px;
+    }
+    .summary-grid { display:grid; gap: 12px; grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .summary-item { padding: 12px 14px; background:#fff; border:1px solid rgba(19,33,24,.08); border-radius: 14px; }
+    .summary-item .k { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing:.06em; margin-bottom: 5px; }
+    .summary-item .v { font-weight:700; }
+
+    .confirm { text-align:center; padding: 18px 6px 4px; }
+    .check {
+      width: 74px; height: 74px; border-radius: 50%; margin: 0 auto 14px; display:flex; align-items:center; justify-content:center;
+      background: rgba(31,143,77,.12); color: var(--green-dark); font-size: 2rem; font-weight: 900;
+    }
+    .confirm h2 { font-family: "Fraunces", Georgia, serif; font-size: clamp(2rem, 4vw, 3rem); letter-spacing:-.04em; margin: 0 0 8px; }
+    .confirm p { color: var(--muted); line-height:1.65; max-width: 60ch; margin: 0 auto 14px; }
+    .fine { color: var(--muted); font-size: .84rem; margin-top: 10px; }
+
+    .hidden { display:none; }
+    @media (max-width: 720px) {
+      .grid.two, .grid.three, .summary-grid { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      .btn, .btn.full { width: 100%; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="logo" href="index.html"><span class="mark"></span>NeighborlyWork</a>
+      <a class="home-link" href="index.html">Back to Home</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Get your free HVAC quotes.</h1>
+      <p class="sub">Answer a few quick questions and we’ll match you with three vetted local contractors. No pressure, no spam.</p>
+      <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-meta"><span id="progressText">Step 1 of 5</span><span>NeighborlyWork intake</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <form id="wizardForm">
+        <div id="step1" class="step">
+          <div class="step-label">Step 1 of 5</div>
+          <div class="step-title">What do you need?</div>
+          <div class="option-actions"><button type="button" class="mode-btn" id="multiBtn">Allow up to 3 options</button></div>
+          <div class="grid two" id="needGrid">
+            <label class="radio"><input type="radio" name="need" value="AC Installation" required><div><strong>AC Installation</strong><span>Install a new AC system.</span></div></label>
+            <label class="radio"><input type="radio" name="need" value="Furnace or Heat Pump"><div><strong>Furnace or Heat Pump</strong><span>Replace or upgrade heating.</span></div></label>
+            <label class="radio"><input type="radio" name="need" value="Mini-Split"><div><strong>Mini-Split</strong><span>Ductless comfort solution.</span></div></label>
+            <label class="radio"><input type="radio" name="need" value="Full HVAC System"><div><strong>Full HVAC System</strong><span>Complete replacement or new install.</span></div></label>
+            <label class="radio"><input type="radio" name="need" value="Repair or Tune-Up"><div><strong>Repair or Tune-Up</strong><span>Get service or fix a system issue.</span></div></label>
+          </div>
+        </div>
+
+        <div id="step2" class="step hidden">
+          <div class="step-label">Step 2 of 5</div>
+          <div class="step-title">Tell us about your home</div>
+          <div class="grid two">
+            <div class="field" style="grid-column:1 / -1;">
+              <label><div><strong>Home address</strong><small>Street, city, zip</small></div></label>
+              <input class="input" name="address" placeholder="1234 Main St, Sacramento, CA 95825" required />
+            </div>
+            <div class="field">
+              <label><div><strong>Home size</strong></div></label>
+              <select name="size" required>
+                <option value="">Select size</option>
+                <option>Under 1,000 sq ft</option>
+                <option>1,000–1,500 sq ft</option>
+                <option>1,500–2,000 sq ft</option>
+                <option>2,000–3,000 sq ft</option>
+                <option>3,000+ sq ft</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><div><strong>Type</strong></div></label>
+              <select name="type" required>
+                <option value="">Select type</option>
+                <option>Single family</option>
+                <option>Condo</option>
+                <option>Townhome</option>
+                <option>Multi-unit</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="step3" class="step hidden">
+          <div class="step-label">Step 3 of 5</div>
+          <div class="step-title">Your current system</div>
+          <div class="grid two">
+            <div class="field">
+              <label><div><strong>How old is your current system?</strong></div></label>
+              <select name="age" required>
+                <option value="">Select age</option>
+                <option>Less than 5 years</option>
+                <option>5–10 years</option>
+                <option>10–15 years</option>
+                <option>15+ years</option>
+                <option>Don't know</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><div><strong>Is this an emergency?</strong></div></label>
+              <select name="emergency" required>
+                <option value="">Select one</option>
+                <option>Yes — system is down</option>
+                <option>No — planning ahead</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="step4" class="step hidden">
+          <div class="step-label">Step 4 of 5</div>
+          <div class="step-title">Your contact info</div>
+          <div class="grid two">
+            <div class="field"><label><div><strong>First name</strong></div></label><input class="input" name="first" placeholder="Mia" required /></div>
+            <div class="field"><label><div><strong>Last name</strong></div></label><input class="input" name="last" placeholder="Johnson" required /></div>
+            <div class="field"><label><div><strong>Phone number</strong></div></label><input class="input" name="phone" placeholder="(916) 555-0142" required /></div>
+            <div class="field"><label><div><strong>Email address</strong></div></label><input class="input" type="email" name="email" placeholder="mia@example.com" required /></div>
+          </div>
+          <div class="fine">We do not share your data with any contractors. Only the contractor you choose gets your contact information. Contractors can ask clarifying questions inside the secure chat, but your contact info stays private until you pick a contractor. No spam. No selling your data.</div>
+          <div class="legal"><strong>Notice at Collection:</strong> We collect your name, address, phone number, email address, and HVAC project details to match you with contractors and provide quotes. <a href="privacy.html">Privacy Policy</a> · <a href="privacy.html">Do Not Sell or Share My Personal Information</a></div>
+        </div>
+
+        <div id="step5" class="step hidden">
+          <div class="confirm">
+            <div class="check">✓</div>
+            <h2>You're matched! 3 contractors will contact you within 48 hours.</h2>
+            <p>Each contractor will submit a quote showing equipment, price, and timeline. You compare, no pressure.</p>
+          </div>
+          <div class="summary">
+            <div class="summary-grid" id="summaryGrid"></div>
+          </div>
+          <div class="actions" style="justify-content:center;">
+            <a class="btn btn-primary" href="index.html" style="background:var(--green);color:#fff;">Back to Home</a>
+          </div>
+        </div>
+
+        <div class="actions" id="actions">
+          <button type="button" class="btn secondary" id="backBtn">Back</button>
+          <button type="button" class="btn primary" id="nextBtn">Next</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const steps = ['step1','step2','step3','step4','step5'];
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const nextBtn = document.getElementById('nextBtn');
+    const backBtn = document.getElementById('backBtn');
+    const actions = document.getElementById('actions');
+    const form = document.getElementById('wizardForm');
+    const multiBtn = document.getElementById('multiBtn');
+    const needGrid = document.getElementById('needGrid');
+    let current = 0;
+    let multiMode = false;
+
+    const renderNeedOptions = () => {
+      const selected = Array.from(form.querySelectorAll('input[name="need"]:checked')).map(i => i.value);
+      const options = [
+        ['AC Installation','Install a new AC system.'],
+        ['Furnace or Heat Pump','Replace or upgrade heating.'],
+        ['Mini-Split','Ductless comfort solution.'],
+        ['Full HVAC System','Complete replacement or new install.'],
+        ['Repair or Tune-Up','Get service or fix a system issue.']
+      ];
+      needGrid.innerHTML = options.map(([value, desc]) => {
+        const checked = selected.includes(value) ? 'checked' : '';
+        const type = multiMode ? 'checkbox' : 'radio';
+        const name = multiMode ? 'needMulti' : 'need';
+        const input = multiMode ? `<input type="checkbox" name="needMulti" value="${value}" ${checked}>` : `<input type="radio" name="need" value="${value}" ${checked}>`;
+        return `<label class="radio">${input}<div><strong>${value}</strong><span>${desc}</span></div></label>`;
+      }).join('');
+    };
+
+    multiBtn.addEventListener('click', () => {
+      multiMode = !multiMode;
+      multiBtn.classList.toggle('active', multiMode);
+      multiBtn.textContent = multiMode ? 'Up to 3 options enabled' : 'Allow up to 3 options';
+      renderNeedOptions();
+    });
+
+    const showStep = (idx) => {
+      current = idx;
+      steps.forEach((id, i) => document.getElementById(id).classList.toggle('hidden', i !== idx));
+      progressBar.style.width = `${(idx + 1) * 20}%`;
+      progressText.textContent = idx < 4 ? `Step ${idx + 1} of 5` : 'Step 5 of 5';
+      backBtn.style.visibility = idx === 0 ? 'hidden' : 'visible';
+      actions.style.display = idx === 4 ? 'none' : 'flex';
+      if (idx === 4) renderSummary();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const stepValidate = (idx) => {
+      const stepEl = document.getElementById(steps[idx]);
+      const fields = Array.from(stepEl.querySelectorAll('input, select'));
+      if (idx === 0) {
+        const singles = form.querySelectorAll('input[name="need"]:checked');
+        const multis = form.querySelectorAll('input[name="needMulti"]:checked');
+        return multiMode ? multis.length > 0 && multis.length <= 3 : !!singles.length;
+      }
+      return fields.every(el => el.checkValidity());
+    };
+
+    const renderSummary = () => {
+      const data = new FormData(form);
+      const selectedNeed = multiMode ? Array.from(form.querySelectorAll('input[name="needMulti"]:checked')).map(i => i.value).join(', ') : (data.get('need') || '—');
+      const map = {
+        need: 'What do you need?',
+        address: 'Home address',
+        size: 'Home size',
+        type: 'Home type',
+        age: 'Current system age',
+        emergency: 'Emergency?',
+        first: 'First name',
+        last: 'Last name',
+        phone: 'Phone number',
+        email: 'Email address'
+      };
+      const items = [];
+      for (const [key, label] of Object.entries(map)) {
+        const value = key === 'need' ? selectedNeed : (data.get(key) || '—');
+        items.push(`<div class="summary-item"><div class="k">${label}</div><div class="v">${value}</div></div>`);
+      }
+      document.getElementById('summaryGrid').innerHTML = items.join('');
+    };
+
+    nextBtn.addEventListener('click', () => {
+      if (!stepValidate(current)) {
+        const active = document.querySelector(`#${steps[current]} input, #${steps[current]} select`);
+        if (active) active.reportValidity();
+        return;
+      }
+      if (current < 4) showStep(current + 1);
+    });
+
+    backBtn.addEventListener('click', () => {
+      if (current > 0) showStep(current - 1);
+    });
+
+    renderNeedOptions();
+    showStep(0);
+  </script>
+</body>
+</html>

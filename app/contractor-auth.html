@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contractor Account | NeighborlyWork</title>
+  <meta name="description" content="Apply, log in, and manage HVAC quote leads with NeighborlyWork." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+    :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:var(--off);color:var(--text)}
+    .tabs-wrap{max-width:1180px;margin:0 auto;padding:24px 18px 40px}.brand{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1.5rem;color:var(--green);margin:4px 0 18px}.mark{width:14px;height:14px;border-radius:4px;background:var(--green);box-shadow:0 0 0 4px rgba(26,92,58,.10)}
+    .tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:#f3f5f1;padding:6px;border-radius:16px;margin-bottom:18px}.tab{border:none;background:transparent;padding:12px 10px;border-radius:12px;font-weight:800;color:var(--muted);cursor:pointer;font:inherit}.tab.active{background:#fff;color:var(--green);box-shadow:0 8px 22px rgba(0,0,0,.06)}
+    .screen{display:none}.screen.active{display:block}.card{background:#fff;border:none;border-radius:28px;box-shadow:var(--shadow);overflow:hidden}h1,h2{font-family:'Outfit',sans-serif;letter-spacing:-.04em;line-height:.96;margin:0}
+    .small{font-size:.92rem;color:var(--muted);line-height:1.6}.btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:15px 18px;font-weight:800;cursor:pointer;font-size:1rem;text-decoration:none}.btn-green{background:var(--green);color:#fff;width:100%}.btn-orange{background:var(--orange);color:#fff;width:100%}
+    .field{display:grid;gap:6px;margin-bottom:12px}label{font-size:.92rem;font-weight:700;color:#283229}input{width:100%;padding:14px 14px;border:none;border-radius:14px;background:#f5f5f7;color:var(--text);font:inherit}input:focus{outline:2px solid rgba(26,92,58,.22)}
+    .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:#eef5ef;color:var(--green);font-weight:800;border-radius:10px;padding:8px 10px;cursor:pointer}.password-wrap{position:relative}
+    .screen-grid{display:grid;grid-template-columns:1fr 1fr;min-height:700px}.left{background:var(--green);color:#fff;padding:36px}.left h1{font-size:clamp(2.2rem,4.6vw,4rem);max-width:12ch}.left p{color:#d6e3dc;max-width:36ch;line-height:1.7}
+    .bullets{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:12px}.bullets li{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:14px 16px;border-radius:18px}.check{flex-shrink:0;width:22px;height:22px;border-radius:999px;background:#fff;color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;margin-top:2px}
+    .right{padding:34px;background:#fff}.right h2{font-size:clamp(1.8rem,3.8vw,3rem);margin-bottom:8px}.link-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}.link{background:none;border:none;color:var(--green);font-weight:800;cursor:pointer;font:inherit}.notice,.error,.success{border-radius:14px;padding:12px 14px;font-size:.95rem;line-height:1.5;display:none;margin-bottom:14px}.notice.show,.error.show,.success.show{display:block}.notice{background:#eef5ef;color:var(--green)}.error{background:#fff1ed;color:#8a2e18}.success{background:#eef7f0;color:var(--green)}
+    .loading{opacity:.7;pointer-events:none}
+    @media(max-width:900px){.screen-grid{grid-template-columns:1fr}.left,.right{padding:24px;min-height:0}}
+    @media(max-width:640px){.tabs{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="tabs-wrap">
+    <div class="brand"><span class="mark"></span>NeighborlyWork</div>
+    <div class="tabs" role="tablist" aria-label="Contractor account tabs">
+      <button class="tab active" data-screen="login" type="button">Sign In</button>
+      <button class="tab" data-screen="apply" type="button">Create Account</button>
+    </div>
+
+    <section class="screen active" id="login">
+      <div class="card screen-grid">
+        <div class="left">
+          <h1>More real jobs.</h1>
+          <p>Sign in to review HVAC requests, submit quotes, and track your pipeline.</p>
+          <ul class="bullets">
+            <li><span class="check">✓</span><span>See leads in your approved service area</span></li>
+            <li><span class="check">✓</span><span>Respond quickly and submit quotes</span></li>
+            <li><span class="check">✓</span><span>Track wins and account status</span></li>
+          </ul>
+        </div>
+        <div class="right">
+          <h2>Log in</h2>
+          <p class="small">Access your contractor dashboard and homeowner requests.</p>
+          <div class="error" id="loginError"></div>
+          <div class="success" id="loginSuccess"></div>
+          <form class="form" id="loginForm">
+            <div class="field"><label>Email address</label><input id="loginEmail" type="email" placeholder="you@company.com" required></div>
+            <div class="field"><label>Password</label><div class="password-wrap"><input id="loginPass" type="password" placeholder="Your password" required><button class="toggle" type="button" data-toggle="loginPass">Show</button></div></div>
+            <button class="btn btn-green" type="submit">Log In →</button>
+          </form>
+          <div class="link-row"><button class="link" type="button" onclick="openScreen('apply')">Create an account</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="apply">
+      <div class="card screen-grid">
+        <div class="left">
+          <h1>Grow your HVAC business.</h1>
+          <p>Join the network, get qualified leads, and only pay when you win closed work.</p>
+          <ul class="bullets">
+            <li><span class="check">✓</span><span>Free to join</span></li>
+            <li><span class="check">✓</span><span>Local leads only</span></li>
+            <li><span class="check">✓</span><span>Approval review within 24 hours</span></li>
+          </ul>
+        </div>
+        <div class="right">
+          <h2>Apply to join</h2>
+          <p class="small">Create your contractor account and submit your business details.</p>
+          <div class="error" id="signupError"></div>
+          <div class="success" id="signupSuccess"></div>
+          <form class="form" id="signupForm">
+            <div class="field"><label>First name</label><input id="firstName" type="text" placeholder="Carlos" required></div>
+            <div class="field"><label>Last name</label><input id="lastName" type="text" placeholder="Mendez" required></div>
+            <div class="field"><label>Business name</label><input id="businessName" type="text" placeholder="Arctic Air HVAC" required></div>
+            <div class="field"><label>Email address</label><input id="signupEmail" type="email" placeholder="you@company.com" required></div>
+            <div class="field"><label>Phone number</label><input id="phone" type="tel" placeholder="(555) 555-5555" required></div>
+            <div class="field"><label>Password</label><div class="password-wrap"><input id="signupPass" type="password" placeholder="Create password" required><button class="toggle" type="button" data-toggle="signupPass">Show</button></div></div>
+            <button class="btn btn-orange" type="submit">Apply to Join →</button>
+          </form>
+          <div class="link-row"><button class="link" type="button" onclick="openScreen('login')">Already have an account?</button></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function openScreen(id){
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`.tab[data-screen="${id}"]`).classList.add('active');
+      clearMessages();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function clearMessages() {
+      document.querySelectorAll('.error, .success, .notice').forEach(el => {
+        el.textContent = '';
+        el.classList.remove('show');
+      });
+    }
+
+    function setMessage(id, text) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.add('show');
+    }
+
+    function friendlyAuthError(message) {
+      const lower = (message || '').toLowerCase();
+      if (lower.includes('invalid login credentials')) return 'Incorrect email or password.';
+      if (lower.includes('user already registered')) return 'An account with that email already exists.';
+      return message || 'Something went wrong. Please try again.';
+    }
+
+    document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>openScreen(tab.dataset.screen)));
+    document.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.toggle);
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.textContent = show ? 'Hide' : 'Show';
+      });
+    });
+
+    async function redirectByRole() {
+      const role = await getUserRole();
+      if (role === 'homeowner') {
+        window.location.href = '/app/homeowner-dashboard.html';
+        return;
+      }
+      if (role === 'contractor') {
+        window.location.href = '/app/contractor-portal.html';
+        return;
+      }
+      if (role === 'admin') {
+        window.location.href = '/app/founder-dashboard.html';
+        return;
+      }
+      setMessage('loginError', 'Your account exists, but no valid role was found.');
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearMessages();
+      const form = e.currentTarget;
+      form.classList.add('loading');
+      try {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPass').value;
+        const { error } = await db.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        setMessage('loginSuccess', 'Signed in. Redirecting...');
+        await redirectByRole();
+      } catch (err) {
+        setMessage('loginError', friendlyAuthError(err.message));
+      } finally {
+        form.classList.remove('loading');
+      }
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearMessages();
+      const form = e.currentTarget;
+      form.classList.add('loading');
+      try {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const businessName = document.getElementById('businessName').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const password = document.getElementById('signupPass').value;
+
+        const { data, error } = await db.auth.signUp({ email, password });
+        if (error) throw error;
+        const user = data?.user;
+        if (!user) throw new Error('Account was created, but no user record was returned.');
+
+        const fullName = `${firstName} ${lastName}`.trim();
+        const { error: userInsertError } = await db.from('users').insert({
+          id: user.id,
+          email: user.email,
+          full_name: fullName,
+          phone,
+          role: 'contractor'
+        });
+        if (userInsertError) {
+          const message = (userInsertError.message || '').toLowerCase();
+          if (message.includes('row-level security')) {
+            throw new Error('Signup reached Supabase, but contractor profile creation is blocked by the current database policy. Run the Supabase RLS fix in the browser checklist, then try again.');
+          }
+          throw userInsertError;
+        }
+
+        const { error: contractorInsertError } = await db.from('contractors').insert({
+          id: user.id,
+          business_name: businessName,
+          license_number: 'pending',
+          insured: false,
+          service_zips: [],
+          services: [],
+          status: 'pending'
+        });
+        if (contractorInsertError) {
+          const message = (contractorInsertError.message || '').toLowerCase();
+          if (message.includes('row-level security')) {
+            throw new Error('Contractor account was created, but the contractor record is blocked by the current database policy. Run the Supabase RLS fix in the browser checklist, then try again.');
+          }
+          throw contractorInsertError;
+        }
+
+        setMessage('signupSuccess', 'Application received. We will review and approve your account within 24 hours.');
+        form.reset();
+      } catch (err) {
+        setMessage('signupError', friendlyAuthError(err.message));
+      } finally {
+        form.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>

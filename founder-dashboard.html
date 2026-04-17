@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NeighborlyWork Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #081019;
+      --panel: #0d1723;
+      --panel-2: #101b29;
+      --line: rgba(255,255,255,.08);
+      --text: #f5f7fb;
+      --muted: #9ca9b8;
+      --green: #43d17c;
+      --green-soft: rgba(67, 209, 124, .14);
+      --blue: #4ea1ff;
+      --blue-soft: rgba(78, 161, 255, .14);
+      --yellow: #f5c542;
+      --yellow-soft: rgba(245, 197, 66, .14);
+      --orange: #ff9a3d;
+      --orange-soft: rgba(255, 154, 61, .14);
+      --red: #ff5b6b;
+      --red-soft: rgba(255, 91, 107, .14);
+      --gray: #8b95a6;
+      --shadow: 0 18px 55px rgba(0,0,0,.35);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(1000px 500px at 20% 0%, rgba(78,161,255,.08), transparent 55%), var(--bg);
+      color: var(--text);
+    }
+    .wrap { width: min(1440px, calc(100% - 32px)); margin: 0 auto; }
+
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(18px);
+      background: rgba(8,16,25,.82);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      padding: 18px 0;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 900; letter-spacing: -.04em; font-size: 1.05rem;
+    }
+    .mark { width: 14px; height: 14px; border-radius: 4px; background: linear-gradient(135deg, var(--green), var(--blue)); }
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tab {
+      text-decoration: none; color: var(--muted);
+      padding: 10px 14px; border-radius: 999px; border: 1px solid transparent;
+      font-size: .92rem; font-weight: 600;
+    }
+    .tab.active, .tab:hover { color: var(--text); border-color: var(--line); background: rgba(255,255,255,.03); }
+
+    .hero {
+      display: flex; justify-content: space-between; gap: 18px; align-items: end;
+      padding: 28px 0 18px;
+    }
+    h1 { margin: 0; font-size: clamp(2rem, 3vw, 2.8rem); letter-spacing: -.05em; }
+    .sub { color: var(--muted); margin-top: 6px; max-width: 70ch; line-height: 1.6; }
+    .status-pill {
+      align-self: center;
+      padding: 10px 14px; border-radius: 999px; border: 1px solid var(--green-soft);
+      background: rgba(67,209,124,.08); color: #bff2d0; font-size: .9rem; font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .section { margin: 20px 0 28px; }
+    .section-title { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 14px; }
+    .section-title h2 { margin: 0; font-size: 1.15rem; letter-spacing: -.03em; }
+    .section-title p { margin: 0; color: var(--muted); font-size: .92rem; }
+
+    .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .kpi {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--line); border-radius: var(--radius); padding: 18px;
+      box-shadow: var(--shadow);
+      min-height: 126px;
+    }
+    .kpi .label { color: var(--muted); font-size: .82rem; margin-bottom: 10px; }
+    .kpi .value { font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 900; letter-spacing: -.05em; line-height: 1; }
+    .kpi .trend { margin-top: 10px; font-size: .84rem; display: flex; align-items: center; gap: 6px; color: var(--muted); }
+    .up { color: var(--green); }
+    .down { color: var(--red); }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+
+    .filters {
+      display: flex; gap: 10px; flex-wrap: wrap; padding: 16px; border-bottom: 1px solid var(--line);
+      align-items: center;
+    }
+    .filters select, .filters input {
+      background: #0b1521; color: var(--text);
+      border: 1px solid var(--line); border-radius: 12px;
+      padding: 11px 12px; font: inherit; min-width: 160px;
+      outline: none;
+    }
+    .filters input[type="date"] { min-width: 150px; }
+    .filters .spacer { flex: 1; }
+    .filters .chip { font-size: .82rem; color: var(--muted); }
+
+    .table-wrap { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      text-align: left; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.06);
+      font-size: .93rem; white-space: nowrap;
+    }
+    th { color: var(--muted); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+    tr:hover td { background: rgba(255,255,255,.015); }
+
+    .badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 7px 10px; border-radius: 999px; font-size: .78rem; font-weight: 800;
+      border: 1px solid transparent;
+    }
+    .new { background: var(--yellow-soft); color: #ffd76b; border-color: rgba(245,197,66,.25); }
+    .quoted { background: var(--blue-soft); color: #a8d1ff; border-color: rgba(78,161,255,.25); }
+    .scheduled { background: var(--orange-soft); color: #ffc08d; border-color: rgba(255,154,61,.25); }
+    .closed { background: var(--green-soft); color: #a8f0c0; border-color: rgba(67,209,124,.25); }
+    .lost { background: rgba(139,149,166,.14); color: #b7bfcb; border-color: rgba(139,149,166,.25); }
+    .active { background: var(--green-soft); color: #a8f0c0; border-color: rgba(67,209,124,.25); }
+    .inactive { background: rgba(139,149,166,.14); color: #b7bfcb; border-color: rgba(139,149,166,.25); }
+    .overdue { background: var(--red-soft); color: #ffb4bd; border-color: rgba(255,91,107,.25); }
+    .red-row { background: rgba(255,91,107,.05); }
+
+    .grid-2 { display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; }
+    .grid-2 .panel { padding: 16px; }
+    .contractors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .contractor {
+      border: 1px solid var(--line); border-radius: 18px; padding: 16px;
+      background: rgba(255,255,255,.03);
+    }
+    .contractor-top { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+    .contractor h3 { margin: 0; font-size: 1rem; }
+    .contractor .trade { color: var(--muted); font-size: .84rem; margin-top: 4px; }
+    .meta { color: var(--muted); font-size: .84rem; line-height: 1.5; margin-top: 10px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+    .mini { background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
+    .mini .num { font-weight: 900; font-size: 1.05rem; }
+    .mini .label { color: var(--muted); font-size: .72rem; margin-top: 4px; }
+    .contractor.red-border { border-color: rgba(255,91,107,.35); box-shadow: inset 0 0 0 1px rgba(255,91,107,.08); }
+
+    .funnel { display: grid; grid-template-columns: 1.1fr .9fr; gap: 14px; }
+    .funnel-card { padding: 16px; }
+    .flow {
+      display: grid; gap: 10px; margin-top: 10px;
+    }
+    .flow-row {
+      display: grid; grid-template-columns: 220px 1fr 80px; gap: 12px; align-items: center;
+      padding: 12px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.03);
+    }
+    .flow-row .bar {
+      height: 12px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden;
+    }
+    .flow-row .bar span { display:block; height:100%; border-radius: inherit; }
+    .flow-row small { color: var(--muted); }
+    .drop { color: #ffb4bd; font-weight: 800; text-align: right; }
+
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    canvas { width: 100% !important; height: 320px !important; }
+
+    @media (max-width: 1200px) {
+      .kpis { grid-template-columns: repeat(3, 1fr); }
+      .grid-2, .funnel, .charts { grid-template-columns: 1fr; }
+      .contractors { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .kpis { grid-template-columns: 1fr 1fr; }
+      .hero { flex-direction: column; align-items: start; }
+      .flow-row { grid-template-columns: 1fr; }
+      .flow-row .drop { text-align: left; }
+      .filters select, .filters input { min-width: 100%; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand"><span class="mark"></span> NeighborlyWork</div>
+      <div class="tabs">
+        <a class="tab active" href="#">Dashboard</a>
+        <a class="tab" href="#contractors">Contractors</a>
+        <a class="tab" href="#campaigns">Campaigns</a>
+        <a class="tab" href="#settings">Settings</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <h1>Founder Dashboard</h1>
+        <div class="sub">Private internal view for running NeighborlyWork. Everything important at a glance: leads, contractors, revenue, and funnel health.</div>
+      </div>
+      <div class="status-pill">Live test data • Sacramento</div>
+    </section>
+
+    <section class="section">
+      <div class="section-title"><h2>Top KPI Bar</h2><p>The numbers that matter most this month.</p></div>
+      <div class="kpis" id="kpis"></div>
+    </section>
+
+    <section class="section panel">
+      <div class="filters">
+        <select id="statusFilter"><option value="all">All statuses</option><option>New</option><option>Quoted</option><option>Scheduled</option><option>Closed</option><option>Lost</option></select>
+        <select id="serviceFilter"><option value="all">All service types</option><option>HVAC</option><option>Roofing</option><option>Plumbing</option><option>Electrical</option><option>Lawn</option><option>Cleaning</option><option>Handyman</option><option>Painting</option><option>Pool</option></select>
+        <input id="startDate" type="date" />
+        <input id="endDate" type="date" />
+        <div class="spacer"></div>
+        <div class="chip">Lead Pipeline Table</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date submitted</th><th>Homeowner</th><th>Service type</th><th>City / Zip</th><th>Status</th><th>Contractor</th><th>Revenue earned</th>
+            </tr>
+          </thead>
+          <tbody id="leadRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="contractors">
+      <div class="section-title"><h2>Contractor Performance Grid</h2><p>Sorted by close rate descending.</p></div>
+      <div class="contractors" id="contractorGrid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-title"><h2>Marketing Funnel</h2><p>Website visitors, lead capture, matching, quotes, and closes.</p></div>
+      <div class="funnel">
+        <div class="panel funnel-card">
+          <div class="flow" id="funnelFlow"></div>
+        </div>
+        <div class="panel funnel-card">
+          <div class="section-title" style="margin-bottom:10px;"><h2 style="font-size:1.05rem;margin:0;">Weekly Lead Volume</h2><p>Past 8 weeks.</p></div>
+          <canvas id="weeklyChart"></canvas>
+        </div>
+      </div>
+      <div class="charts">
+        <div class="panel funnel-card">
+          <div class="section-title" style="margin-bottom:10px;"><h2 style="font-size:1.05rem;margin:0;">Leads by Service Type</h2><p>Current month.</p></div>
+          <canvas id="serviceChart"></canvas>
+        </div>
+        <div class="panel funnel-card">
+          <div class="section-title" style="margin-bottom:10px;"><h2 style="font-size:1.05rem;margin:0;">Campaign Notes</h2><p>What to do next.</p></div>
+          <div style="display:grid;gap:12px;">
+            <div class="contractor"><strong>HVAC ads</strong><div class="meta">Highest-value channel. Keep spend focused on Sacramento + Roseville.</div></div>
+            <div class="contractor"><strong>Community Jobs ads</strong><div class="meta">Best for homeowner trust and cheaper acquisition.</div></div>
+            <div class="contractor"><strong>Follow-up</strong><div class="meta">Auto-reach out to every new lead in under 5 minutes.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const dashboardSource = {
+      lastUpdated: '2026-04-11',
+      summary: {
+        totalLeads: 286,
+        contractorsSigned: 42,
+        jobsClosed: 39,
+        revenueThisMonth: '$13,650',
+        visitorsThisMonth: '8,420',
+        conversionRate: '13.6%'
+      },
+      leads: JSON.parse(localStorage.getItem('neighborlywork_homeowner_leads') || '[]').concat([
+        { date: '2026-04-01', name: 'Mia', service: 'HVAC', city: 'Sacramento', zip: '95825', status: 'New', contractor: 'Top Rank Heating', revenue: '' },
+        { date: '2026-04-02', name: 'Ethan', service: 'Handyman', city: 'Roseville', zip: '95678', status: 'Quoted', contractor: 'Local Handyman Pro', revenue: '' },
+        { date: '2026-04-02', name: 'Ava', service: 'Plumbing', city: 'Folsom', zip: '95630', status: 'Scheduled', contractor: 'Apex Plumbing', revenue: '' },
+        { date: '2026-04-03', name: 'Noah', service: 'HVAC', city: 'Elk Grove', zip: '95758', status: 'Closed', contractor: 'All Year Heating', revenue: '$350' },
+        { date: '2026-04-03', name: 'Sophia', service: 'Roofing', city: 'Sacramento', zip: '95818', status: 'Closed', contractor: 'Capital Roofing Co.', revenue: '$350' },
+        { date: '2026-04-04', name: 'Liam', service: 'Lawn', city: 'Citrus Heights', zip: '95621', status: 'Lost', contractor: 'Green Thumb Crew', revenue: '' },
+        { date: '2026-04-05', name: 'Olivia', service: 'Cleaning', city: 'Sacramento', zip: '95816', status: 'Quoted', contractor: 'Sparkle Home', revenue: '' },
+        { date: '2026-04-05', name: 'James', service: 'HVAC', city: 'Roseville', zip: '95661', status: 'Closed', contractor: 'Bell Brothers', revenue: '$350' },
+        { date: '2026-04-06', name: 'Isabella', service: 'Painting', city: 'Sacramento', zip: '95822', status: 'New', contractor: 'Paint Now', revenue: '' },
+        { date: '2026-04-06', name: 'Lucas', service: 'Pool', city: 'Folsom', zip: '95630', status: 'Quoted', contractor: 'Blue Water Pool', revenue: '' },
+        { date: '2026-04-07', name: 'Mason', service: 'Electrical', city: 'Sacramento', zip: '95823', status: 'Scheduled', contractor: 'Amped Electric', revenue: '' },
+        { date: '2026-04-07', name: 'Amelia', service: 'HVAC', city: 'Sacramento', zip: '95828', status: 'Closed', contractor: 'Aire Serv', revenue: '$350' },
+        { date: '2026-04-09', name: 'Zayith Test', service: 'HVAC', city: 'Sacramento', zip: '95814', status: 'New', contractor: 'Unassigned', revenue: '' }
+      ]),
+      contractors: [
+        { name: 'Bell Brothers', trade: 'HVAC', zip: '95661, 95825', leads: 34, closed: 17, fees: '$5,950', last: '2026-04-07', status: 'Active' },
+        { name: 'Aire Serv', trade: 'HVAC', zip: '95814, 95828', leads: 29, closed: 13, fees: '$4,550', last: '2026-04-07', status: 'Active' },
+        { name: 'Top Rank Heating', trade: 'HVAC', zip: '95758, 95759', leads: 21, closed: 9, fees: '$3,150', last: '2026-04-06', status: 'Active' },
+        { name: 'Capital Roofing Co.', trade: 'Roofing', zip: '95818, 95819', leads: 13, closed: 5, fees: '$1,750', last: '2026-04-05', status: 'Inactive' },
+        { name: 'Apex Plumbing', trade: 'Plumbing', zip: '95630, 95762', leads: 15, closed: 6, fees: '$2,100', last: '2026-04-04', status: 'Overdue Payment' },
+        { name: 'Amped Electric', trade: 'Electrical', zip: '95823, 95824', leads: 11, closed: 4, fees: '$1,400', last: '2026-04-06', status: 'Active' }
+      ],
+      campaigns: [
+        { name: 'HVAC Search Ads', status: 'Live', spend: '$126.40', budget: '$200 cap', notes: 'Running in Sacramento/Roseville/Folsom.' },
+        { name: 'Performance Max', status: 'Live', spend: '$0.00', budget: '$10/day', notes: 'Awaiting final optimization.' }
+      ],
+      funnel: [8420, 286, 248, 181, 39]
+    };
+    initDashboard(dashboardSource);
+
+    function initDashboard(dashboardSource) {
+      const leads = dashboardSource.leads || [];
+      const contractors = (dashboardSource.contractors || []).slice().sort((a,b) => (b.closed / b.leads) - (a.closed / a.leads));
+      const campaigns = dashboardSource.campaigns || [];
+
+      const stats = [
+        { label:'Total leads submitted', value: dashboardSource.summary.totalLeads, trend:'+18% vs last month', dir:'up' },
+        { label:'Total contractors signed up', value: dashboardSource.summary.contractorsSigned, trend:'+6% vs last month', dir:'up' },
+        { label:'Total jobs closed this month', value: dashboardSource.summary.jobsClosed, trend:'+11% vs last month', dir:'up' },
+        { label:'Total revenue earned this month', value: dashboardSource.summary.revenueThisMonth, trend:'+14% vs last month', dir:'up' },
+        { label:'Website visitors this month', value: dashboardSource.summary.visitorsThisMonth, trend:'+22% vs last month', dir:'up' },
+        { label:'Lead-to-close conversion rate', value: dashboardSource.summary.conversionRate, trend:'-1.4% vs last month', dir:'down' },
+      ];
+
+      const kpiEl = document.getElementById('kpis');
+      kpiEl.innerHTML = stats.map(s => `
+        <div class="kpi">
+          <div class="label">${s.label}</div>
+          <div class="value">${s.value}</div>
+          <div class="trend ${s.dir === 'up' ? 'up' : 'down'}">${s.dir === 'up' ? '▲' : '▼'} ${s.trend}</div>
+        </div>
+      `).join('');
+
+      const badgeClass = s => ({New:'new', Quoted:'quoted', Scheduled:'scheduled', Closed:'closed', Lost:'lost'}[s] || 'lost');
+      const statusClass = s => ({Active:'active', Inactive:'inactive', 'Overdue Payment':'overdue'}[s] || 'inactive');
+
+      const renderLeads = rows => {
+        const tbody = document.getElementById('leadRows');
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td>${r.date}</td>
+            <td>${r.name}</td>
+            <td>${r.service}</td>
+            <td>${r.city} / ${r.zip}</td>
+            <td><span class="badge ${badgeClass(r.status)}">${r.status}</span></td>
+            <td>${r.contractor}</td>
+            <td>${r.revenue || ''}</td>
+          </tr>
+        `).join('');
+      };
+
+      renderLeads(leads);
+
+      document.getElementById('statusFilter').addEventListener('change', filterLeads);
+      document.getElementById('serviceFilter').addEventListener('change', filterLeads);
+      document.getElementById('startDate').addEventListener('change', filterLeads);
+      document.getElementById('endDate').addEventListener('change', filterLeads);
+
+      function filterLeads() {
+        const status = document.getElementById('statusFilter').value;
+        const service = document.getElementById('serviceFilter').value;
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        const filtered = leads.filter(l =>
+          (status === 'all' || l.status === status) &&
+          (service === 'all' || l.service === service) &&
+          (!start || l.date >= start) &&
+          (!end || l.date <= end)
+        );
+        renderLeads(filtered);
+      }
+
+      const contractorGrid = document.getElementById('contractorGrid');
+      contractorGrid.innerHTML = contractors.map(c => {
+        const closeRate = Math.round((c.closed / c.leads) * 100);
+        const redBorder = c.status === 'Overdue Payment' ? 'red-border' : '';
+        return `
+          <div class="contractor ${redBorder}">
+            <div class="contractor-top">
+              <div>
+                <h3>${c.name}</h3>
+                <div class="trade">${c.trade}</div>
+              </div>
+              <span class="badge ${statusClass(c.status)}">${c.status}</span>
+            </div>
+            <div class="meta">Covers: ${c.zip}</div>
+            <div class="stats">
+              <div class="mini"><div class="num">${c.leads}</div><div class="label">Leads received</div></div>
+              <div class="mini"><div class="num">${c.closed}</div><div class="label">Leads closed</div></div>
+              <div class="mini"><div class="num">${closeRate}%</div><div class="label">Close rate</div></div>
+            </div>
+            <div class="stats" style="grid-template-columns:1fr 1fr; margin-top:8px;">
+              <div class="mini"><div class="num">${c.fees}</div><div class="label">Fees owed</div></div>
+              <div class="mini"><div class="num">${c.last}</div><div class="label">Last activity</div></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    const sourceNote = document.createElement('div');
+    sourceNote.className = 'panel';
+    sourceNote.style.padding = '16px';
+    sourceNote.style.marginTop = '14px';
+    sourceNote.innerHTML = `<strong>Data source</strong><div class="meta">${dashboardSource.notes}<br>Last updated: ${dashboardSource.lastUpdated}</div>`;
+    document.querySelector('main').appendChild(sourceNote);
+
+      const funnel = [
+        { label:'Website visitors', value: dashboardSource.funnel[0], max: dashboardSource.funnel[0], color:'var(--blue)', drop:'0%' },
+        { label:'Leads submitted', value: dashboardSource.funnel[1], max: dashboardSource.funnel[0], color:'var(--green)', drop:'96.6%' },
+        { label:'Leads matched', value: dashboardSource.funnel[2], max: dashboardSource.funnel[0], color:'var(--yellow)', drop:'13.3%' },
+        { label:'Quotes sent', value: dashboardSource.funnel[3], max: dashboardSource.funnel[0], color:'var(--orange)', drop:'27.0%' },
+        { label:'Jobs closed', value: dashboardSource.funnel[4], max: dashboardSource.funnel[0], color:'var(--green)', drop:'78.4%' },
+      ];
+      document.getElementById('funnelFlow').innerHTML = funnel.map(f => `
+        <div class="flow-row">
+          <div><strong>${f.label}</strong><br><small>${f.value.toLocaleString()} total</small></div>
+          <div class="bar"><span style="width:${Math.max(8, (f.value / f.max) * 100)}%; background:${f.color};"></span></div>
+          <div class="drop">${f.drop}</div>
+        </div>
+      `).join('');
+
+      const serviceCtx = document.getElementById('serviceChart');
+      const weeklyCtx = document.getElementById('weeklyChart');
+      const campaignsList = document.getElementById('campaignNotes');
+      if (campaignsList) {
+        campaignsList.innerHTML = campaigns.map(c => `<div class="contractor"><strong>${c.name}</strong><div class="meta">Status: ${c.status} · Spend: ${c.spend} · Budget: ${c.budget}<br>${c.notes}</div></div>`).join('');
+      }
+      new Chart(serviceCtx, {
+        type: 'bar',
+        data: {
+          labels: ['HVAC','Roofing','Plumbing','Electrical','Lawn','Cleaning','Handyman','Painting','Pool'],
+          datasets: [{
+            label: 'Leads',
+            data: [104, 24, 36, 31, 29, 18, 27, 10, 7],
+            backgroundColor: ['#4ea1ff','#ff9a3d','#43d17c','#f5c542','#43d17c','#43d17c','#43d17c','#9ea8b8','#4ea1ff'],
+            borderRadius: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display:false } },
+          scales: {
+            x: { ticks: { color: '#9ca9b8' }, grid: { color: 'rgba(255,255,255,.05)' } },
+            y: { ticks: { color: '#9ca9b8' }, grid: { color: 'rgba(255,255,255,.05)' } }
+          }
+        }
+      });
+
+      new Chart(weeklyCtx, {
+        type: 'line',
+        data: {
+          labels: ['W1','W2','W3','W4','W5','W6','W7','W8'],
+          datasets: [{
+            label: 'Leads',
+            data: [22, 31, 29, 38, 44, 41, 52, 59],
+            borderColor: '#4ea1ff',
+            backgroundColor: 'rgba(78,161,255,.15)',
+            fill: true,
+            tension: .35,
+            pointRadius: 4,
+            pointBackgroundColor: '#f5f7fb'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display:false } },
+          scales: {
+            x: { ticks: { color: '#9ca9b8' }, grid: { color: 'rgba(255,255,255,.05)' } },
+            y: { ticks: { color: '#9ca9b8' }, grid: { color: 'rgba(255,255,255,.05)' } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
