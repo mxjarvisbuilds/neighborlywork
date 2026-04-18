@@ -197,7 +197,7 @@
       document.getElementById('openLeadsCount').textContent = state.leads.filter(l => l.status === 'open').length;
       document.getElementById('approvedContractorsCount').textContent = state.contractors.filter(c => c.status === 'approved').length;
       document.getElementById('pendingContractorsCount').textContent = state.contractors.filter(c => c.status === 'pending').length;
-      document.getElementById('revenueCount').textContent = formatCurrency(state.leads.filter(l => l.status === 'closed').length * 350);
+      document.getElementById('revenueCount').textContent = formatCurrency(state.leads.filter(l => l.status === 'closed').length * 800);
 
       const serviceFilter = document.getElementById('leadServiceFilter');
       const services = [...new Set(state.leads.map(l => l.service_type).filter(Boolean))].sort();
@@ -286,5 +286,6 @@
       }
     })();
   </script>
+<footer style="padding:24px;text-align:center;color:#6e6e73;font-size:.9rem"><div class="legal-links"><a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a></div></footer>
 </body>
 </html>

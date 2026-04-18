@@ -23,7 +23,7 @@ One brand with two revenue engines. Small jobs use a community marketplace where
 - Small jobs: accept posted price
 - Big installs: submit equipment, warranty, timeline, and total price
 - Never see competitor quotes on Pro Installs
-- Pay worker-side fee on small jobs, or $75 / $350 on HVAC closes
+- Pay worker-side fee on small jobs, or $75 / $800 on HVAC closes
 
 ---
 
@@ -42,7 +42,7 @@ One brand with two revenue engines. Small jobs use a community marketplace where
    - Match to 3 vetted contractors max
    - Contractors do not see each other
    - Homeowner compares side-by-side quotes
-   - Contractor is billed on close: $75 repair or $350 install/replacement
+   - Contractor is billed on close: $75 repair or $800 install/replacement
 
 ---
 
@@ -93,7 +93,7 @@ One brand with two revenue engines. Small jobs use a community marketplace where
 | Source | Rate |
 |--------|------|
 | Closed HVAC repair | $75 |
-| Closed HVAC install / replacement | $350 |
+| Closed HVAC install / replacement | $800 |
 | Priority placement | later, optional |
 
 ### Future priority placement
@@ -104,8 +104,8 @@ One brand with two revenue engines. Small jobs use a community marketplace where
 | Job | Value | Platform fee | Worker gets |
 |-----|-------|-------------|-------------|
 | HVAC repair | $900 | $75 | $825 |
-| HVAC install | $3,500 | $350 | $3,150 |
-| Replacement system | $7,500 | $350 | $7,150 |
+| HVAC install | $3,500 | $800 | $3,150 |
+| Replacement system | $7,500 | $800 | $7,150 |
 
 ---
 

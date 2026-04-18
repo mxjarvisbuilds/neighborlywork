@@ -39,7 +39,7 @@
         <button class="tab" data-screen="quote">Submit Quote</button>
         <button class="tab" data-screen="profile">Profile</button>
       </div>
-      <div class="side-note">Blind quote system. Homeowners can compare all quotes, but contractors never see each other's pricing. $350 fee only if the homeowner selects you and the job is installed.</div>
+      <div class="side-note">Blind quote system. Homeowners can compare all quotes, but contractors never see each other's pricing. $800 fee only if the homeowner selects you and the job is installed.</div>
     </aside>
 
     <main>
@@ -128,10 +128,10 @@
               <div class="field" style="grid-column:1 / -1;"><label>Note to homeowner</label><textarea id="noteToHomeowner" maxlength="300" placeholder="Share anything helpful about your quote."></textarea></div>
               <div class="money-row" style="grid-column:1 / -1;">
                 <div class="money"><div class="k">Total price</div><div class="v" id="totalPriceDisplay">$0</div></div>
-                <div class="money"><div class="k">Fee reminder</div><div class="v">$350 on won + installed jobs</div></div>
+                <div class="money"><div class="k">Fee reminder</div><div class="v">$800 on won + installed jobs</div></div>
               </div>
               <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-                <div class="small-note">Your quote is blind. Homeowner sees all quotes but contractors never see each other's pricing. $350 fee only if homeowner selects you and job is installed.</div>
+                <div class="small-note">Your quote is blind. Homeowner sees all quotes but contractors never see each other's pricing. $800 fee only if homeowner selects you and job is installed.</div>
                 <button class="btn btn-orange" id="submitQuoteBtn" type="submit">Submit Quote</button>
               </div>
             </form>
@@ -370,7 +370,7 @@
       document.getElementById('newLeadsCount').textContent = state.leads.filter(l => l.status === 'open' && !state.quoteLeadIds.has(l.id)).length;
       document.getElementById('quotesSubmittedCount').textContent = state.quoteLeadIds.size;
       document.getElementById('jobsWonCount').textContent = jobsWon;
-      document.getElementById('feesOwedCount').textContent = formatCurrency(jobsWon * 350);
+      document.getElementById('feesOwedCount').textContent = formatCurrency(jobsWon * 800);
 
       renderLeadRows();
     }
@@ -456,5 +456,6 @@
       }
     })();
   </script>
+<footer style="padding:24px;text-align:center;color:#6e6e73;font-size:.9rem"><div class="legal-links"><a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a></div></footer>
 </body>
 </html>

@@ -82,7 +82,8 @@
             <div class="field"><label>Email address</label><input id="signupEmail" type="email" placeholder="you@company.com" required></div>
             <div class="field"><label>Phone number</label><input id="phone" type="tel" placeholder="(555) 555-5555" required></div>
             <div class="field"><label>Password</label><div class="password-wrap"><input id="signupPass" type="password" placeholder="Create password" required><button class="toggle" type="button" data-toggle="signupPass">Show</button></div></div>
-            <button class="btn btn-orange" type="submit">Apply to Join →</button>
+            <label class="checkbox-row"><input id="signupConsent" type="checkbox"><span>I agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a></span></label>
+            <button class="btn btn-orange" id="signupSubmit" type="submit" disabled>Apply to Join →</button>
           </form>
           <div class="link-row"><button class="link" type="button" onclick="openScreen('login')">Already have an account?</button></div>
         </div>
@@ -130,6 +131,14 @@
         btn.textContent = show ? 'Hide' : 'Show';
       });
     });
+
+    const signupConsent = document.getElementById('signupConsent');
+    const signupSubmit = document.getElementById('signupSubmit');
+    if (signupConsent && signupSubmit) {
+      signupConsent.addEventListener('change', () => {
+        signupSubmit.disabled = !signupConsent.checked;
+      });
+    }
 
     async function redirectByRole() {
       const role = await getUserRole();
@@ -179,6 +188,7 @@
         const email = document.getElementById('signupEmail').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const password = document.getElementById('signupPass').value;
+        if (!document.getElementById('signupConsent').checked) throw new Error('You must agree to the Terms of Service and Privacy Policy.');
 
         const { data, error } = await db.auth.signUp({ email, password });
         if (error) throw error;

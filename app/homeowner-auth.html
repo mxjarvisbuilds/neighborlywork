@@ -23,6 +23,7 @@
     .divider{display:flex;align-items:center;gap:12px;color:var(--muted);margin:18px 0}.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line)}
     .link-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}.link{background:none;border:none;color:var(--green);font-weight:800;cursor:pointer;font:inherit}
     .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.notice,.error,.success{border-radius:14px;padding:12px 14px;font-size:.95rem;line-height:1.5;display:none}.notice.show,.error.show,.success.show{display:block}.notice{background:#eef5ef;color:var(--green)}.error{background:#fff1ed;color:#8a2e18}.success{background:#eef7f0;color:var(--green)}
+    .checkbox-row{display:flex;align-items:flex-start;gap:10px;font-size:.92rem;color:var(--muted);line-height:1.5}.checkbox-row input{width:18px;height:18px;margin-top:2px;flex:0 0 auto}.checkbox-row a{color:var(--green);font-weight:700;text-decoration:none}.checkbox-row a:hover{text-decoration:underline}.btn[disabled]{opacity:.45;cursor:not-allowed}
     .loading{opacity:.7;pointer-events:none}
     @media(max-width:640px){.card{padding:22px}.grid{grid-template-columns:1fr}}
   </style>
@@ -82,7 +83,8 @@
               <button class="toggle" type="button" data-toggle="signupPass2">Show</button>
             </div>
           </div>
-          <button class="btn btn-green" type="submit">Create Account →</button>
+          <label class="checkbox-row"><input id="signupConsent" type="checkbox"><span>I agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a></span></label>
+          <button class="btn btn-green" id="signupSubmit" type="submit" disabled>Create Account →</button>
         </form>
         <div class="divider">Already have an account?</div>
         <div class="link-row"><button class="link" type="button" onclick="openScreen('login')">Sign in instead</button></div>
@@ -131,6 +133,14 @@
         btn.textContent = show ? 'Hide' : 'Show';
       });
     });
+
+    const signupConsent = document.getElementById('signupConsent');
+    const signupSubmit = document.getElementById('signupSubmit');
+    if (signupConsent && signupSubmit) {
+      signupConsent.addEventListener('change', () => {
+        signupSubmit.disabled = !signupConsent.checked;
+      });
+    }
 
     async function redirectByRole() {
       const role = await getUserRole();
@@ -181,6 +191,7 @@
         const confirm = document.getElementById('signupPass2').value;
 
         if (password !== confirm) throw new Error("Passwords don't match.");
+        if (!document.getElementById('signupConsent').checked) throw new Error('You must agree to the Terms of Service and Privacy Policy.');
 
         const { data, error } = await db.auth.signUp({ email, password });
         if (error) throw error;
