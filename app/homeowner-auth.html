@@ -184,16 +184,26 @@
 
         const { data, error } = await db.auth.signUp({ email, password });
         if (error) throw error;
-        const user = data?.user;
-        if (!user) throw new Error('Account was created, but no user record was returned.');
+
+        await db.auth.refreshSession();
+        const { data: userData, error: userError } = await db.auth.getUser();
+        if (userError) throw userError;
+        const user = userData?.user || data?.user || null;
+        if (!user?.id) {
+          throw new Error('Account was created, but no authenticated user was available for profile creation.');
+        }
 
         const fullName = `${firstName} ${lastName}`.trim();
-        const { error: insertError } = await db.from('users').insert({
-          id: user.id,
-          email: user.email,
-          full_name: fullName,
-          role: 'homeowner'
-        });
+        const { data: upsertData, error: insertError } = await db
+          .from('users')
+          .upsert({
+            id: user.id,
+            email: user.email,
+            full_name: fullName,
+            role: 'homeowner'
+          }, { onConflict: 'id' })
+          .select()
+          .single();
         if (insertError) {
           const message = (insertError.message || '').toLowerCase();
           if (message.includes('row-level security')) {
