@@ -978,17 +978,17 @@ footer {
  <section class="contractor-section" id="contractor">
  <div class="section-label">For professionals</div>
  <div class="section-title">Are you an HVAC contractor?</div>
- <p class="contractor-sub">Free to join. Pay $800 only when you close and install a job.</p>
+ <p class="contractor-sub">Free qualified leads. No monthly fees. No cold-calling. Only engage with homeowners who are ready to buy.</p>
  <div class="contractor-checks">
- <span class="check-item">No monthly fees</span>
- <span class="check-item">Leads in your zip codes</span>
- <span class="check-item">Only pay when you win</span>
+ <span class="check-item">Free qualified leads delivered to you</span>
+ <span class="check-item">No monthly fees or subscriptions</span>
+ <span class="check-item">Blind bids with ready-to-buy homeowners</span>
  </div>
  <div class="contractor-form">
  <input type="text" placeholder="Your name">
  <input type="text" placeholder="Business name">
  <input type="text" placeholder="ZIP code">
- <button class="btn-white" onclick="openModal('modal-contractor')">Apply →</button>
+ <button class="btn-white" onclick="window.location.href='/app/contractor-auth.html'">Sign up →</button>
  </div>
  </section>
 
@@ -1185,116 +1185,6 @@ footer {
  </div>
 </div>
 
-<div class="modal-overlay" id="modal-contractor">
- <div class="modal">
- <button class="modal-close" onclick="closeModal('modal-contractor')">✕</button>
-
- <div id="ct-step-1">
- <div class="step-counter">Step 1 of 2</div>
- <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
- <h2>Apply to join</h2>
- <p class="modal-sub">Free to join. Pay $800 only when you close a job.</p>
- <button class="btn-google">
- <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
- Continue with Google
- </button>
- <div class="divider-or">or</div>
- <div class="form-row">
- <div class="form-group">
- <label class="form-label">First name</label>
- <input class="form-input" type="text" placeholder="Carlos">
- </div>
- <div class="form-group">
- <label class="form-label">Last name</label>
- <input class="form-input" type="text" placeholder="Mendez">
- </div>
- </div>
- <div class="form-group">
- <label class="form-label">Business name</label>
- <input class="form-input" type="text" placeholder="Arctic Air HVAC">
- </div>
- <div class="form-group">
- <label class="form-label">Email address</label>
- <input class="form-input" type="email" placeholder="carlos@arcticair.com">
- </div>
- <div class="form-group">
- <label class="form-label">Password</label>
- <div class="password-wrap">
- <input class="form-input" type="password" placeholder="Create a password" id="ct-pw">
- <button class="toggle-pw" onclick="togglePassword('ct-pw', this)">Show</button>
- </div>
- </div>
- <div class="modal-footer">
- <button class="btn-next" onclick="ctNext()">Continue →</button>
- </div>
- </div>
-
- <div id="ct-step-2" style="display:none">
- <div class="step-counter">Step 2 of 2</div>
- <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
- <h2>Your business</h2>
- <p class="modal-sub">Almost done — just a few more details.</p>
- <div class="form-row">
- <div class="form-group">
- <label class="form-label">Phone</label>
- <input class="form-input" type="tel" placeholder="(813) 555-0100">
- </div>
- <div class="form-group">
- <label class="form-label">License number</label>
- <input class="form-input" type="text" placeholder="CAC123456">
- </div>
- </div>
- <div class="form-group">
- <label class="form-label">Service ZIP codes (up to 5)</label>
- <div style="display:flex; gap:8px; flex-wrap:wrap">
- <input class="form-input" type="text" placeholder="33614" maxlength="5" style="width:80px">
- <input class="form-input" type="text" placeholder="33615" maxlength="5" style="width:80px">
- <input class="form-input" type="text" placeholder="33616" maxlength="5" style="width:80px">
- <input class="form-input" type="text" placeholder="33617" maxlength="5" style="width:80px">
- <input class="form-input" type="text" placeholder="33618" maxlength="5" style="width:80px">
- </div>
- </div>
- <div class="form-group">
- <label class="form-label" style="margin-bottom:10px">Services you offer</label>
- <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
- <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> AC Installation</label>
- <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> AC Repair</label>
- <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> Furnace / Heat Pump</label>
- <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> Mini-Split</label>
- <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> Full System</label>
- <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> Maintenance</label>
- </div>
- </div>
- <div class="form-group" style="margin-top:4px">
- <label style="display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--muted); cursor:pointer">
- <input type="checkbox" style="accent-color:var(--green); margin-top:2px">
- I confirm I am licensed and insured. I understand NeighborlyWork may verify this.
- </label>
- </div>
- <div class="modal-footer">
- <button class="btn-back" onclick="ctBack()">← Back</button>
- <button class="btn-next" onclick="ctSubmit()">Submit application</button>
- </div>
- </div>
-
- <div id="ct-step-3" style="display:none">
- <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
- <div class="success-screen">
- <div class="success-icon">✓</div>
- <h2>Application received!</h2>
- <p>We'll review your application within 24 hours and send you an email once approved.</p>
- <div class="summary-card">
- <div class="summary-row"><span>Cost to join</span><span style="color:var(--green); font-weight:600">Free</span></div>
- <div class="summary-row"><span>Fee per closed job</span><span>$800 flat</span></div>
- <div class="summary-row"><span>Monthly fees</span><span>None</span></div>
- <div class="summary-row"><span>Review time</span><span>Within 24 hours</span></div>
- </div>
- <button class="btn-next" style="margin-top:20px; width:100%" onclick="closeModal('modal-contractor')">Done</button>
- </div>
- </div>
-
- </div>
-</div>
 
 <script>
 function openModal(id) {
@@ -1344,20 +1234,6 @@ function hwBack(step) {
  document.getElementById('hw-step-' + (step - 1)).style.display = 'block';
 }
 
-function ctNext() {
- document.getElementById('ct-step-1').style.display = 'none';
- document.getElementById('ct-step-2').style.display = 'block';
-}
-
-function ctBack() {
- document.getElementById('ct-step-2').style.display = 'none';
- document.getElementById('ct-step-1').style.display = 'block';
-}
-
-function ctSubmit() {
- document.getElementById('ct-step-2').style.display = 'none';
- document.getElementById('ct-step-3').style.display = 'block';
-}
 
 function selectRadio(el) {
  document.querySelectorAll('.radio-option').forEach(r => r.classList.remove('selected'));

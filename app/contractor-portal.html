@@ -38,8 +38,9 @@
         <button class="tab active" data-screen="dashboard">Dashboard</button>
         <button class="tab" data-screen="quote">Submit Quote</button>
         <button class="tab" data-screen="profile">Profile</button>
+        <button class="tab" data-screen="billing">Fee Terms</button>
       </div>
-      <div class="side-note">Blind quote system. Homeowners can compare all quotes, but contractors never see each other's pricing. $800 fee only if the homeowner selects you and the job is installed.</div>
+      <div class="side-note">Blind quote system. Homeowners can compare all quotes, but contractors never see each other's pricing.</div>
     </aside>
 
     <main>
@@ -128,10 +129,10 @@
               <div class="field" style="grid-column:1 / -1;"><label>Note to homeowner</label><textarea id="noteToHomeowner" maxlength="300" placeholder="Share anything helpful about your quote."></textarea></div>
               <div class="money-row" style="grid-column:1 / -1;">
                 <div class="money"><div class="k">Total price</div><div class="v" id="totalPriceDisplay">$0</div></div>
-                <div class="money"><div class="k">Fee reminder</div><div class="v">$800 on won + installed jobs</div></div>
+                <div class="money"><div class="k">Install timing</div><div class="v" id="quoteTimingDisplay">Ready to submit</div></div>
               </div>
               <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-                <div class="small-note">Your quote is blind. Homeowner sees all quotes but contractors never see each other's pricing. $800 fee only if homeowner selects you and job is installed.</div>
+                <div class="small-note">Your quote is blind. Homeowners compare the options side by side, but contractors never see each other's pricing.</div>
                 <button class="btn btn-orange" id="submitQuoteBtn" type="submit">Submit Quote</button>
               </div>
             </form>
@@ -173,6 +174,28 @@
           </form>
         </div>
       </section>
+
+      <section class="screen" id="billingScreen">
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h2>Fee terms</h2>
+              <p>Reference the contractor agreement terms anytime from your account.</p>
+            </div>
+          </div>
+          <div class="summary">
+            <strong>$800 per closed install job</strong>
+            <p class="small-note">You owe the fee only when a NeighborlyWork homeowner selects you and the install is completed.</p>
+          </div>
+          <div class="summary" style="margin-top:14px;display:grid;gap:10px;">
+            <div><strong>When it applies</strong><div class="small-note">A matched NeighborlyWork lead becomes a completed HVAC install or replacement you perform for that homeowner.</div></div>
+            <div><strong>When it does not apply</strong><div class="small-note">No fee for lost bids, unselected quotes, cancelled jobs, or installs that never close.</div></div>
+            <div><strong>Billing timing</strong><div class="small-note">Billed after the completed install and due within 30 days.</div></div>
+            <div><strong>Recurring charges</strong><div class="small-note">No monthly subscription and no recurring platform fee.</div></div>
+          </div>
+          <div style="margin-top:16px"><a class="btn btn-light" href="/terms.html" target="_blank" rel="noopener">Open full Terms of Service</a></div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -181,7 +204,8 @@
     const screens = {
       dashboard: document.getElementById('dashboardScreen'),
       quote: document.getElementById('quoteScreen'),
-      profile: document.getElementById('profileScreen')
+      profile: document.getElementById('profileScreen'),
+      billing: document.getElementById('billingScreen')
     };
     const state = {
       user: null,

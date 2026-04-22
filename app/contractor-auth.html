@@ -13,16 +13,16 @@
     *{box-sizing:border-box} body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:var(--off);color:var(--text)}
     .tabs-wrap{max-width:1180px;margin:0 auto;padding:24px 18px 40px}.brand{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1.5rem;color:var(--green);margin:4px 0 18px}.mark{width:14px;height:14px;border-radius:4px;background:var(--green);box-shadow:0 0 0 4px rgba(26,92,58,.10)}
     .tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:#f3f5f1;padding:6px;border-radius:16px;margin-bottom:18px}.tab{border:none;background:transparent;padding:12px 10px;border-radius:12px;font-weight:800;color:var(--muted);cursor:pointer;font:inherit}.tab.active{background:#fff;color:var(--green);box-shadow:0 8px 22px rgba(0,0,0,.06)}
-    .screen{display:none}.screen.active{display:block}.card{background:#fff;border:none;border-radius:28px;box-shadow:var(--shadow);overflow:hidden}h1,h2{font-family:'Outfit',sans-serif;letter-spacing:-.04em;line-height:.96;margin:0}
-    .small{font-size:.92rem;color:var(--muted);line-height:1.6}.btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:15px 18px;font-weight:800;cursor:pointer;font-size:1rem;text-decoration:none}.btn-green{background:var(--green);color:#fff;width:100%}.btn-orange{background:var(--orange);color:#fff;width:100%}
-    .field{display:grid;gap:6px;margin-bottom:12px}label{font-size:.92rem;font-weight:700;color:#283229}input{width:100%;padding:14px 14px;border:none;border-radius:14px;background:#f5f5f7;color:var(--text);font:inherit}input:focus{outline:2px solid rgba(26,92,58,.22)}
+    .screen{display:none}.screen.active{display:block}.card{background:#fff;border:none;border-radius:28px;box-shadow:var(--shadow);overflow:hidden}h1,h2,h3{font-family:'Outfit',sans-serif;letter-spacing:-.04em;line-height:.96;margin:0}
+    .small{font-size:.92rem;color:var(--muted);line-height:1.6}.btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:15px 18px;font-weight:800;cursor:pointer;font-size:1rem;text-decoration:none}.btn-green{background:var(--green);color:#fff;width:100%}.btn-orange{background:var(--orange);color:#fff;width:100%}.btn-light{background:#fff;color:var(--text);border:1px solid var(--line)}
+    .field{display:grid;gap:6px;margin-bottom:12px}label{font-size:.92rem;font-weight:700;color:#283229}input,textarea{width:100%;padding:14px 14px;border:none;border-radius:14px;background:#f5f5f7;color:var(--text);font:inherit}input:focus,textarea:focus{outline:2px solid rgba(26,92,58,.22)}textarea{min-height:90px;resize:vertical}
     .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:#eef5ef;color:var(--green);font-weight:800;border-radius:10px;padding:8px 10px;cursor:pointer}.password-wrap{position:relative}
-    .screen-grid{display:grid;grid-template-columns:1fr 1fr;min-height:700px}.left{background:var(--green);color:#fff;padding:36px}.left h1{font-size:clamp(2.2rem,4.6vw,4rem);max-width:12ch}.left p{color:#d6e3dc;max-width:36ch;line-height:1.7}
+    .screen-grid{display:grid;grid-template-columns:1fr 1fr;min-height:760px}.left{background:var(--green);color:#fff;padding:36px}.left h1{font-size:clamp(2.2rem,4.6vw,4rem);max-width:12ch}.left p{color:#d6e3dc;max-width:38ch;line-height:1.7}
     .bullets{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:12px}.bullets li{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:14px 16px;border-radius:18px}.check{flex-shrink:0;width:22px;height:22px;border-radius:999px;background:#fff;color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;margin-top:2px}
     .right{padding:34px;background:#fff}.right h2{font-size:clamp(1.8rem,3.8vw,3rem);margin-bottom:8px}.link-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}.link{background:none;border:none;color:var(--green);font-weight:800;cursor:pointer;font:inherit}.notice,.error,.success{border-radius:14px;padding:12px 14px;font-size:.95rem;line-height:1.5;display:none;margin-bottom:14px}.notice.show,.error.show,.success.show{display:block}.notice{background:#eef5ef;color:var(--green)}.error{background:#fff1ed;color:#8a2e18}.success{background:#eef7f0;color:var(--green)}
-    .loading{opacity:.7;pointer-events:none}
+    .loading{opacity:.7;pointer-events:none}.step{display:none}.step.active{display:block}.step-counter{font-size:.8rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:10px}.progress{height:10px;background:#edf2ee;border-radius:999px;overflow:hidden;margin-bottom:18px}.progress > div{height:100%;background:linear-gradient(90deg,var(--green),#47b46e);transition:width .2s ease}.recap,.agreement-box,.fee-box{background:#f7faf8;border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0}.recap h3,.agreement-box h3,.fee-box h3{font-size:1.2rem;margin-bottom:8px}.mini-list{display:grid;gap:10px;padding:0;margin:12px 0 0;list-style:none}.mini-list li{display:flex;gap:10px;align-items:flex-start}.mini-list strong{display:block}.inline-note{font-size:.88rem;color:var(--muted);line-height:1.55}.checkbox-row{display:flex;align-items:flex-start;gap:10px;font-size:.92rem;color:var(--text);margin:8px 0 12px}.checkbox-row input{width:auto;margin-top:2px}.checkbox-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.choice{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fafbf9}.choice input{width:auto;margin-top:3px}.footer-actions{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-top:18px}.footer-actions .btn{width:auto;min-width:160px}.disabled-btn{opacity:.45;pointer-events:none}
     @media(max-width:900px){.screen-grid{grid-template-columns:1fr}.left,.right{padding:24px;min-height:0}}
-    @media(max-width:640px){.tabs{grid-template-columns:1fr}}
+    @media(max-width:640px){.tabs{grid-template-columns:1fr}.checkbox-grid{grid-template-columns:1fr}.footer-actions{flex-direction:column}.footer-actions .btn{width:100%}}
   </style>
 </head>
 <body>
@@ -37,11 +37,11 @@
       <div class="card screen-grid">
         <div class="left">
           <h1>More real jobs.</h1>
-          <p>Sign in to review HVAC requests, submit quotes, and track your pipeline.</p>
+          <p>Sign in to review matched HVAC requests, submit blind quotes, and manage your pipeline.</p>
           <ul class="bullets">
             <li><span class="check">✓</span><span>See leads in your approved service area</span></li>
-            <li><span class="check">✓</span><span>Respond quickly and submit quotes</span></li>
-            <li><span class="check">✓</span><span>Track wins and account status</span></li>
+            <li><span class="check">✓</span><span>Respond quickly with clean blind quotes</span></li>
+            <li><span class="check">✓</span><span>Track wins, installs, and account details</span></li>
           </ul>
         </div>
         <div class="right">
@@ -62,29 +62,117 @@
     <section class="screen" id="apply">
       <div class="card screen-grid">
         <div class="left">
-          <h1>Grow your HVAC business.</h1>
-          <p>Join the network, get qualified leads, and only pay when you win closed work.</p>
+          <h1>Grow without chasing leads.</h1>
+          <p>Free qualified leads. No subscriptions. No door-knocking. Only engage with homeowners who are ready to buy.</p>
           <ul class="bullets">
-            <li><span class="check">✓</span><span>Free to join</span></li>
-            <li><span class="check">✓</span><span>Local leads only</span></li>
-            <li><span class="check">✓</span><span>Approval review within 24 hours</span></li>
+            <li><span class="check">✓</span><span>Free qualified leads delivered to you</span></li>
+            <li><span class="check">✓</span><span>No monthly fees, no subscriptions</span></li>
+            <li><span class="check">✓</span><span>The homeowner has already chosen to compare bids</span></li>
+            <li><span class="check">✓</span><span>No cold-calling, no door-knocking, no sales commission to a middleman</span></li>
+            <li><span class="check">✓</span><span>You only engage with customers who are ready to buy</span></li>
+            <li><span class="check">✓</span><span>Pay nothing unless you win and install</span></li>
           </ul>
         </div>
         <div class="right">
-          <h2>Apply to join</h2>
-          <p class="small">Create your contractor account and submit your business details.</p>
           <div class="error" id="signupError"></div>
           <div class="success" id="signupSuccess"></div>
-          <form class="form" id="signupForm">
-            <div class="field"><label>First name</label><input id="firstName" type="text" placeholder="Carlos" required></div>
-            <div class="field"><label>Last name</label><input id="lastName" type="text" placeholder="Mendez" required></div>
-            <div class="field"><label>Business name</label><input id="businessName" type="text" placeholder="Arctic Air HVAC" required></div>
-            <div class="field"><label>Email address</label><input id="signupEmail" type="email" placeholder="you@company.com" required></div>
-            <div class="field"><label>Phone number</label><input id="phone" type="tel" placeholder="(555) 555-5555" required></div>
-            <div class="field"><label>Password</label><div class="password-wrap"><input id="signupPass" type="password" placeholder="Create password" required><button class="toggle" type="button" data-toggle="signupPass">Show</button></div></div>
-            <label class="checkbox-row"><input id="signupConsent" type="checkbox"><span>I agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a></span></label>
-            <button class="btn btn-orange" id="signupSubmit" type="submit" disabled>Apply to Join →</button>
-          </form>
+
+          <div class="progress"><div id="applyProgress" style="width:25%"></div></div>
+
+          <div class="step active" id="applyStep1">
+            <div class="step-counter">Step 1 of 4</div>
+            <h2>Why contractors join</h2>
+            <p class="small">NeighborlyWork is built to send you real homeowner demand without the usual noise.</p>
+            <div class="recap">
+              <h3>What you get</h3>
+              <ul class="mini-list">
+                <li><span class="check">✓</span><span><strong>Qualified local demand</strong> Homeowners come in asking for HVAC quotes right now.</span></li>
+                <li><span class="check">✓</span><span><strong>No recurring cost</strong> No monthly platform fee or subscription just to stay listed.</span></li>
+                <li><span class="check">✓</span><span><strong>Less selling</strong> No cold outreach, no canvassing, no paying a sales rep to hunt jobs.</span></li>
+              </ul>
+            </div>
+            <div class="footer-actions">
+              <span></span>
+              <button class="btn btn-orange" type="button" onclick="goApplyStep(2)">Continue →</button>
+            </div>
+          </div>
+
+          <div class="step" id="applyStep2">
+            <div class="step-counter">Step 2 of 4</div>
+            <h2>How it works</h2>
+            <p class="small">Simple process. Blind competition. Homeowner stays in control.</p>
+            <div class="agreement-box">
+              <h3>The flow</h3>
+              <ol class="mini-list" style="list-style:decimal;padding-left:18px">
+                <li><span><strong>Homeowner submits a request</strong> with property details, urgency, and project type.</span></li>
+                <li><span><strong>We match up to 3 contractors</strong> based on service area and fit.</span></li>
+                <li><span><strong>You submit a blind competitive bid</strong> without seeing anyone else’s price.</span></li>
+                <li><span><strong>The homeowner picks</strong> the contractor they want to move forward with.</span></li>
+                <li><span><strong>You install</strong> and complete the job directly with the homeowner.</span></li>
+              </ol>
+            </div>
+            <div class="footer-actions">
+              <button class="btn btn-light" type="button" onclick="goApplyStep(1)">← Back</button>
+              <button class="btn btn-orange" type="button" onclick="goApplyStep(3)">Continue →</button>
+            </div>
+          </div>
+
+          <div class="step" id="applyStep3">
+            <div class="step-counter">Step 3 of 4</div>
+            <h2>The agreement</h2>
+            <p class="small">This is the fee structure and the operating rule set you’re agreeing to before account creation.</p>
+            <div class="fee-box">
+              <h3>$800 per closed install job</h3>
+              <ul class="mini-list">
+                <li><span class="check">✓</span><span><strong>Fee amount:</strong> $800 per closed install job.</span></li>
+                <li><span class="check">✓</span><span><strong>When it’s owed:</strong> Only when the homeowner selects you <em>and</em> the install is completed.</span></li>
+                <li><span class="check">✓</span><span><strong>What counts as a closed job:</strong> A matched NeighborlyWork lead that becomes a completed HVAC install or replacement you perform for that homeowner.</span></li>
+                <li><span class="check">✓</span><span><strong>Billing timing:</strong> Billed after the install is completed, due within 30 days.</span></li>
+                <li><span class="check">✓</span><span><strong>If the job falls through:</strong> No fee if the homeowner never selects you, cancels before completion, or the install does not close.</span></li>
+                <li><span class="check">✓</span><span><strong>No extra charges:</strong> No fee for lost bids, no fee for unselected quotes, and no monthly charges.</span></li>
+              </ul>
+            </div>
+            <p class="inline-note">You’ll be asked to explicitly agree to these terms on the next step before creating your account.</p>
+            <div class="footer-actions">
+              <button class="btn btn-light" type="button" onclick="goApplyStep(2)">← Back</button>
+              <button class="btn btn-orange" type="button" onclick="goApplyStep(4)">Continue →</button>
+            </div>
+          </div>
+
+          <div class="step" id="applyStep4">
+            <div class="step-counter">Step 4 of 4</div>
+            <h2>Create your account</h2>
+            <p class="small">Add your business details and confirm the agreement terms to finish your application.</p>
+            <form class="form" id="signupForm">
+              <div class="field"><label>First name</label><input id="firstName" type="text" placeholder="Carlos" required></div>
+              <div class="field"><label>Last name</label><input id="lastName" type="text" placeholder="Mendez" required></div>
+              <div class="field"><label>Business name</label><input id="businessName" type="text" placeholder="Arctic Air HVAC" required></div>
+              <div class="field"><label>Email address</label><input id="signupEmail" type="email" placeholder="you@company.com" required></div>
+              <div class="field"><label>Phone number</label><input id="phone" type="tel" placeholder="(555) 555-5555" required></div>
+              <div class="field"><label>Password</label><div class="password-wrap"><input id="signupPass" type="password" placeholder="Create password" required><button class="toggle" type="button" data-toggle="signupPass">Show</button></div></div>
+              <div class="field"><label>License number</label><input id="licenseNumber" type="text" placeholder="CAC123456 or leave blank if pending"></div>
+              <div class="field"><label>Service ZIP codes</label><input id="serviceZips" type="text" placeholder="95825, 95661, 95630"></div>
+              <div class="field">
+                <label>Services you offer</label>
+                <div class="checkbox-grid">
+                  <label class="choice"><input type="checkbox" name="signupServices" value="AC Installation"><span>AC Installation</span></label>
+                  <label class="choice"><input type="checkbox" name="signupServices" value="Furnace or Heat Pump"><span>Furnace or Heat Pump</span></label>
+                  <label class="choice"><input type="checkbox" name="signupServices" value="Mini-Split"><span>Mini-Split</span></label>
+                  <label class="choice"><input type="checkbox" name="signupServices" value="Full HVAC System"><span>Full HVAC System</span></label>
+                  <label class="choice"><input type="checkbox" name="signupServices" value="Repair or Tune-Up"><span>Repair or Tune-Up</span></label>
+                </div>
+              </div>
+              <label class="checkbox-row"><input id="signupLicenseConsent" type="checkbox"><span>I confirm I am licensed and insured, or actively completing final verification, and I understand NeighborlyWork may verify this information.</span></label>
+              <label class="checkbox-row"><input id="signupFeeConsent" type="checkbox"><span>I understand and agree to the $800 referral fee per closed install as described in the previous step.</span></label>
+              <label class="checkbox-row"><input id="signupLegalConsent" type="checkbox"><span>I agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
+              <button class="btn btn-orange" id="signupSubmit" type="submit" disabled>Create contractor account →</button>
+            </form>
+            <div class="footer-actions">
+              <button class="btn btn-light" type="button" onclick="goApplyStep(3)">← Back</button>
+              <span></span>
+            </div>
+          </div>
+
           <div class="link-row"><button class="link" type="button" onclick="openScreen('login')">Already have an account?</button></div>
         </div>
       </div>
@@ -122,6 +210,25 @@
       return message || 'Something went wrong. Please try again.';
     }
 
+    function goApplyStep(step) {
+      document.querySelectorAll('#apply .step').forEach(el => el.classList.remove('active'));
+      document.getElementById(`applyStep${step}`).classList.add('active');
+      document.getElementById('applyProgress').style.width = `${step * 25}%`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getSelectedSignupServices() {
+      return Array.from(document.querySelectorAll('input[name="signupServices"]:checked')).map(el => el.value);
+    }
+
+    function updateSignupSubmitState() {
+      const submit = document.getElementById('signupSubmit');
+      const license = document.getElementById('signupLicenseConsent').checked;
+      const fee = document.getElementById('signupFeeConsent').checked;
+      const legal = document.getElementById('signupLegalConsent').checked;
+      submit.disabled = !(license && fee && legal);
+    }
+
     document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>openScreen(tab.dataset.screen)));
     document.querySelectorAll('[data-toggle]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -132,13 +239,10 @@
       });
     });
 
-    const signupConsent = document.getElementById('signupConsent');
-    const signupSubmit = document.getElementById('signupSubmit');
-    if (signupConsent && signupSubmit) {
-      signupConsent.addEventListener('change', () => {
-        signupSubmit.disabled = !signupConsent.checked;
-      });
-    }
+    ['signupLicenseConsent','signupFeeConsent','signupLegalConsent'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', updateSignupSubmitState);
+    });
 
     async function redirectByRole() {
       const role = await getUserRole();
@@ -188,7 +292,12 @@
         const email = document.getElementById('signupEmail').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const password = document.getElementById('signupPass').value;
-        if (!document.getElementById('signupConsent').checked) throw new Error('You must agree to the Terms of Service and Privacy Policy.');
+        const licenseNumber = document.getElementById('licenseNumber').value.trim() || 'pending';
+        const serviceZips = document.getElementById('serviceZips').value.split(',').map(z => z.trim()).filter(Boolean);
+        const services = getSelectedSignupServices();
+        if (!document.getElementById('signupLicenseConsent').checked || !document.getElementById('signupFeeConsent').checked || !document.getElementById('signupLegalConsent').checked) {
+          throw new Error('You must agree to the contractor terms before creating your account.');
+        }
 
         const { data, error } = await db.auth.signUp({ email, password });
         if (error) throw error;
@@ -218,10 +327,10 @@
         const { error: contractorInsertError } = await db.from('contractors').upsert({
           id: user.id,
           business_name: businessName,
-          license_number: 'pending',
-          insured: false,
-          service_zips: [],
-          services: [],
+          license_number: licenseNumber,
+          insured: true,
+          service_zips: serviceZips,
+          services,
           status: 'pending'
         }, { onConflict: 'id' }).select().single();
         if (contractorInsertError) {
@@ -234,6 +343,8 @@
 
         setMessage('signupSuccess', 'Application received. We will review and approve your account within 24 hours.');
         form.reset();
+        updateSignupSubmitState();
+        goApplyStep(1);
       } catch (err) {
         setMessage('signupError', friendlyAuthError(err.message));
       } finally {
