@@ -2,6 +2,10 @@
 -- Generated 2026-04-22
 -- Applies enum, table, and column changes required for v1 lifecycle, billing, notifications,
 -- draft quote generation, and change-order support.
+-- CHECKPOINT 1.2 hardening notes:
+-- - safe to rerun
+-- - tolerates legacy lead status typing
+-- - reconciles legacy quote total fields when present
 
 begin;
 
@@ -280,16 +284,17 @@ end $$;
 -- Migrate existing lead status column if needed ------------------------------
 do $$
 declare
-  current_type text;
+  current_data_type text;
+  current_udt_name text;
 begin
-  select data_type
-    into current_type
+  select data_type, udt_name
+    into current_data_type, current_udt_name
   from information_schema.columns
   where table_schema = 'public'
     and table_name = 'leads'
     and column_name = 'status';
 
-  if current_type = 'text' then
+  if current_data_type = 'text' then
     alter table public.leads
       alter column status drop default;
 
@@ -300,7 +305,33 @@ begin
       when status = 'selected' then 'homeowner_selected'
       when status = 'installed' then 'install_complete'
       when status = 'closed' then 'cleared'
-      else coalesce(status, 'new')
+      when status = 'cancelled' then 'cancelled'
+      else 'new'
+    end;
+
+    alter table public.leads
+      alter column status type public.lead_status_v1
+      using status::public.lead_status_v1;
+
+    alter table public.leads
+      alter column status set default 'new';
+  elsif current_udt_name is not null and current_udt_name <> 'lead_status_v1' then
+    alter table public.leads
+      alter column status drop default;
+
+    alter table public.leads
+      alter column status type text
+      using status::text;
+
+    update public.leads
+    set status = case
+      when status in ('open', 'new') then 'new'
+      when status = 'quoted' then 'quotes_submitted'
+      when status = 'selected' then 'homeowner_selected'
+      when status = 'installed' then 'install_complete'
+      when status = 'closed' then 'cleared'
+      when status = 'cancelled' then 'cancelled'
+      else 'new'
     end;
 
     alter table public.leads
@@ -312,6 +343,22 @@ begin
   end if;
 exception when undefined_column then
   null;
+end $$;
+
+-- Reconcile legacy total_price column if present.
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'quotes'
+      and column_name = 'total_price'
+  ) then
+    update public.quotes
+    set price_total = coalesce(price_total, total_price)
+    where total_price is not null;
+  end if;
 end $$;
 
 create index if not exists idx_leads_status_v1 on public.leads(status);
