@@ -4,3 +4,4 @@
 [2026-04-22 19:24] — reviewed repo heartbeat/commit trail; backend foundation is shipped and logged, but heartbeat cadence is lagging behind actual work — next: append missed entries and continue brand ratings seed
 [2026-04-22 19:57] — CHECKPOINT 1.1: current live schema inventory and legacy-column reconciliation complete — next: CHECKPOINT 1.2: harden 001_backend_v1_schema.sql for real migration safety
 [2026-04-22 19:58] — CHECKPOINT 1.2: harden 001_backend_v1_schema.sql for real migration safety complete — next: CHECKPOINT 1.3: harden 002_backend_v1_rls.sql for real policy application
+[2026-04-22 19:59] — CHECKPOINT 1.3: harden 002_backend_v1_rls.sql for real policy application complete — next: CHECKPOINT 1.4: apply schema in Supabase/test environment

@@ -1,5 +1,9 @@
 -- NeighborlyWork backend v1 RLS policies
 -- Generated 2026-04-22
+-- CHECKPOINT 1.3 hardening notes:
+-- - safe to rerun
+-- - keeps admin management isolated to admin users
+-- - limits contractor visibility on change-order records to original bidders only
 
 begin;
 
@@ -74,6 +78,7 @@ using (
       select 1
       from public.quotes q
       where q.lead_id = public.change_orders.lead_id
+        and q.status in ('submitted', 'selected', 'rejected', 'superseded')
         and q.contractor_id = auth.uid()
         and q.contractor_id <> public.change_orders.contractor_id
     )
@@ -160,6 +165,7 @@ with check (
     join public.quotes q on q.lead_id = co.lead_id
     where co.id = public.change_order_responses.change_order_id
       and co.visible_to_other_contractors = true
+      and q.status in ('submitted', 'selected', 'rejected', 'superseded')
       and q.contractor_id = auth.uid()
       and q.contractor_id <> co.contractor_id
   )
@@ -330,7 +336,12 @@ create policy "notifications_insert_owner_or_admin"
 on public.notifications
 for insert
 with check (
-  auth.uid() = user_id
+  (user_id is null and exists (
+    select 1 from public.users
+    where public.users.id = auth.uid()
+      and public.users.role = 'admin'
+  ))
+  or auth.uid() = user_id
   or exists (
     select 1 from public.users
     where public.users.id = auth.uid()
