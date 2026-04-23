@@ -5,3 +5,4 @@
 [2026-04-22 19:57] — CHECKPOINT 1.1: current live schema inventory and legacy-column reconciliation complete — next: CHECKPOINT 1.2: harden 001_backend_v1_schema.sql for real migration safety
 [2026-04-22 19:58] — CHECKPOINT 1.2: harden 001_backend_v1_schema.sql for real migration safety complete — next: CHECKPOINT 1.3: harden 002_backend_v1_rls.sql for real policy application
 [2026-04-22 19:59] — CHECKPOINT 1.3: harden 002_backend_v1_rls.sql for real policy application complete — next: CHECKPOINT 1.4: apply schema in Supabase/test environment
+[2026-04-23 00:19] — CHECKPOINT 1.4: paused schema apply; switching overnight priority to browser-bridge repair and launch validation per direct instruction — next: repair browser path and validate homeowner flow
