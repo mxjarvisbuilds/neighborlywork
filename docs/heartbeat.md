@@ -13,3 +13,4 @@
 [2026-04-23 00:27] — CHECKPOINT 1.4: contractor account creation validation complete — next: quote submission validation
 [2026-04-23 00:28] — CHECKPOINT 1.4: quote submission validation is partial; auth persistence needs a test session — next: messaging/admin validation after auth path fix
 [2026-04-23 00:45] — CHECKPOINT 1.4: created local test accounts for homeowner/contractor/admin — next: establish persistent browser sessions
+[2026-04-23 00:46] — CHECKPOINT 1.4: persistent browser session attempt started — next: sign in homeowner test account and capture auth path
