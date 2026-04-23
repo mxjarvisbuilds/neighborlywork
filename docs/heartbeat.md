@@ -11,3 +11,4 @@
 [2026-04-23 00:24] — CHECKPOINT 1.4: contractor signup validation step 2 complete — next: contractor fee agreement and account creation
 [2026-04-23 00:26] — CHECKPOINT 1.4: contractor fee agreement validation complete — next: contractor account creation validation
 [2026-04-23 00:27] — CHECKPOINT 1.4: contractor account creation validation complete — next: quote submission validation
+[2026-04-23 00:28] — CHECKPOINT 1.4: quote submission validation is partial; auth persistence needs a test session — next: messaging/admin validation after auth path fix
