@@ -18,3 +18,5 @@
 [2026-04-23 07:27] — CHECKPOINT 1.4: live validation blocked because Netlify paused neighborlywork.com for usage limits — next: waiting on site resume / billing unpause
 [2026-04-23 07:49] — CHECKPOINT 1.4: skipping live-site-gated validation and resuming backend/non-live checkpoints — next: map live-site-dependent checkpoints and continue schema/application work
 [2026-04-23 18:23] — CHECKPOINT 1.3: inherited backend foundation re-verified and hardened in deploy repo — next: CHECKPOINT 1.4: apply schema in Supabase/test environment
+[2026-04-23 22:03] — CHECKPOINT 1.4: hardened schema + RLS SQL applied successfully in live Supabase project `uuaofdponevqwbfzwxtp` — next: CHECKPOINT 1.5: verify tables/enums/indexes via direct queries
+[2026-04-23 22:03] — CHECKPOINT 1.5: live schema verification complete (7 tables / 13 enums / 13 indexes + inherited leads/quotes/contractors columns confirmed) — next: CHECKPOINT 1.6: verify RLS behavior for homeowner/contractor/admin paths
