@@ -20,3 +20,4 @@
 [2026-04-23 18:23] — CHECKPOINT 1.3: inherited backend foundation re-verified and hardened in deploy repo — next: CHECKPOINT 1.4: apply schema in Supabase/test environment
 [2026-04-23 22:03] — CHECKPOINT 1.4: hardened schema + RLS SQL applied successfully in live Supabase project `uuaofdponevqwbfzwxtp` — next: CHECKPOINT 1.5: verify tables/enums/indexes via direct queries
 [2026-04-23 22:03] — CHECKPOINT 1.5: live schema verification complete (7 tables / 13 enums / 13 indexes + inherited leads/quotes/contractors columns confirmed) — next: CHECKPOINT 1.6: verify RLS behavior for homeowner/contractor/admin paths
+[2026-04-23 22:03] — CHECKPOINT 1.6: live RLS verification passed with impersonated homeowner/contractor/admin fixtures (10/10 checks green) — next: CHECKPOINT 2.1: define brand ratings methodology + source rubric
