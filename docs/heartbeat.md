@@ -17,3 +17,4 @@
 [2026-04-23 00:58] — CHECKPOINT 1.4: homeowner auth workaround under investigation after direct sign-in failed — next: browser-side auth path or direct Supabase auth request
 [2026-04-23 07:27] — CHECKPOINT 1.4: live validation blocked because Netlify paused neighborlywork.com for usage limits — next: waiting on site resume / billing unpause
 [2026-04-23 07:49] — CHECKPOINT 1.4: skipping live-site-gated validation and resuming backend/non-live checkpoints — next: map live-site-dependent checkpoints and continue schema/application work
+[2026-04-23 18:23] — CHECKPOINT 1.3: inherited backend foundation re-verified and hardened in deploy repo — next: CHECKPOINT 1.4: apply schema in Supabase/test environment

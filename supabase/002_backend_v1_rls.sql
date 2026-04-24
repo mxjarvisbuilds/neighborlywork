@@ -1,9 +1,9 @@
 -- NeighborlyWork backend v1 RLS policies
 -- Generated 2026-04-22
 -- CHECKPOINT 1.3 hardening notes:
--- - safe to rerun
+-- - narrows change-order access to active participants and valid response windows
 -- - keeps admin management isolated to admin users
--- - limits contractor visibility on change-order records to original bidders only
+-- - limits self-service notification updates to acknowledgements instead of record rewrites
 
 begin;
 
@@ -55,6 +55,8 @@ with check (
 drop policy if exists "change_orders_select_participants" on public.change_orders;
 drop policy if exists "change_orders_insert_selected_contractor" on public.change_orders;
 drop policy if exists "change_orders_update_participants_or_admin" on public.change_orders;
+drop policy if exists "change_orders_update_selected_contractor_or_admin" on public.change_orders;
+drop policy if exists "change_orders_update_homeowner_response_or_admin" on public.change_orders;
 
 create policy "change_orders_select_participants"
 on public.change_orders
@@ -74,6 +76,8 @@ using (
   )
   or (
     visible_to_other_contractors = true
+    and resolved_at is null
+    and response_window_expires > now()
     and exists (
       select 1
       from public.quotes q
@@ -92,23 +96,21 @@ with check (
   auth.uid() = contractor_id
   and exists (
     select 1
-    from public.leads
-    where public.leads.id = public.change_orders.lead_id
-      and public.leads.selected_contractor_id = auth.uid()
+    from public.leads l
+    join public.quotes q on q.id = public.change_orders.quote_id
+    where l.id = public.change_orders.lead_id
+      and l.selected_contractor_id = auth.uid()
+      and l.status in ('pending_verification', 'change_order_open')
+      and q.lead_id = l.id
+      and q.contractor_id = auth.uid()
   )
 );
 
-create policy "change_orders_update_participants_or_admin"
+create policy "change_orders_update_selected_contractor_or_admin"
 on public.change_orders
 for update
 using (
   auth.uid() = contractor_id
-  or exists (
-    select 1
-    from public.leads
-    where public.leads.id = public.change_orders.lead_id
-      and public.leads.homeowner_id = auth.uid()
-  )
   or exists (
     select 1 from public.users
     where public.users.id = auth.uid()
@@ -118,10 +120,37 @@ using (
 with check (
   auth.uid() = contractor_id
   or exists (
+    select 1 from public.users
+    where public.users.id = auth.uid()
+      and public.users.role = 'admin'
+  )
+);
+
+create policy "change_orders_update_homeowner_response_or_admin"
+on public.change_orders
+for update
+using (
+  exists (
     select 1
     from public.leads
     where public.leads.id = public.change_orders.lead_id
       and public.leads.homeowner_id = auth.uid()
+      and public.change_orders.resolved_at is null
+  )
+  or exists (
+    select 1 from public.users
+    where public.users.id = auth.uid()
+      and public.users.role = 'admin'
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.leads
+    where public.leads.id = public.change_orders.lead_id
+      and public.leads.homeowner_id = auth.uid()
+      and public.change_orders.resolved_at is null
+      and public.change_orders.homeowner_response in ('pending', 'accepted', 'rejected_switched_contractor', 'requested_more_info')
   )
   or exists (
     select 1 from public.users
@@ -165,6 +194,8 @@ with check (
     join public.quotes q on q.lead_id = co.lead_id
     where co.id = public.change_order_responses.change_order_id
       and co.visible_to_other_contractors = true
+      and co.resolved_at is null
+      and co.response_window_expires > now()
       and q.status in ('submitted', 'selected', 'rejected', 'superseded')
       and q.contractor_id = auth.uid()
       and q.contractor_id <> co.contractor_id
@@ -285,12 +316,6 @@ using (
       )
   )
   or exists (
-    select 1
-    from public.quotes q
-    where q.lead_id = public.lead_status_history.lead_id
-      and q.contractor_id = auth.uid()
-  )
-  or exists (
     select 1 from public.users
     where public.users.id = auth.uid()
       and public.users.role = 'admin'
@@ -336,13 +361,7 @@ create policy "notifications_insert_owner_or_admin"
 on public.notifications
 for insert
 with check (
-  (user_id is null and exists (
-    select 1 from public.users
-    where public.users.id = auth.uid()
-      and public.users.role = 'admin'
-  ))
-  or auth.uid() = user_id
-  or exists (
+  exists (
     select 1 from public.users
     where public.users.id = auth.uid()
       and public.users.role = 'admin'
@@ -361,7 +380,10 @@ using (
   )
 )
 with check (
-  auth.uid() = user_id
+  (
+    auth.uid() = user_id
+    and status = 'read'
+  )
   or exists (
     select 1 from public.users
     where public.users.id = auth.uid()

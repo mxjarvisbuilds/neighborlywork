@@ -3,9 +3,10 @@
 -- Applies enum, table, and column changes required for v1 lifecycle, billing, notifications,
 -- draft quote generation, and change-order support.
 -- CHECKPOINT 1.2 hardening notes:
--- - safe to rerun
--- - tolerates legacy lead status typing
--- - reconciles legacy quote total fields when present
+-- - adds missing inherited columns before indexing them
+-- - reconciles legacy lead/quote status typing when present
+-- - adds integrity guards for billing, change orders, and notifications
+-- - intended for an inherited NeighborlyWork schema rather than a blank bootstrap
 
 begin;
 
@@ -228,6 +229,52 @@ create table if not exists public.notifications (
   created_at timestamptz not null default now()
 );
 
+-- Table integrity guards ------------------------------------------------------
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'billing_cycles_date_order_ck'
+  ) then
+    alter table public.billing_cycles
+      add constraint billing_cycles_date_order_ck
+      check (cycle_end_date >= cycle_start_date);
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'billing_cycles_nonnegative_ck'
+  ) then
+    alter table public.billing_cycles
+      add constraint billing_cycles_nonnegative_ck
+      check (total_cleared_jobs >= 0 and total_amount_due >= 0 and retry_count >= 0);
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'change_orders_price_values_ck'
+  ) then
+    alter table public.change_orders
+      add constraint change_orders_price_values_ck
+      check (
+        original_price >= 0
+        and revised_price >= 0
+        and price_difference = (revised_price - original_price)
+      );
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'notifications_target_presence_ck'
+  ) then
+    alter table public.notifications
+      add constraint notifications_target_presence_ck
+      check (
+        user_id is not null
+        or lead_id is not null
+        or quote_id is not null
+        or change_order_id is not null
+        or billing_cycle_id is not null
+      );
+  end if;
+end $$;
+
 -- Existing table extensions --------------------------------------------------
 alter table public.contractors
   add column if not exists stripe_customer_id text,
@@ -239,6 +286,7 @@ alter table public.contractors
 
 alter table public.leads
   add column if not exists quote_type public.lead_quote_type not null default 'accurate_quote',
+  add column if not exists status public.lead_status_v1 not null default 'new',
   add column if not exists selected_contractor_id uuid references public.contractors(id) on delete set null,
   add column if not exists selection_timestamp timestamptz,
   add column if not exists verification_window_expires timestamptz,
@@ -347,6 +395,65 @@ end $$;
 
 -- Reconcile legacy total_price column if present.
 do $$
+declare
+  current_data_type text;
+  current_udt_name text;
+begin
+  select data_type, udt_name
+    into current_data_type, current_udt_name
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'quotes'
+    and column_name = 'status';
+
+  if current_data_type = 'text' then
+    alter table public.quotes
+      alter column status drop default;
+
+    update public.quotes
+    set status = case
+      when status in ('draft', 'submitted', 'superseded', 'selected', 'rejected') then status
+      when status in ('pending', 'new') then 'draft'
+      when status = 'approved' then 'selected'
+      when status = 'declined' then 'rejected'
+      else 'submitted'
+    end;
+
+    alter table public.quotes
+      alter column status type public.quote_status
+      using status::public.quote_status;
+
+    alter table public.quotes
+      alter column status set default 'submitted';
+  elsif current_udt_name is not null and current_udt_name <> 'quote_status' then
+    alter table public.quotes
+      alter column status drop default;
+
+    alter table public.quotes
+      alter column status type text
+      using status::text;
+
+    update public.quotes
+    set status = case
+      when status in ('draft', 'submitted', 'superseded', 'selected', 'rejected') then status
+      when status in ('pending', 'new') then 'draft'
+      when status = 'approved' then 'selected'
+      when status = 'declined' then 'rejected'
+      else 'submitted'
+    end;
+
+    alter table public.quotes
+      alter column status type public.quote_status
+      using status::public.quote_status;
+
+    alter table public.quotes
+      alter column status set default 'submitted';
+  end if;
+exception when undefined_column then
+  null;
+end $$;
+
+do $$
 begin
   if exists (
     select 1
@@ -361,12 +468,112 @@ begin
   end if;
 end $$;
 
+-- Cross-table integrity triggers ---------------------------------------------
+create or replace function public.validate_change_order_consistency()
+returns trigger
+language plpgsql
+as $$
+declare
+  quote_lead_id uuid;
+  quote_contractor_id uuid;
+  homeowner_id uuid;
+begin
+  select q.lead_id, q.contractor_id
+    into quote_lead_id, quote_contractor_id
+  from public.quotes q
+  where q.id = new.quote_id;
+
+  if quote_lead_id is null then
+    raise exception 'change_order quote_id % does not reference an existing quote', new.quote_id;
+  end if;
+
+  if quote_lead_id <> new.lead_id then
+    raise exception 'change_order lead_id must match quote.lead_id';
+  end if;
+
+  if quote_contractor_id <> new.contractor_id then
+    raise exception 'change_order contractor_id must match quote.contractor_id';
+  end if;
+
+  if tg_op = 'UPDATE' then
+    select l.homeowner_id into homeowner_id
+    from public.leads l
+    where l.id = new.lead_id;
+
+    if homeowner_id = auth.uid() then
+      if new.quote_id <> old.quote_id
+        or new.lead_id <> old.lead_id
+        or new.contractor_id <> old.contractor_id
+        or new.original_price <> old.original_price
+        or new.revised_price <> old.revised_price
+        or new.price_difference <> old.price_difference
+        or new.reason_category <> old.reason_category
+        or new.reason_description <> old.reason_description
+        or new.is_upsell_or_necessary <> old.is_upsell_or_necessary
+        or new.submitted_at <> old.submitted_at
+        or new.response_window_expires <> old.response_window_expires
+        or new.visible_to_other_contractors <> old.visible_to_other_contractors
+        or new.created_by is distinct from old.created_by
+      then
+        raise exception 'homeowner may only respond to a change order, not rewrite its commercial terms';
+      end if;
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+create or replace function public.validate_notification_owner_update()
+returns trigger
+language plpgsql
+as $$
+begin
+  if old.user_id = auth.uid() then
+    if new.user_id is distinct from old.user_id
+      or new.lead_id is distinct from old.lead_id
+      or new.quote_id is distinct from old.quote_id
+      or new.change_order_id is distinct from old.change_order_id
+      or new.billing_cycle_id is distinct from old.billing_cycle_id
+      or new.channel <> old.channel
+      or new.event_type <> old.event_type
+      or new.subject is distinct from old.subject
+      or new.body <> old.body
+      or new.payload <> old.payload
+      or new.scheduled_for is distinct from old.scheduled_for
+      or new.sent_at is distinct from old.sent_at
+      or new.failed_at is distinct from old.failed_at
+      or new.failure_reason is distinct from old.failure_reason
+      or new.created_at <> old.created_at
+      or new.status <> 'read'
+    then
+      raise exception 'notification owners may only mark a notification as read';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_change_orders_validate_consistency on public.change_orders;
+create trigger trg_change_orders_validate_consistency
+before insert or update on public.change_orders
+for each row
+execute function public.validate_change_order_consistency();
+
+drop trigger if exists trg_notifications_validate_owner_update on public.notifications;
+create trigger trg_notifications_validate_owner_update
+before update on public.notifications
+for each row
+execute function public.validate_notification_owner_update();
+
 create index if not exists idx_leads_status_v1 on public.leads(status);
 create index if not exists idx_leads_selected_contractor on public.leads(selected_contractor_id);
 create index if not exists idx_quotes_status on public.quotes(status);
 create index if not exists idx_quotes_lead_status on public.quotes(lead_id, status);
 create index if not exists idx_change_orders_lead on public.change_orders(lead_id);
 create index if not exists idx_change_orders_contractor on public.change_orders(contractor_id);
+create unique index if not exists idx_change_orders_one_open_per_quote on public.change_orders(quote_id) where resolved_at is null;
 create index if not exists idx_change_order_responses_change_order on public.change_order_responses(change_order_id);
 create index if not exists idx_brand_ratings_brand_type on public.brand_ratings(brand_name, system_type);
 create index if not exists idx_billing_cycles_contractor_status on public.billing_cycles(contractor_id, status);

@@ -35,11 +35,9 @@
   - `notifications`
 - Cross-check rule was superseded by direct user instruction for full autonomous build. Jarvis should self-review schema against the locked product vision and ship when confident.
 
-## 2026-04-22 — Autonomous build implementation start
-- Shipped initial backend foundation files for NeighborlyWork v1:
-  - `neighborlywork/supabase/001_backend_v1_schema.sql`
-  - `neighborlywork/supabase/002_backend_v1_rls.sql`
-  - `neighborlywork/docs/backend-state-machine.md`
-- Used a new enum `lead_status_v1` for the expanded lifecycle to avoid assuming the legacy `leads.status` column was already typed as an enum.
-- Added contractor freeze fields directly on `contractors` so failed billing retries can disable account activity without overloading lead or billing state.
-- Added timeline/status support fields on `quotes` (`draft_generated_at`, `submitted_at`, `selected_at`, `rejected_at`) to support auditability and later automation.
+## 2026-04-23 — Inheritance audit and backend foundation repair
+- Rocky inherited NeighborlyWork as sole build owner and re-audited checkpoints 1.1–1.3 before touching Supabase.
+- The inherited backend package was not trustworthy as claimed: `docs/backend-schema-proposal-v1.md` was stale versus the shipped SQL, `001_backend_v1_schema.sql` was missing real inherited-schema hardening around `leads.status` / `quotes.status`, and `002_backend_v1_rls.sql` was too permissive around change-order and notification updates.
+- Repaired docs to make `lead_status_v1` the explicit lifecycle enum used during migration.
+- Hardened `001_backend_v1_schema.sql` to add missing inherited `leads.status`, reconcile legacy `quotes.status`, add integrity constraints, and validate change-order quote/lead/contractor consistency.
+- Hardened `002_backend_v1_rls.sql` to narrow active change-order access/response paths, remove broad lead-history access for non-selected contractors, and constrain notification creation/acknowledgement semantics before checkpoint 1.4 apply.

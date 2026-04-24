@@ -1,6 +1,6 @@
 # NeighborlyWork Backend Schema Proposal v1
 
-_Status: Proposed for Rocky review. Do not execute SQL until frontend/data-model cross-check is complete._
+_Status: Active backend source-of-truth for NeighborlyWork v1 foundation. Verified/repaired after inheritance audit on 2026-04-23; execute only alongside the hardened SQL migrations in `supabase/001_backend_v1_schema.sql` and `supabase/002_backend_v1_rls.sql`._
 
 ## Purpose
 This document is the source-of-truth schema proposal for NeighborlyWork v1 backend foundation. It covers enums, tables, columns, and foreign-key relationships required for:
@@ -29,7 +29,8 @@ This document is the source-of-truth schema proposal for NeighborlyWork v1 backe
 - `quick_quote`
 - `accurate_quote`
 
-### `lead_status`
+### `lead_status_v1`
+Legacy-safe lifecycle enum applied to `public.leads.status` during the v1 migration.
 - `new`
 - `matched_to_contractors`
 - `quotes_submitted`
@@ -146,7 +147,7 @@ Notes:
 ### `public.leads` (extend)
 Add columns:
 - `quote_type lead_quote_type not null default 'accurate_quote'`
-- `status lead_status not null default 'new'`
+- `status lead_status_v1 not null default 'new'`
 - `selected_contractor_id uuid null references public.contractors(id) on delete set null`
 - `selection_timestamp timestamptz null`
 - `verification_window_expires timestamptz null`
@@ -287,8 +288,8 @@ Purpose: auditable state-transition log for lifecycle enforcement, analytics, an
 Columns:
 - `id uuid primary key default gen_random_uuid()`
 - `lead_id uuid not null references public.leads(id) on delete cascade`
-- `previous_status lead_status null`
-- `new_status lead_status not null`
+- `previous_status lead_status_v1 null`
+- `new_status lead_status_v1 not null`
 - `triggered_by uuid null references public.users(id) on delete set null`
 - `triggered_by_system boolean not null default false`
 - `reason text null`
