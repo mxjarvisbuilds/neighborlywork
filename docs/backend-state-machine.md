@@ -40,7 +40,9 @@
 Requires:
 - lead exists
 - homeowner exists
-- up to 3 eligible contractors matched
+- **1 to 3** eligible contractors matched
+- matched contractors are distinct
+- matched contractors are in approved / active-for-bidding state
 
 Effects:
 - notifications queued for selected contractors
@@ -56,10 +58,12 @@ Requires:
 - selected quote belongs to lead
 - selected quote status = `submitted`
 - selected contractor exists
+- at least 1 submitted quote exists on the lead
 
 Effects:
 - set `selected_contractor_id`
 - set `selection_timestamp`
+- transition must be logged in `lead_status_history`
 
 ### `homeowner_selected -> pending_verification`
 Requires:
@@ -74,10 +78,14 @@ Effects:
 Requires:
 - selected contractor submits valid change order
 - original selected quote exists
+- change order quote belongs to the lead
+- change order contractor matches `selected_contractor_id`
 
 Effects:
 - original selected quote becomes `superseded`
 - 48-hour response window opens for other eligible bidders
+- `change_orders.response_window_expires` set
+- transition logged in `lead_status_history`
 
 ### `change_order_open -> pending_verification`
 Use when homeowner rejects change order and switches to another bidder.
@@ -85,20 +93,30 @@ Use when homeowner rejects change order and switches to another bidder.
 Requires:
 - homeowner response = `rejected_switched_contractor`
 - replacement contractor chosen from original eligible bidders
+- prior change order marked resolved
 
 Effects:
 - `selected_contractor_id` updates to replacement contractor
 - `selection_timestamp` resets to switch time
 - `verification_window_expires` resets to switch time + 72 hours
+- lead transition logged in `lead_status_history`
 
 ### `change_order_open -> confirmed`
 Requires:
 - homeowner response = `accepted`
+- change order marked resolved
+- revised commercial terms captured on the accepted path
+
+Effects:
+- lead transition logged in `lead_status_history`
 
 ### `pending_verification -> confirmed`
 Requires one of:
 - contractor/homeowner verification complete with no change order
 - system/admin confirms verification period passed cleanly and work confirmed
+
+Effects:
+- lead transition logged in `lead_status_history`
 
 ### `confirmed -> install_scheduled`
 Requires:
@@ -121,9 +139,11 @@ Requires:
 ### `install_complete -> cleared`
 Requires:
 - dispute window expires with no active dispute
+- no unresolved change-order state remains
 
 Effects:
 - set `billing_status = 'ready_for_cycle'`
+- lead transition logged in `lead_status_history`
 
 ### `disputed -> cleared`
 Requires:
@@ -132,6 +152,10 @@ Requires:
 ### `disputed -> cancelled`
 Requires:
 - admin manual review voids chargeable outcome and cancels billing path
+
+Effects:
+- set `billing_status = 'waived'` or equivalent non-chargeable terminal path
+- lead transition logged in `lead_status_history`
 
 ## Quote lifecycle (`quotes.status`)
 Allowed values:
@@ -198,3 +222,12 @@ Every successful lead status transition must create one `lead_status_history` ro
 
 ## Notifications rule
 Any major lifecycle event should create notification records for the relevant user(s) before downstream channel delivery.
+
+## Implementation notes for v1
+- The schema and RLS now protect the major ownership boundaries for `brand_ratings`, `billing_cycles`, `change_orders`, `change_order_responses`, `contractor_pricing_profiles`, `lead_status_history`, and `notifications`.
+- The canonical transition map in this document is still a **service-layer contract**. Postgres enums prevent invalid state labels, but they do **not** fully enforce legal transition order by themselves.
+- Any transition service built in checkpoints 3.2+ must:
+  - validate the `from -> to` transition against this map
+  - enforce the listed preconditions before writing
+  - write exactly one `lead_status_history` row on success
+  - perform all downstream quote / billing / notification side effects in the same logical operation

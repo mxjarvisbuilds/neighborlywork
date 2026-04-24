@@ -52,3 +52,8 @@
 - Added `supabase/003_brand_ratings_seed_v1.sql` as the executable launch seed file for `public.brand_ratings`, covering 17 launch/expansion brand rows with upsert behavior.
 - Applied `supabase/003_brand_ratings_seed_v1.sql` in the live Supabase project and verified the seeded rows exist.
 - Verified founder/admin update behavior for `public.brand_ratings` with an impersonated admin SQL transaction that updated and rolled back a seeded row successfully.
+
+## 2026-04-23 — State machine contract re-locked after live schema apply
+- Re-audited `docs/backend-state-machine.md` against the live-applied schema and RLS behavior.
+- Tightened the canonical transition map with explicit preconditions for matching, quote selection, change-order opening, contractor switching, confirmation, clearance, and dispute cancellation.
+- Added implementation notes clarifying that enums/RLS protect ownership and allowed labels, but checkpoints 3.2+ still need service-layer transition enforcement and one-row-per-transition history logging.
