@@ -7,6 +7,7 @@
   <meta name="description" content="Review matched leads, submit blind quotes, and manage your contractor profile." />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script type="module" src="draft-quote-generator.mjs"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
     :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
@@ -112,13 +113,14 @@
               </div>
             </div>
             <div class="summary" id="leadSummary">Select a lead from the dashboard to begin.</div>
+            <div class="summary" id="draftQuoteSummary" style="margin-top:12px;">Draft quote suggestions will appear here after you select a lead.</div>
             <form id="quoteForm" class="form-grid">
-              <div class="field"><label>Equipment brand</label><select id="equipmentBrand" required><option value="">Select brand</option><option>Carrier</option><option>Trane</option><option>Lennox</option><option>Rheem</option><option>Goodman</option><option>Daikin</option><option>Other</option></select></div>
+              <div class="field"><label>Equipment brand</label><select id="equipmentBrand" required><option value="">Select brand</option><option value="Carrier">Carrier</option><option value="Trane">Trane</option><option value="Lennox">Lennox</option><option value="Rheem">Rheem</option><option value="Goodman">Goodman</option><option value="Daikin">Daikin</option><option value="Other">Other</option></select></div>
               <div class="field"><label>Equipment model</label><input id="equipmentModel" type="text" placeholder="Model number"></div>
-              <div class="field"><label>SEER rating</label><select id="seerRating" required><option value="">Select</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18+</option></select></div>
-              <div class="field"><label>Warranty</label><select id="warrantyYears" required><option value="">Select</option><option>5 years</option><option>10 years</option><option>12 years</option><option>15 years</option></select></div>
-              <div class="field"><label>Tonnage</label><select id="tonnage"><option value="">Select</option><option>1.5 ton</option><option>2 ton</option><option>2.5 ton</option><option>3 ton</option><option>4 ton</option><option>5 ton</option></select></div>
-              <div class="field"><label>Install time</label><select id="installTime"><option value="">Select</option><option>Same day</option><option>1 day</option><option>2 days</option><option>3+ days</option></select></div>
+              <div class="field"><label>SEER rating</label><select id="seerRating" required><option value="">Select</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18+</option></select></div>
+              <div class="field"><label>Warranty</label><select id="warrantyYears" required><option value="">Select</option><option value="5">5 years</option><option value="10">10 years</option><option value="12">12 years</option><option value="15">15 years</option></select></div>
+              <div class="field"><label>Tonnage</label><select id="tonnage"><option value="">Select</option><option value="1.5">1.5 ton</option><option value="2">2 ton</option><option value="2.5">2.5 ton</option><option value="3">3 ton</option><option value="4">4 ton</option><option value="5">5 ton</option></select></div>
+              <div class="field"><label>Install time</label><select id="installTime"><option value="">Select</option><option value="0">Same day</option><option value="1">1 day</option><option value="2">2 days</option><option value="3">3+ days</option></select></div>
               <div class="field"><label>Equipment cost ($)</label><input id="equipmentCost" type="number" min="0" step="0.01" required></div>
               <div class="field"><label>Labor cost ($)</label><input id="laborCost" type="number" min="0" step="0.01" required></div>
               <div class="field"><label>Additional cost ($)</label><input id="additionalCost" type="number" min="0" step="0.01" value="0"></div>
@@ -134,7 +136,10 @@
               </div>
               <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
                 <div class="small-note">Your quote is blind. Homeowners compare the options side by side, but contractors never see each other's pricing.</div>
-                <button class="btn btn-orange" id="submitQuoteBtn" type="submit">Submit Quote</button>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                  <button class="btn btn-light" id="generateDraftBtn" type="button">Generate Draft</button>
+                  <button class="btn btn-orange" id="submitQuoteBtn" type="submit">Submit Quote</button>
+                </div>
               </div>
             </form>
           </div>
@@ -239,9 +244,11 @@
       profile: null,
       contractor: null,
       pricingProfile: null,
+      brandRatings: [],
       leads: [],
       leadMap: new Map(),
       selectedLead: null,
+      selectedDraft: null,
       quoteLeadIds: new Set()
     };
 
@@ -299,6 +306,93 @@
 
     function updateTotalPrice() {
       document.getElementById('totalPriceDisplay').textContent = formatCurrency(totalPrice());
+    }
+
+    function installTimeLabel(value) {
+      if (value === '' || value === null || value === undefined) return 'Ready to submit';
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) return 'Ready to submit';
+      if (numeric <= 0) return 'Same day';
+      if (numeric === 1) return '1 day';
+      if (numeric === 2) return '2 days';
+      return '3+ days';
+    }
+
+    function updateQuoteTimingDisplay() {
+      document.getElementById('quoteTimingDisplay').textContent = installTimeLabel(document.getElementById('installTime').value);
+    }
+
+    function ensureSelectOption(selectId, value, label = value) {
+      if (!value) return;
+      const select = document.getElementById(selectId);
+      const hasOption = Array.from(select.options).some(option => option.value === String(value));
+      if (!hasOption) {
+        const option = document.createElement('option');
+        option.value = String(value);
+        option.textContent = label;
+        select.appendChild(option);
+      }
+    }
+
+    function renderDraftQuoteSummary(message, isReady = false) {
+      const el = document.getElementById('draftQuoteSummary');
+      if (!isReady) {
+        el.innerHTML = `<strong>Draft quote not ready</strong><div class="small-note">${message}</div>`;
+        return;
+      }
+      el.innerHTML = message;
+    }
+
+    function applyDraftToQuoteForm(draft) {
+      if (!draft) return;
+      ensureSelectOption('equipmentBrand', draft.equipment_brand, draft.equipment_brand);
+      document.getElementById('equipmentBrand').value = draft.equipment_brand || '';
+      document.getElementById('equipmentModel').value = draft.equipment_model || '';
+      document.getElementById('seerRating').value = draft.seer_rating ? String(draft.seer_rating) : '';
+      document.getElementById('warrantyYears').value = draft.warranty_years ? String(draft.warranty_years) : '';
+      document.getElementById('tonnage').value = draft.system_size_tons ? String(draft.system_size_tons) : '';
+      document.getElementById('installTime').value = draft.install_timeline_days !== null && draft.install_timeline_days !== undefined
+        ? String(Math.max(0, Math.min(3, Number(draft.install_timeline_days))))
+        : '';
+      document.getElementById('equipmentCost').value = draft.price_breakdown?.equipment_cost ?? 0;
+      document.getElementById('laborCost').value = draft.price_breakdown?.labor_cost ?? 0;
+      document.getElementById('additionalCost').value = draft.price_breakdown?.additional_cost ?? 0;
+      document.getElementById('noteToHomeowner').value = draft.note_to_homeowner || '';
+      updateTotalPrice();
+      updateQuoteTimingDisplay();
+      renderDraftQuoteSummary(`
+        <strong>Draft generated</strong>
+        Recommended brand: ${draft.equipment_brand || '—'}<br>
+        Estimated size: ${draft.system_size_tons || '—'} ton(s)<br>
+        Warranty: ${draft.warranty_years || '—'} year(s)<br>
+        Total: ${formatCurrency(draft.price_total)}
+      `, true);
+    }
+
+    function maybeGenerateDraftQuote() {
+      if (!state.selectedLead) {
+        renderDraftQuoteSummary('Select a lead from the dashboard to generate a draft quote.');
+        return null;
+      }
+      if (!window.DraftQuoteGenerator) {
+        state.selectedDraft = null;
+        renderDraftQuoteSummary('Draft quote generator is still loading. Try again in a moment.');
+        return null;
+      }
+      if (!window.DraftQuoteGenerator.isPricingProfileReadyForDrafts(state.pricingProfile)) {
+        state.selectedDraft = null;
+        renderDraftQuoteSummary('Complete your pricing profile first. Save base labor, default warranty, and default install timeline to enable deterministic quote drafts.');
+        return null;
+      }
+
+      const draft = window.DraftQuoteGenerator.deriveDraftQuote({
+        lead: state.selectedLead,
+        pricingProfile: state.pricingProfile,
+        brandRatings: state.brandRatings,
+      });
+      state.selectedDraft = draft;
+      applyDraftToQuoteForm(draft);
+      return draft;
     }
 
     function formatJsonForTextarea(value) {
@@ -371,12 +465,14 @@
     function selectLead(leadId) {
       state.selectedLead = state.leadMap.get(leadId) || null;
       if (!state.selectedLead) return;
+      state.selectedDraft = null;
       const lead = state.selectedLead;
       document.getElementById('leadSummary').innerHTML = `
         <strong>${firstName(lead.homeowner_name || 'Homeowner')} · ${lead.service_type || 'HVAC Request'}</strong>
         ${extractCity(lead.address)} · ${lead.zip_code || '—'} · ${lead.home_size_sqft || 'Home size unknown'}
       `;
       showScreen('quote');
+      maybeGenerateDraftQuote();
     }
 
     function renderLeadRows() {
@@ -432,9 +528,17 @@
       if (pricingProfileError) throw pricingProfileError;
       state.pricingProfile = pricingProfile || null;
 
+      const { data: brandRatings, error: brandRatingsError } = await db
+        .from('brand_ratings')
+        .select('brand_name, system_type, rating_score')
+        .order('rating_score', { ascending: false });
+      if (brandRatingsError) throw brandRatingsError;
+      state.brandRatings = brandRatings || [];
+
       populateProfileForm();
       populatePricingProfileForm();
       renderContractorSummary();
+      renderDraftQuoteSummary('Select a lead to generate a draft quote from your pricing profile and brand ratings.');
 
       if (contractor.status === 'pending') {
         document.getElementById('pendingState').style.display = 'block';
@@ -490,25 +594,43 @@
       }
       try {
         const total = totalPrice();
+        const installTimelineDaysRaw = document.getElementById('installTime').value;
+        const installTimelineDays = installTimelineDaysRaw === '' ? null : Number(installTimelineDaysRaw);
+        const systemSizeTonsRaw = document.getElementById('tonnage').value;
+        const systemSizeTons = systemSizeTonsRaw === '' ? null : Number(systemSizeTonsRaw);
+        const seerRatingRaw = document.getElementById('seerRating').value;
+        const warrantyYearsRaw = document.getElementById('warrantyYears').value;
         const payload = {
           lead_id: state.selectedLead.id,
           contractor_id: state.user.id,
           equipment_brand: document.getElementById('equipmentBrand').value,
           equipment_model: document.getElementById('equipmentModel').value || null,
-          seer_rating: document.getElementById('seerRating').value,
-          warranty_years: document.getElementById('warrantyYears').value,
-          tonnage: document.getElementById('tonnage').value || null,
+          system_type: window.DraftQuoteGenerator?.normalizeSystemType(state.selectedLead.service_type) || 'split_system',
+          system_size_tons: systemSizeTons,
+          seer_rating: seerRatingRaw === '' ? null : Number(seerRatingRaw),
+          warranty_years: warrantyYearsRaw === '' ? null : Number(warrantyYearsRaw),
+          tonnage: systemSizeTonsRaw || null,
           equipment_cost: Number(document.getElementById('equipmentCost').value || 0),
           labor_cost: Number(document.getElementById('laborCost').value || 0),
           additional_cost: Number(document.getElementById('additionalCost').value || 0),
           total_price: total,
+          price_total: total,
+          price_breakdown: {
+            equipment_cost: Number(document.getElementById('equipmentCost').value || 0),
+            labor_cost: Number(document.getElementById('laborCost').value || 0),
+            additional_cost: Number(document.getElementById('additionalCost').value || 0),
+            generated_from_pricing_profile: Boolean(state.selectedDraft),
+            generated_brand: state.selectedDraft?.equipment_brand || null,
+          },
           includes_removal: document.getElementById('includesRemoval').value === 'true',
           permits_included: document.getElementById('permitsIncluded').value === 'true',
-          install_time: document.getElementById('installTime').value || null,
+          install_time: installTimeLabel(installTimelineDaysRaw),
+          install_timeline_days: installTimelineDays,
           available_date: document.getElementById('availableDate').value || null,
           financing_available: document.getElementById('financingAvailable').value === 'true',
           financing_note: document.getElementById('financingNote').value || null,
           note_to_homeowner: document.getElementById('noteToHomeowner').value || null,
+          draft_generated_at: state.selectedDraft?.draft_generated_at || null,
           status: 'submitted'
         };
         const { error: insertError } = await db.from('quotes').insert(payload);
@@ -528,6 +650,8 @@
         setMessage('portalSuccess', 'Quote submitted successfully.');
         document.getElementById('quoteForm').reset();
         updateTotalPrice();
+        updateQuoteTimingDisplay();
+        state.selectedDraft = null;
         await loadPortal();
         showScreen('dashboard');
       } catch (err) {
@@ -588,6 +712,15 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => showScreen(tab.dataset.screen)));
     ['equipmentCost','laborCost','additionalCost'].forEach(id => document.getElementById(id).addEventListener('input', updateTotalPrice));
+    document.getElementById('installTime').addEventListener('change', updateQuoteTimingDisplay);
+    document.getElementById('generateDraftBtn').addEventListener('click', () => {
+      try {
+        const draft = maybeGenerateDraftQuote();
+        if (draft) setMessage('portalSuccess', 'Draft quote generated from your pricing profile. Review and edit before submitting.');
+      } catch (err) {
+        setMessage('portalError', err.message || 'Could not generate draft quote.');
+      }
+    });
     document.getElementById('refreshBtn').addEventListener('click', loadPortal);
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await db.auth.signOut();
@@ -597,6 +730,7 @@
     (async function init() {
       try {
         updateTotalPrice();
+        updateQuoteTimingDisplay();
         await loadPortal();
       } catch (err) {
         setMessage('portalError', err.message || 'Could not load contractor portal.');
