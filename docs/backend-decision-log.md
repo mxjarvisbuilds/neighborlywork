@@ -41,3 +41,8 @@
 - Repaired docs to make `lead_status_v1` the explicit lifecycle enum used during migration.
 - Hardened `001_backend_v1_schema.sql` to add missing inherited `leads.status`, reconcile legacy `quotes.status`, add integrity constraints, and validate change-order quote/lead/contractor consistency.
 - Hardened `002_backend_v1_rls.sql` to narrow active change-order access/response paths, remove broad lead-history access for non-selected contractors, and constrain notification creation/acknowledgement semantics before checkpoint 1.4 apply.
+
+## 2026-04-23 — Brand ratings methodology locked for launch seed work
+- Added `docs/brand-ratings-methodology-v1.md` as the source-of-truth rubric for `public.brand_ratings` seed work.
+- Launch methodology uses a 6-dimension weighted model with Consumer Reports, ENERGY STAR, AHRI, warranty docs, support footprint, and trust modifiers.
+- Launch brand universe for Sacramento seed work starts with: Carrier, Bryant, Payne, Trane, American Standard, Lennox, Rheem, Ruud, Goodman, Amana, Daikin, York, Coleman, Bosch, and Mitsubishi Electric, with Fujitsu and Gree as the next expansion set.
