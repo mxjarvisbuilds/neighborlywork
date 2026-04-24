@@ -2,8 +2,22 @@
 -- Purpose: prove the lead transition RPC writes the expected lead_status_history rows
 -- without mutating durable project data.
 --
--- Run this script in a privileged SQL session against the live project.
--- Expected outcome:
+-- Preferred execution path:
+--   Run this script in a privileged SQL session against the live project using a
+--   stable non-dashboard path (`psql`, `supabase db execute`, or equivalent).
+--
+-- 2026-04-24 note:
+--   A focused direct-tooling attempt was made on this Mac:
+--   - installed Homebrew `libpq` and confirmed `psql` works locally
+--   - attempted to source a direct project connection string outside the dashboard
+--   - no usable plaintext DSN was exposed locally; dashboard/API paths only exposed
+--     project-managed/encrypted connection data in the available session context
+--
+-- Current verification status:
+--   3.2 is accepted as VERIFIED BY CODE REVIEW, with this script committed as the
+--   backup proof artifact for future privileged execution.
+--
+-- Expected outcome when executed successfully:
 --   1. A single `proof_result` row is returned.
 --   2. `final_status` = `homeowner_selected`.
 --   3. `history_count` = 3.
