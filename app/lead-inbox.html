@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script type="module" src="lead-lifecycle-actions.mjs"></script>
+  <script type="module" src="notifications-queue.mjs"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=DM+Sans:wght@400;500;700&display=swap');
     :root{--green:#1a5c3a;--orange:#c8401a;--bg:#f5f2ec;--white:#fff;--text:#141810;--muted:#667068;--line:rgba(20,24,16,.08);--shadow:0 18px 50px rgba(20,24,16,.08)}
@@ -165,6 +166,19 @@
           disputeWindowExpires: transition.disputeWindowExpires,
           billingStatus: transition.billingStatus,
         });
+
+        const updatedLead = { ...lead, status: transition.newStatus, billing_status: transition.billingStatus ?? lead.billing_status };
+        const notifications = window.NotificationsQueue?.buildLifecycleNotifications
+          ? window.NotificationsQueue.buildLifecycleNotifications({
+              lead: updatedLead,
+              newStatus: transition.newStatus,
+              actorUserId: null,
+            })
+          : [];
+        if (notifications.length) {
+          const { error: notificationError } = await db.from('notifications').insert(notifications);
+          if (notificationError) throw notificationError;
+        }
 
         setMessage('noticeBox', `Lead moved to ${formatLeadStatus(transition.newStatus)}.`);
         await loadInbox();
