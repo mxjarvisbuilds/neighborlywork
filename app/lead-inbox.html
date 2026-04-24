@@ -7,6 +7,7 @@
   <meta name="description" content="Admin lead inbox for reviewing all homeowner requests, quote progress, and contractor matches." />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script type="module" src="lead-lifecycle-actions.mjs"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=DM+Sans:wght@400;500;700&display=swap');
     :root{--green:#1a5c3a;--orange:#c8401a;--bg:#f5f2ec;--white:#fff;--text:#141810;--muted:#667068;--line:rgba(20,24,16,.08);--shadow:0 18px 50px rgba(20,24,16,.08)}
@@ -17,7 +18,7 @@
     .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:18px}.card{background:#fff;border:none;border-radius:24px;box-shadow:var(--shadow);padding:20px}.stat-value{font-family:'Fraunces',serif;font-size:2rem;color:var(--green);line-height:1}.stat-label{margin-top:8px;color:var(--muted);font-size:.92rem}
     .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.filters select,.filters input{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;font:inherit;color:var(--text)}
     .table-card{padding:0;overflow:hidden}.table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse}.data-table th,.data-table td{text-align:left;padding:14px 16px;border-bottom:1px solid rgba(20,24,16,.06);font-size:.93rem;vertical-align:middle}.data-table th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;background:#fcfcfb}.lead-row{cursor:pointer}.lead-row:hover{background:#fbfcfa}.badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:999px;font-size:.8rem;font-weight:800}.badge-open{background:#fff6dd;color:#9a7500}.badge-quoted{background:#e9f2ff;color:#2f67b8}.badge-selected{background:#eef7f0;color:#1f6a35}.badge-installed{background:#f4ecff;color:#6d45a8}.badge-closed{background:#edf1f6;color:#5e6a78}.badge-urgent{background:#fff1ed;color:#a0372b}
-    .details{margin-top:18px;display:none}.details.show{display:block}.details-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.details-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.detail-item{padding:14px;border:1px solid var(--line);border-radius:16px;background:#fbfcfa}.detail-item .k{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}.detail-item .v{font-weight:700;line-height:1.5}.list-box{padding:16px;border:1px solid var(--line);border-radius:18px;background:#fbfcfa}.list-box h3{margin:0 0 10px;font-family:'Fraunces',serif;font-size:1.1rem}.mini-list{display:grid;gap:10px}.mini-row{padding:12px;border-radius:14px;background:#fff;border:1px solid var(--line)}.mini-row strong{display:block;margin-bottom:4px}
+    .details{margin-top:18px;display:none}.details.show{display:block}.details-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.details-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.detail-item{padding:14px;border:1px solid var(--line);border-radius:16px;background:#fbfcfa}.detail-item .k{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}.detail-item .v{font-weight:700;line-height:1.5}.list-box{padding:16px;border:1px solid var(--line);border-radius:18px;background:#fbfcfa}.list-box h3{margin:0 0 10px;font-family:'Fraunces',serif;font-size:1.1rem}.mini-list{display:grid;gap:10px}.mini-row{padding:12px;border-radius:14px;background:#fff;border:1px solid var(--line)}.mini-row strong{display:block;margin-bottom:4px}.action-row{display:flex;gap:8px;flex-wrap:wrap}.btn-orange{background:var(--orange);color:#fff}
     @media(max-width:1100px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.details-grid{grid-template-columns:1fr}}@media(max-width:760px){.stats,.details-list{grid-template-columns:1fr}.topbar{flex-direction:column;align-items:flex-start}}
   </style>
 </head>
@@ -64,7 +65,11 @@
           <option value="quotes_submitted">Quotes submitted</option>
           <option value="homeowner_selected">Homeowner selected</option>
           <option value="pending_verification">Pending verification</option>
+          <option value="change_order_open">Change order open</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="install_scheduled">Install scheduled</option>
           <option value="install_complete">Install complete</option>
+          <option value="disputed">Disputed</option>
           <option value="cleared">Cleared</option>
           <option value="cancelled">Cancelled</option>
         </select>
@@ -127,6 +132,46 @@
       if (value === true) return 'Yes';
       if (value === false) return 'No';
       return value || '—';
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '—';
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return value;
+      return parsed.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function actionButtonClass(actionId) {
+      if (['cancel_verification', 'cancel_dispute'].includes(actionId)) return 'btn-light';
+      if (['mark_disputed', 'open_change_order'].includes(actionId)) return 'btn-orange';
+      return 'btn-green';
+    }
+
+    async function runLifecycleAction(actionId) {
+      const lead = state.leads.find(item => item.id === state.selectedLeadId);
+      if (!lead) return;
+      try {
+        const transition = window.LeadLifecycleActions?.buildLeadLifecycleTransition
+          ? window.LeadLifecycleActions.buildLeadLifecycleTransition({ actionId, lead })
+          : null;
+        if (!transition) throw new Error('Lifecycle actions are not ready yet.');
+
+        await transitionLeadStatus({
+          leadId: transition.leadId,
+          newStatus: transition.newStatus,
+          reason: transition.reason,
+          metadata: transition.metadata,
+          installCompleteTimestamp: transition.installCompleteTimestamp,
+          disputeWindowExpires: transition.disputeWindowExpires,
+          billingStatus: transition.billingStatus,
+        });
+
+        setMessage('noticeBox', `Lead moved to ${formatLeadStatus(transition.newStatus)}.`);
+        await loadInbox();
+        renderDetails(lead.id);
+      } catch (err) {
+        setMessage('errorBox', err.message || 'Could not update lead lifecycle.');
+      }
     }
 
     async function requireAdmin() {
@@ -235,6 +280,7 @@
       const leadQuotes = state.quotes.filter(q => q.lead_id === lead.id);
       const matchedNames = (lead.matched_contractors || []).map(id => state.contractors.get(id) || id);
       const selectedName = lead.selected_contractor_id ? (state.contractors.get(lead.selected_contractor_id) || lead.selected_contractor_id) : '—';
+      const lifecycleActions = window.LeadLifecycleActions?.getLeadLifecycleActions ? window.LeadLifecycleActions.getLeadLifecycleActions(lead) : [];
 
       const fields = [
         ['Homeowner', homeowner?.full_name || homeowner?.email || 'Unknown'],
@@ -265,6 +311,10 @@
         ['Urgency flag', lead.urgency_flag],
         ['Status', lead.status],
         ['Selected contractor', selectedName],
+        ['Verification window', formatDateTime(lead.verification_window_expires)],
+        ['Install complete at', formatDateTime(lead.install_complete_timestamp)],
+        ['Dispute window', formatDateTime(lead.dispute_window_expires)],
+        ['Billing status', lead.billing_status],
         ['Created at', formatDate(lead.created_at)]
       ];
 
@@ -278,6 +328,12 @@
           </div>
           <div style="display:grid;gap:16px;">
             <div class="list-box">
+              <h3>Lifecycle actions</h3>
+              <div class="action-row" id="lifecycleActions">
+                ${lifecycleActions.length ? lifecycleActions.map(action => `<button class="btn ${actionButtonClass(action.id)}" type="button" data-lifecycle-action="${action.id}">${action.label}</button>`).join('') : '<div class="mini-row">No founder actions for this status yet.</div>'}
+              </div>
+            </div>
+            <div class="list-box">
               <h3>Matched contractors</h3>
               <div class="mini-list">
                 ${matchedNames.length ? matchedNames.map(name => `<div class="mini-row"><strong>${name}</strong></div>`).join('') : '<div class="mini-row">No contractors matched yet.</div>'}
@@ -286,12 +342,15 @@
             <div class="list-box">
               <h3>Submitted quotes</h3>
               <div class="mini-list">
-                ${leadQuotes.length ? leadQuotes.map(quote => `<div class="mini-row"><strong>${state.contractors.get(quote.contractor_id) || 'Contractor'}</strong>Total: $${Number(quote.total_price || 0).toLocaleString()}<br>Status: ${quote.status || 'submitted'}<br>Submitted: ${formatDate(quote.submitted_at)}</div>`).join('') : '<div class="mini-row">No quotes submitted yet.</div>'}
+                ${leadQuotes.length ? leadQuotes.map(quote => `<div class="mini-row"><strong>${state.contractors.get(quote.contractor_id) || 'Contractor'}</strong>Total: $${Number(quote.price_total || quote.total_price || 0).toLocaleString()}<br>Status: ${quote.status || 'submitted'}<br>Submitted: ${formatDate(quote.submitted_at)}</div>`).join('') : '<div class="mini-row">No quotes submitted yet.</div>'}
               </div>
             </div>
           </div>
         </div>`;
       document.getElementById('leadDetails').classList.add('show');
+      document.querySelectorAll('[data-lifecycle-action]').forEach(button => {
+        button.addEventListener('click', () => runLifecycleAction(button.dataset.lifecycleAction));
+      });
     }
 
     document.getElementById('statusFilter').addEventListener('change', renderTable);
