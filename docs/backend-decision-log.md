@@ -46,3 +46,4 @@
 - Added `docs/brand-ratings-methodology-v1.md` as the source-of-truth rubric for `public.brand_ratings` seed work.
 - Launch methodology uses a 6-dimension weighted model with Consumer Reports, ENERGY STAR, AHRI, warranty docs, support footprint, and trust modifiers.
 - Launch brand universe for Sacramento seed work starts with: Carrier, Bryant, Payne, Trane, American Standard, Lennox, Rheem, Ruud, Goodman, Amana, Daikin, York, Coleman, Bosch, and Mitsubishi Electric, with Fujitsu and Gree as the next expansion set.
+- Added `docs/brand-ratings-seed-batch-1.md` with the first six launch brand ratings for mainstream ducted split-system comparisons: Carrier, Bryant, Trane, American Standard, Lennox, and Rheem.
