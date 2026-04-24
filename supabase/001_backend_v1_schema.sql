@@ -344,24 +344,30 @@ begin
 
   if current_data_type = 'text' or (current_udt_name is not null and current_udt_name <> 'lead_status_v1') then
     alter table public.leads
-      alter column status drop default;
+      add column if not exists status_v1_tmp public.lead_status_v1;
+
+    update public.leads
+    set status_v1_tmp = (
+      case status::text
+        when 'open' then 'new'
+        when 'new' then 'new'
+        when 'quoted' then 'quotes_submitted'
+        when 'selected' then 'homeowner_selected'
+        when 'installed' then 'install_complete'
+        when 'closed' then 'cleared'
+        when 'cancelled' then 'cancelled'
+        else 'new'
+      end
+    )::public.lead_status_v1;
 
     alter table public.leads
-      alter column status type public.lead_status_v1
-      using (
-        case
-          when status::text in ('open', 'new') then 'new'
-          when status::text = 'quoted' then 'quotes_submitted'
-          when status::text = 'selected' then 'homeowner_selected'
-          when status::text = 'installed' then 'install_complete'
-          when status::text = 'closed' then 'cleared'
-          when status::text = 'cancelled' then 'cancelled'
-          else 'new'
-        end
-      )::public.lead_status_v1;
+      alter column status_v1_tmp set default 'new';
 
     alter table public.leads
-      alter column status set default 'new';
+      drop column status;
+
+    alter table public.leads
+      rename column status_v1_tmp to status;
   end if;
 exception when undefined_column then
   null;
@@ -382,22 +388,32 @@ begin
 
   if current_data_type = 'text' or (current_udt_name is not null and current_udt_name <> 'quote_status') then
     alter table public.quotes
-      alter column status drop default;
+      add column if not exists status_v1_tmp public.quote_status;
+
+    update public.quotes
+    set status_v1_tmp = (
+      case status::text
+        when 'draft' then 'draft'
+        when 'submitted' then 'submitted'
+        when 'superseded' then 'superseded'
+        when 'selected' then 'selected'
+        when 'rejected' then 'rejected'
+        when 'pending' then 'draft'
+        when 'new' then 'draft'
+        when 'approved' then 'selected'
+        when 'declined' then 'rejected'
+        else 'submitted'
+      end
+    )::public.quote_status;
 
     alter table public.quotes
-      alter column status type public.quote_status
-      using (
-        case
-          when status::text in ('draft', 'submitted', 'superseded', 'selected', 'rejected') then status::text
-          when status::text in ('pending', 'new') then 'draft'
-          when status::text = 'approved' then 'selected'
-          when status::text = 'declined' then 'rejected'
-          else 'submitted'
-        end
-      )::public.quote_status;
+      alter column status_v1_tmp set default 'submitted';
 
     alter table public.quotes
-      alter column status set default 'submitted';
+      drop column status;
+
+    alter table public.quotes
+      rename column status_v1_tmp to status;
   end if;
 exception when undefined_column then
   null;
