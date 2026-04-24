@@ -342,49 +342,23 @@ begin
     and table_name = 'leads'
     and column_name = 'status';
 
-  if current_data_type = 'text' then
-    alter table public.leads
-      alter column status drop default;
-
-    update public.leads
-    set status = case
-      when status::text in ('open', 'new') then 'new'
-      when status::text = 'quoted' then 'quotes_submitted'
-      when status::text = 'selected' then 'homeowner_selected'
-      when status::text = 'installed' then 'install_complete'
-      when status::text = 'closed' then 'cleared'
-      when status::text = 'cancelled' then 'cancelled'
-      else 'new'
-    end;
-
-    alter table public.leads
-      alter column status type public.lead_status_v1
-      using status::public.lead_status_v1;
-
-    alter table public.leads
-      alter column status set default 'new';
-  elsif current_udt_name is not null and current_udt_name <> 'lead_status_v1' then
+  if current_data_type = 'text' or (current_udt_name is not null and current_udt_name <> 'lead_status_v1') then
     alter table public.leads
       alter column status drop default;
 
     alter table public.leads
-      alter column status type text
-      using status::text;
-
-    update public.leads
-    set status = case
-      when status::text in ('open', 'new') then 'new'
-      when status::text = 'quoted' then 'quotes_submitted'
-      when status::text = 'selected' then 'homeowner_selected'
-      when status::text = 'installed' then 'install_complete'
-      when status::text = 'closed' then 'cleared'
-      when status::text = 'cancelled' then 'cancelled'
-      else 'new'
-    end;
-
-    alter table public.leads
       alter column status type public.lead_status_v1
-      using status::public.lead_status_v1;
+      using (
+        case
+          when status::text in ('open', 'new') then 'new'
+          when status::text = 'quoted' then 'quotes_submitted'
+          when status::text = 'selected' then 'homeowner_selected'
+          when status::text = 'installed' then 'install_complete'
+          when status::text = 'closed' then 'cleared'
+          when status::text = 'cancelled' then 'cancelled'
+          else 'new'
+        end
+      )::public.lead_status_v1;
 
     alter table public.leads
       alter column status set default 'new';
@@ -406,45 +380,21 @@ begin
     and table_name = 'quotes'
     and column_name = 'status';
 
-  if current_data_type = 'text' then
-    alter table public.quotes
-      alter column status drop default;
-
-    update public.quotes
-    set status = case
-      when status in ('draft', 'submitted', 'superseded', 'selected', 'rejected') then status
-      when status in ('pending', 'new') then 'draft'
-      when status = 'approved' then 'selected'
-      when status = 'declined' then 'rejected'
-      else 'submitted'
-    end;
-
-    alter table public.quotes
-      alter column status type public.quote_status
-      using status::public.quote_status;
-
-    alter table public.quotes
-      alter column status set default 'submitted';
-  elsif current_udt_name is not null and current_udt_name <> 'quote_status' then
+  if current_data_type = 'text' or (current_udt_name is not null and current_udt_name <> 'quote_status') then
     alter table public.quotes
       alter column status drop default;
 
     alter table public.quotes
-      alter column status type text
-      using status::text;
-
-    update public.quotes
-    set status = case
-      when status::text in ('draft', 'submitted', 'superseded', 'selected', 'rejected') then status::text
-      when status::text in ('pending', 'new') then 'draft'
-      when status::text = 'approved' then 'selected'
-      when status::text = 'declined' then 'rejected'
-      else 'submitted'
-    end;
-
-    alter table public.quotes
       alter column status type public.quote_status
-      using status::public.quote_status;
+      using (
+        case
+          when status::text in ('draft', 'submitted', 'superseded', 'selected', 'rejected') then status::text
+          when status::text in ('pending', 'new') then 'draft'
+          when status::text = 'approved' then 'selected'
+          when status::text = 'declined' then 'rejected'
+          else 'submitted'
+        end
+      )::public.quote_status;
 
     alter table public.quotes
       alter column status set default 'submitted';
