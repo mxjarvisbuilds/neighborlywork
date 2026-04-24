@@ -49,3 +49,4 @@
 - Added `docs/brand-ratings-seed-batch-1.md` with the first six launch brand ratings for mainstream ducted split-system comparisons: Carrier, Bryant, Trane, American Standard, Lennox, and Rheem.
 - Added `docs/brand-ratings-seed-batch-2.md` with the next six launch brand ratings for mainstream ducted split-system comparisons: Ruud, Goodman, Amana, Daikin, York, and Coleman.
 - Added `docs/brand-ratings-seed-batch-3.md` with the final launch / expansion set: Payne, Bosch, Mitsubishi Electric, Fujitsu, Gree, plus the regional-addition rule for new quote traffic.
+- Added `supabase/003_brand_ratings_seed_v1.sql` as the executable launch seed file for `public.brand_ratings`, covering 17 launch/expansion brand rows with upsert behavior.
