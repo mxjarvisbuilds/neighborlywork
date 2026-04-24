@@ -373,12 +373,12 @@ begin
 
     update public.leads
     set status = case
-      when status in ('open', 'new') then 'new'
-      when status = 'quoted' then 'quotes_submitted'
-      when status = 'selected' then 'homeowner_selected'
-      when status = 'installed' then 'install_complete'
-      when status = 'closed' then 'cleared'
-      when status = 'cancelled' then 'cancelled'
+      when status::text in ('open', 'new') then 'new'
+      when status::text = 'quoted' then 'quotes_submitted'
+      when status::text = 'selected' then 'homeowner_selected'
+      when status::text = 'installed' then 'install_complete'
+      when status::text = 'closed' then 'cleared'
+      when status::text = 'cancelled' then 'cancelled'
       else 'new'
     end;
 
@@ -435,10 +435,10 @@ begin
 
     update public.quotes
     set status = case
-      when status in ('draft', 'submitted', 'superseded', 'selected', 'rejected') then status
-      when status in ('pending', 'new') then 'draft'
-      when status = 'approved' then 'selected'
-      when status = 'declined' then 'rejected'
+      when status::text in ('draft', 'submitted', 'superseded', 'selected', 'rejected') then status::text
+      when status::text in ('pending', 'new') then 'draft'
+      when status::text = 'approved' then 'selected'
+      when status::text = 'declined' then 'rejected'
       else 'submitted'
     end;
 
