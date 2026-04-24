@@ -197,7 +197,7 @@ Tracked on `leads.billing_status` and `billing_cycles.status`.
 - `waived`
 
 ### Billing rules
-- fee amount = `$800` per cleared install
+- fee amount = configured install referral fee
 - only `cleared` leads are billable
 - nightly job marks eligible leads `ready_for_cycle`
 - 14-day billing job groups by contractor into `billing_cycles`

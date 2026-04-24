@@ -23,7 +23,7 @@ One brand with two revenue engines. Small jobs use a community marketplace where
 - Small jobs: accept posted price
 - Big installs: submit equipment, warranty, timeline, and total price
 - Never see competitor quotes on Pro Installs
-- Pay worker-side fee on small jobs, or $75 / $800 on HVAC closes
+- Pay worker-side fee on small jobs, or the launch install referral fee on HVAC closes
 
 ---
 
@@ -42,7 +42,7 @@ One brand with two revenue engines. Small jobs use a community marketplace where
    - Match to 3 vetted contractors max
    - Contractors do not see each other
    - Homeowner compares side-by-side quotes
-   - Contractor is billed on close: $75 repair or $800 install/replacement
+   - Contractor is billed on close at the launch install referral rate
 
 ---
 
@@ -92,8 +92,8 @@ One brand with two revenue engines. Small jobs use a community marketplace where
 ### Pro Installs
 | Source | Rate |
 |--------|------|
-| Closed HVAC repair | $75 |
-| Closed HVAC install / replacement | $800 |
+| Closed HVAC repair | deferred / not launch-scoped |
+| Closed HVAC install / replacement | launch install referral fee |
 | Priority placement | later, optional |
 
 ### Future priority placement
@@ -103,9 +103,9 @@ One brand with two revenue engines. Small jobs use a community marketplace where
 ### Example earnings
 | Job | Value | Platform fee | Worker gets |
 |-----|-------|-------------|-------------|
-| HVAC repair | $900 | $75 | $825 |
-| HVAC install | $3,500 | $800 | $3,150 |
-| Replacement system | $7,500 | $800 | $7,150 |
+| HVAC repair | $900 | deferred / not launch-scoped | varies |
+| HVAC install | $3,500 | launch install referral fee | contractor net depends on configured referral rate |
+| Replacement system | $7,500 | launch install referral fee | contractor net depends on configured referral rate |
 
 ---
 

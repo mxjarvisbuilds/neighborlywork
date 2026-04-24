@@ -17,7 +17,7 @@ test('collectBillableLeads only returns cleared-ready leads eligible for cycle c
   assert.deepEqual(eligible.map(item => item.id), ['lead-1']);
 });
 
-test('buildBillingCycles groups ready leads by contractor into pending 14-day cycles at $800 per lead', () => {
+test('buildBillingCycles groups ready leads by contractor into pending 14-day cycles at the install referral rate', () => {
   const leads = [
     { id: 'lead-1', status: 'cleared', billing_status: 'ready_for_cycle', selected_contractor_id: 'contractor-1' },
     { id: 'lead-2', status: 'cleared', billing_status: 'ready_for_cycle', selected_contractor_id: 'contractor-1' },
