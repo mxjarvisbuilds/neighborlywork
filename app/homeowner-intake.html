@@ -582,7 +582,7 @@
 
         const payload = {
           homeowner_id: user.id,
-          status: 'open',
+          status: 'new',
           service_type: serviceType,
           zip_code: zipCode,
           address,
@@ -615,8 +615,22 @@
           urgency_flag: emergency === 'Yes — system is down'
         };
 
-        const { error } = await db.from('leads').insert(payload);
+        const { data: insertedLead, error } = await db.from('leads').insert(payload).select('id').single();
         if (error) throw error;
+
+        if (matchedContractors.length) {
+          await transitionLeadStatus({
+            leadId: insertedLead.id,
+            newStatus: 'matched_to_contractors',
+            reason: 'Homeowner intake submitted and contractors matched',
+            metadata: {
+              source: 'homeowner-intake',
+              matched_contractor_ids: matchedContractors,
+              service_type: serviceType,
+              zip_code: zipCode
+            }
+          });
+        }
 
         setMessage('formSuccess', 'Request submitted. Redirecting to your dashboard...');
         submitBtn.textContent = 'Submitted';

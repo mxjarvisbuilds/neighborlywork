@@ -59,11 +59,14 @@
       <div class="filters">
         <select id="statusFilter">
           <option value="all">All statuses</option>
-          <option value="open">Open</option>
-          <option value="quoted">Quoted</option>
-          <option value="selected">Selected</option>
-          <option value="installed">Installed</option>
-          <option value="closed">Closed</option>
+          <option value="new">New</option>
+          <option value="matched_to_contractors">Matched</option>
+          <option value="quotes_submitted">Quotes submitted</option>
+          <option value="homeowner_selected">Homeowner selected</option>
+          <option value="pending_verification">Pending verification</option>
+          <option value="install_complete">Install complete</option>
+          <option value="cleared">Cleared</option>
+          <option value="cancelled">Cancelled</option>
         </select>
         <input id="zipFilter" type="text" maxlength="5" placeholder="ZIP code">
         <select id="serviceFilter">
@@ -115,11 +118,8 @@
     }
 
     function badge(status) {
-      if (status === 'open') return '<span class="badge badge-open">Open</span>';
-      if (status === 'quoted') return '<span class="badge badge-quoted">Quoted</span>';
-      if (status === 'selected') return '<span class="badge badge-selected">Selected</span>';
-      if (status === 'installed') return '<span class="badge badge-installed">Installed</span>';
-      return '<span class="badge badge-closed">Closed</span>';
+      const meta = getLeadStatusMeta(status);
+      return `<span class="badge ${meta.badge}">${meta.label}</span>`;
     }
 
     function display(value) {
@@ -180,8 +180,8 @@
       }
 
       document.getElementById('allLeadsCount').textContent = state.leads.length;
-      document.getElementById('openLeadsCount').textContent = state.leads.filter(l => l.status === 'open').length;
-      document.getElementById('quotedLeadsCount').textContent = state.leads.filter(l => l.status === 'quoted').length;
+      document.getElementById('openLeadsCount').textContent = state.leads.filter(l => ['new', 'matched_to_contractors'].includes(String(l.status || '').toLowerCase())).length;
+      document.getElementById('quotedLeadsCount').textContent = state.leads.filter(l => leadHasQuotes(l.status, state.quotes.filter(q => q.lead_id === l.id).length)).length;
       document.getElementById('urgentLeadsCount').textContent = state.leads.filter(l => l.urgency_flag).length;
 
       const services = [...new Set(state.leads.map(l => l.service_type).filter(Boolean))].sort();

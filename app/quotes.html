@@ -229,8 +229,21 @@
       if (!selectedContractorId) throw new Error('This quote is missing a contractor id.');
 
       const otherQuoteIds = quotes.filter(q => q.id !== selectedQuoteId).map(q => q.id);
+      const selectionTimestamp = new Date().toISOString();
       const updates = [
-        db.from('leads').update({ selected_contractor_id: selectedContractorId, status: 'selected' }).eq('id', leadId),
+        transitionLeadStatus({
+          leadId,
+          newStatus: 'homeowner_selected',
+          selectedContractorId,
+          selectedQuoteId,
+          selectionTimestamp,
+          reason: 'Homeowner selected a contractor quote',
+          metadata: {
+            source: 'homeowner-quotes',
+            selected_quote_id: selectedQuoteId,
+            selected_contractor_id: selectedContractorId
+          }
+        }),
         db.from('quotes').update({ status: 'selected' }).eq('id', selectedQuoteId)
       ];
       if (otherQuoteIds.length) {

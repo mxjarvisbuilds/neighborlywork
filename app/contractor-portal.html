@@ -254,8 +254,8 @@
     }
 
     function statusBadge(status) {
-      if (status === 'quoted') return '<span class="badge badge-quoted">Quoted</span>';
-      return '<span class="badge badge-open">Open</span>';
+      const meta = getLeadStatusMeta(status);
+      return `<span class="badge ${meta.badge}">${meta.label}</span>`;
     }
 
     function getSelectedServices() {
@@ -369,7 +369,7 @@
       const { data: leads, error: leadsError } = await db
         .from('leads')
         .select('id, homeowner_id, service_type, zip_code, address, home_size_sqft, urgency_flag, created_at, status, selected_contractor_id')
-        .in('status', ['open', 'quoted'])
+        .in('status', ['matched_to_contractors', 'quotes_submitted'])
         .in('zip_code', serviceZips)
         .in('service_type', services)
         .order('urgency_flag', { ascending: false })
@@ -391,7 +391,7 @@
       state.quoteLeadIds = new Set((quotes || []).map(q => q.lead_id));
 
       const jobsWon = contractor.total_jobs_won || 0;
-      document.getElementById('newLeadsCount').textContent = state.leads.filter(l => l.status === 'open' && !state.quoteLeadIds.has(l.id)).length;
+      document.getElementById('newLeadsCount').textContent = state.leads.filter(l => l.status === 'matched_to_contractors' && !state.quoteLeadIds.has(l.id)).length;
       document.getElementById('quotesSubmittedCount').textContent = state.quoteLeadIds.size;
       document.getElementById('jobsWonCount').textContent = jobsWon;
       document.getElementById('feesOwedCount').textContent = formatCurrency(jobsWon * 800);
@@ -430,8 +430,18 @@
         };
         const { error: insertError } = await db.from('quotes').insert(payload);
         if (insertError) throw insertError;
-        const { error: leadError } = await db.from('leads').update({ status: 'quoted' }).eq('id', state.selectedLead.id);
-        if (leadError) throw leadError;
+
+        if (state.selectedLead.status === 'matched_to_contractors') {
+          await transitionLeadStatus({
+            leadId: state.selectedLead.id,
+            newStatus: 'quotes_submitted',
+            reason: 'Contractor submitted first quote',
+            metadata: {
+              source: 'contractor-portal',
+              contractor_id: state.user.id
+            }
+          });
+        }
         setMessage('portalSuccess', 'Quote submitted successfully.');
         document.getElementById('quoteForm').reset();
         updateTotalPrice();

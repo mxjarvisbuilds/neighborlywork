@@ -60,11 +60,14 @@
       <div class="filters">
         <select id="leadStatusFilter">
           <option value="all">All statuses</option>
-          <option value="open">Open</option>
-          <option value="quoted">Quoted</option>
-          <option value="selected">Selected</option>
-          <option value="installed">Installed</option>
-          <option value="closed">Closed</option>
+          <option value="new">New</option>
+          <option value="matched_to_contractors">Matched</option>
+          <option value="quotes_submitted">Quotes submitted</option>
+          <option value="homeowner_selected">Homeowner selected</option>
+          <option value="pending_verification">Pending verification</option>
+          <option value="install_complete">Install complete</option>
+          <option value="cleared">Cleared</option>
+          <option value="cancelled">Cancelled</option>
         </select>
         <select id="leadServiceFilter">
           <option value="all">All services</option>
@@ -134,14 +137,13 @@
 
     function badge(status) {
       const s = (status || '').toLowerCase();
-      if (s === 'open') return '<span class="badge badge-open">Open</span>';
-      if (s === 'quoted') return '<span class="badge badge-quoted">Quoted</span>';
-      if (s === 'selected') return '<span class="badge badge-selected">Selected</span>';
-      if (s === 'installed') return '<span class="badge badge-installed">Installed</span>';
-      if (s === 'closed') return '<span class="badge badge-closed">Closed</span>';
-      if (s === 'pending') return '<span class="badge badge-pending">Pending</span>';
-      if (s === 'approved') return '<span class="badge badge-approved">Approved</span>';
-      return '<span class="badge badge-suspended">Suspended</span>';
+      if (['pending', 'approved', 'suspended'].includes(s)) {
+        if (s === 'pending') return '<span class="badge badge-pending">Pending</span>';
+        if (s === 'approved') return '<span class="badge badge-approved">Approved</span>';
+        return '<span class="badge badge-suspended">Suspended</span>';
+      }
+      const meta = getLeadStatusMeta(status);
+      return `<span class="badge ${meta.badge}">${meta.label}</span>`;
     }
 
     function formatDate(value) {
@@ -194,10 +196,10 @@
       }
 
       document.getElementById('allLeadsCount').textContent = state.leads.length;
-      document.getElementById('openLeadsCount').textContent = state.leads.filter(l => l.status === 'open').length;
+      document.getElementById('openLeadsCount').textContent = state.leads.filter(l => ['new', 'matched_to_contractors'].includes(String(l.status || '').toLowerCase())).length;
       document.getElementById('approvedContractorsCount').textContent = state.contractors.filter(c => c.status === 'approved').length;
       document.getElementById('pendingContractorsCount').textContent = state.contractors.filter(c => c.status === 'pending').length;
-      document.getElementById('revenueCount').textContent = formatCurrency(state.leads.filter(l => l.status === 'closed').length * 800);
+      document.getElementById('revenueCount').textContent = formatCurrency(state.leads.filter(l => l.status === 'cleared').length * 800);
 
       const serviceFilter = document.getElementById('leadServiceFilter');
       const services = [...new Set(state.leads.map(l => l.service_type).filter(Boolean))].sort();
