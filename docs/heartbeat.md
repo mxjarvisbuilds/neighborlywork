@@ -26,3 +26,4 @@
 [2026-04-23 22:03] — CHECKPOINT 2.3: second 6 launch brand ratings drafted in `docs/brand-ratings-seed-batch-2.md` (Ruud, Goodman, Amana, Daikin, York, Coleman) — next: CHECKPOINT 2.4: score final launch batch + expansion brands
 [2026-04-23 22:03] — CHECKPOINT 2.4: final launch / expansion brand ratings drafted in `docs/brand-ratings-seed-batch-3.md` (Payne, Bosch, Mitsubishi Electric, Fujitsu, Gree + regional expansion rule) — next: CHECKPOINT 2.5: convert batches into SQL seed/import path
 [2026-04-23 22:03] — CHECKPOINT 2.5: SQL seed/import path created in `supabase/003_brand_ratings_seed_v1.sql` with 17 brand rows and upsert logic — next: CHECKPOINT 2.6: verify seeded records + founder update path
+[2026-04-23 22:03] — CHECKPOINT 2.6: live brand_ratings seed verified in Supabase (17 rows present) and founder/admin update path confirmed in rolled-back impersonation test — next: CHECKPOINT 3.1: canonical transition map + preconditions

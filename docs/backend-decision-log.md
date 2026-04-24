@@ -50,3 +50,5 @@
 - Added `docs/brand-ratings-seed-batch-2.md` with the next six launch brand ratings for mainstream ducted split-system comparisons: Ruud, Goodman, Amana, Daikin, York, and Coleman.
 - Added `docs/brand-ratings-seed-batch-3.md` with the final launch / expansion set: Payne, Bosch, Mitsubishi Electric, Fujitsu, Gree, plus the regional-addition rule for new quote traffic.
 - Added `supabase/003_brand_ratings_seed_v1.sql` as the executable launch seed file for `public.brand_ratings`, covering 17 launch/expansion brand rows with upsert behavior.
+- Applied `supabase/003_brand_ratings_seed_v1.sql` in the live Supabase project and verified the seeded rows exist.
+- Verified founder/admin update behavior for `public.brand_ratings` with an impersonated admin SQL transaction that updated and rolled back a seeded row successfully.
