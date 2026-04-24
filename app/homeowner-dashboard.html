@@ -7,6 +7,7 @@
   <meta name="description" content="Track your HVAC quote requests and compare contractor responses." />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script type="module" src="lead-verification.mjs"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
     :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
@@ -91,7 +92,7 @@
 
       const { data: leads, error } = await db
         .from('leads')
-        .select('id, service_type, created_at, status')
+        .select('id, service_type, created_at, status, verification_window_expires')
         .eq('homeowner_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -137,7 +138,7 @@
             <div class="lead-top">
               <div>
                 <div class="lead-title">${lead.service_type || 'HVAC Request'}</div>
-                <div class="lead-meta">Submitted ${formatDate(lead.created_at)}</div>
+                <div class="lead-meta">Submitted ${formatDate(lead.created_at)}${lead.status === 'pending_verification' && lead.verification_window_expires ? ` · Verify by ${window.LeadVerification?.formatVerificationWindow ? window.LeadVerification.formatVerificationWindow(lead.verification_window_expires) : formatDate(lead.verification_window_expires)}` : ''}</div>
               </div>
               <span class="${badgeClass(lead.status)}">${formatStatus(lead.status)}</span>
             </div>
