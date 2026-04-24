@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Change Order Review | NeighborlyWork</title>
+  <meta name="description" content="Review an HVAC change order, compare competing responses, and decide how to proceed." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script type="module" src="change-order-workflow.mjs"></script>
+  <script type="module" src="notifications-queue.mjs"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+    :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:var(--off);color:var(--text)}
+    .wrap{width:min(1120px,calc(100% - 28px));margin:0 auto;padding:24px 0 48px}.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:18px}.brand{display:flex;align-items:center;gap:10px;color:var(--green);font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;text-decoration:none}.mark{width:13px;height:13px;border-radius:4px;background:var(--green);box-shadow:0 0 0 4px rgba(26,92,58,.10)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:13px 16px;font-weight:800;cursor:pointer;font-size:.95rem;text-decoration:none}.btn-green{background:var(--green);color:#fff}.btn-orange{background:var(--orange);color:#fff}.btn-light{background:#fff;color:var(--text);border:1px solid var(--line)}
+    h1{margin:0;font-family:'Outfit',sans-serif;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.04em}.sub{margin:10px 0 0;color:var(--muted);line-height:1.6;max-width:65ch}
+    .message{display:none;border-radius:16px;padding:14px 16px;margin:0 0 16px;font-size:.95rem;line-height:1.5}.message.show{display:block}.message.error{background:#fff1ed;color:#8a2e18}.message.success{background:#eef7f0;color:#1a5c3a}
+    .grid{display:grid;gap:16px}.layout{grid-template-columns:1.05fr .95fr}.card{background:#fff;border:none;border-radius:24px;box-shadow:var(--shadow);padding:22px}.section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}.section-title h2{margin:0;font-family:'Outfit',sans-serif;font-size:1.4rem;letter-spacing:-.03em}.section-title p{margin:0;color:var(--muted);font-size:.92rem}
+    .summary{background:#f8fbf8;border:1px solid rgba(26,92,58,.12);border-radius:18px;padding:16px}.summary strong{display:block;margin-bottom:6px}.small{color:var(--muted);font-size:.9rem;line-height:1.6}
+    .field{display:grid;gap:8px;margin-top:14px} label{font-weight:700;font-size:.92rem} textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:#fbfcfe;font:inherit;color:var(--text);min-height:120px;resize:vertical}
+    .response-list{display:grid;gap:12px}.response-item{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fafbf9}.response-item strong{display:block;margin-bottom:6px}.meta{color:var(--muted);font-size:.88rem;line-height:1.55}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    @media(max-width:860px){.layout{grid-template-columns:1fr}.top{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <div>
+        <a class="brand" href="/app/homeowner-dashboard.html"><span class="mark"></span>NeighborlyWork</a>
+        <h1>Review change order</h1>
+        <p class="sub">Your selected contractor updated the project scope or price. Review the details below, compare any competing responses, and choose how to proceed.</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-light" href="/app/homeowner-dashboard.html">Back to Dashboard</a>
+        <button class="btn btn-green" id="logoutBtn" type="button">Log Out</button>
+      </div>
+    </div>
+
+    <div class="message error" id="errorBox"></div>
+    <div class="message success" id="successBox"></div>
+
+    <div class="grid layout" id="content"></div>
+  </main>
+
+  <script>
+    function setMessage(id, text) {
+      ['errorBox','successBox'].forEach(mid => {
+        const el = document.getElementById(mid);
+        el.textContent = '';
+        el.classList.remove('show');
+      });
+      const target = document.getElementById(id);
+      target.textContent = text;
+      target.classList.add('show');
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(value || 0));
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '—';
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return value;
+      return parsed.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function getLeadId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('lead_id');
+    }
+
+    async function loadLead(user, leadId) {
+      const { data, error } = await db.from('leads').select('*').eq('id', leadId).eq('homeowner_id', user.id).single();
+      if (error) throw error;
+      return data;
+    }
+
+    async function loadOpenChangeOrder(leadId) {
+      const { data, error } = await db.from('change_orders').select('*').eq('lead_id', leadId).is('resolved_at', null).order('submitted_at', { ascending: false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data;
+    }
+
+    async function loadResponses(changeOrderId) {
+      if (!changeOrderId) return [];
+      const { data, error } = await db.from('change_order_responses').select('*').eq('change_order_id', changeOrderId).order('submitted_at', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function loadQuotes(leadId) {
+      const { data, error } = await db.from('quotes').select('*').eq('lead_id', leadId).order('submitted_at', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function loadContractorNames(ids) {
+      if (!ids.length) return new Map();
+      const { data, error } = await db.from('contractors').select('id, business_name').in('id', ids);
+      if (error) throw error;
+      return new Map((data || []).map(item => [item.id, item.business_name || 'Contractor']));
+    }
+
+    function buildOriginalContractorSwitchNotification({ leadId, originalContractorId, replacementContractorId, changeOrderId }) {
+      return window.NotificationsQueue?.buildNotificationRecord
+        ? window.NotificationsQueue.buildNotificationRecord({
+            userId: originalContractorId,
+            leadId,
+            changeOrderId,
+            channel: 'portal',
+            eventType: 'contractor_selected',
+            subject: 'Homeowner switched contractors',
+            body: 'The homeowner declined your change order and switched to another original bidder.',
+            payload: { replacement_contractor_id: replacementContractorId },
+          })
+        : null;
+    }
+
+    function buildRequestMoreInfoNotification({ leadId, contractorId, changeOrderId, note }) {
+      return window.NotificationsQueue?.buildNotificationRecord
+        ? window.NotificationsQueue.buildNotificationRecord({
+            userId: contractorId,
+            leadId,
+            changeOrderId,
+            channel: 'portal',
+            eventType: 'manual_review_required',
+            subject: 'Homeowner requested more info',
+            body: note || 'The homeowner requested more information on your change order.',
+            payload: { homeowner_action: 'requested_more_info' },
+          })
+        : null;
+    }
+
+    async function handleResolution(action, lead, changeOrder, quotes, responses, detailNote = null) {
+      if (!window.ChangeOrderWorkflow) throw new Error('Change-order helpers are not ready yet.');
+      let replacementQuote = null;
+      let selectedResponse = null;
+      if (action === 'rejected_switched_contractor') {
+        if (!detailNote) throw new Error('Select a competing response to switch contractors.');
+        selectedResponse = responses.find(item => item.id === detailNote);
+        if (!selectedResponse) throw new Error('Selected competing response could not be found.');
+        replacementQuote = quotes.find(quote => quote.contractor_id === selectedResponse.responding_contractor_id);
+        if (!replacementQuote) throw new Error('Could not find the original quote for the selected competing contractor.');
+      }
+
+      const resolution = window.ChangeOrderWorkflow.buildHomeownerChangeOrderResolution({
+        lead,
+        changeOrder,
+        action,
+        actedAt: new Date().toISOString(),
+        replacementQuote,
+        selectedResponse,
+      });
+
+      const { error: changeOrderError } = await db.from('change_orders').update(resolution.changeOrderUpdate).eq('id', changeOrder.id);
+      if (changeOrderError) throw changeOrderError;
+
+      for (const quoteUpdate of resolution.quoteUpdates || []) {
+        const { error: quoteError } = await db.from('quotes').update({ status: quoteUpdate.status }).eq('id', quoteUpdate.quoteId);
+        if (quoteError) throw quoteError;
+      }
+
+      const notifications = [];
+      if (resolution.leadTransition) {
+        await transitionLeadStatus({
+          leadId: resolution.leadTransition.leadId,
+          newStatus: resolution.leadTransition.newStatus,
+          selectedContractorId: resolution.leadTransition.selectedContractorId || null,
+          selectedQuoteId: resolution.leadTransition.selectedQuoteId || null,
+          selectionTimestamp: resolution.leadTransition.selectionTimestamp || null,
+          verificationWindowExpires: resolution.leadTransition.verificationWindowExpires || null,
+          billingStatus: resolution.leadTransition.billingStatus || null,
+          reason: resolution.leadTransition.reason,
+          metadata: resolution.leadTransition.metadata,
+        });
+
+        const updatedLead = {
+          ...lead,
+          status: resolution.leadTransition.newStatus,
+          selected_contractor_id: resolution.leadTransition.selectedContractorId || lead.selected_contractor_id,
+          billing_status: resolution.leadTransition.billingStatus || lead.billing_status,
+        };
+        if (window.NotificationsQueue?.buildLifecycleNotifications) {
+          notifications.push(...window.NotificationsQueue.buildLifecycleNotifications({
+            lead: updatedLead,
+            newStatus: resolution.leadTransition.newStatus,
+            actorUserId: lead.homeowner_id,
+          }));
+        }
+        if (action === 'rejected_switched_contractor') {
+          const switchedNotification = buildOriginalContractorSwitchNotification({
+            leadId: lead.id,
+            originalContractorId: changeOrder.contractor_id,
+            replacementContractorId: resolution.leadTransition.selectedContractorId,
+            changeOrderId: changeOrder.id,
+          });
+          if (switchedNotification) notifications.push(switchedNotification);
+        }
+      } else if (action === 'requested_more_info') {
+        const moreInfoNotification = buildRequestMoreInfoNotification({
+          leadId: lead.id,
+          contractorId: changeOrder.contractor_id,
+          changeOrderId: changeOrder.id,
+          note: detailNote,
+        });
+        if (moreInfoNotification) notifications.push(moreInfoNotification);
+      }
+
+      if (notifications.length) {
+        const { error: notificationError } = await db.from('notifications').insert(notifications);
+        if (notificationError) throw notificationError;
+      }
+    }
+
+    function renderPage({ lead, changeOrder, responses, quotes, contractorNames }) {
+      const selectedContractorName = contractorNames.get(changeOrder.contractor_id) || 'Selected contractor';
+      const responseCards = responses.length
+        ? responses.map(response => {
+            const contractorName = contractorNames.get(response.responding_contractor_id) || 'Competing contractor';
+            return `
+              <div class="response-item">
+                <strong>${contractorName}</strong>
+                <div class="meta">Response: ${String(response.response_type || '').replace(/_/g, ' ')}${response.alternative_price ? ` · Alternative total ${formatCurrency(response.alternative_price)}` : ''}</div>
+                <div class="meta">Submitted ${formatDateTime(response.submitted_at)}</div>
+                <div style="margin-top:8px;">${response.response_notes || 'No additional notes provided.'}</div>
+                <div class="actions">
+                  <button class="btn btn-light" type="button" data-switch-response="${response.id}">Reject & Switch to This Contractor</button>
+                </div>
+              </div>`;
+          }).join('')
+        : '<div class="response-item">No competing bidder responses yet. You can still ask for more info or accept the submitted change order.</div>';
+
+      document.getElementById('content').innerHTML = `
+        <section class="card">
+          <div class="section-title"><div><h2>Submitted change order</h2><p>Review why the scope changed and the revised commercial terms.</p></div></div>
+          <div class="summary">
+            <strong>${selectedContractorName}</strong>
+            <div class="small">Original total: ${formatCurrency(changeOrder.original_price)} · Revised total: ${formatCurrency(changeOrder.revised_price)} · Difference: ${formatCurrency(changeOrder.price_difference)}</div>
+            <div class="small">Submitted ${formatDateTime(changeOrder.submitted_at)} · Response window closes ${formatDateTime(changeOrder.response_window_expires)}</div>
+          </div>
+          <div class="field"><label>Reason category</label><div>${String(changeOrder.reason_category || '').replace(/_/g, ' ')}</div></div>
+          <div class="field"><label>Need type</label><div>${String(changeOrder.is_upsell_or_necessary || '').replace(/_/g, ' ')}</div></div>
+          <div class="field"><label>Contractor explanation</label><div>${changeOrder.reason_description || '—'}</div></div>
+          <div class="actions">
+            <button class="btn btn-green" type="button" id="acceptBtn">Accept Change Order</button>
+            <button class="btn btn-light" type="button" id="requestInfoBtn">Request More Info</button>
+          </div>
+          <div class="field">
+            <label>More info request note (optional)</label>
+            <textarea id="moreInfoNote" placeholder="Ask the contractor to clarify pricing, scope, code issues, timeline, or photos."></textarea>
+          </div>
+        </section>
+        <section class="card">
+          <div class="section-title"><div><h2>Competing original bidders</h2><p>If you reject the change order, you can switch back to an original bidder who responded during the 48-hour window.</p></div></div>
+          <div class="response-list">${responseCards}</div>
+        </section>`;
+
+      document.getElementById('acceptBtn').addEventListener('click', async () => {
+        try {
+          await handleResolution('accepted', lead, changeOrder, quotes, responses);
+          setMessage('successBox', 'Change order accepted. Your project is now confirmed.');
+          window.location.href = '/app/homeowner-dashboard.html';
+        } catch (err) {
+          setMessage('errorBox', err.message || 'Could not accept the change order.');
+        }
+      });
+
+      document.getElementById('requestInfoBtn').addEventListener('click', async () => {
+        try {
+          await handleResolution('requested_more_info', lead, changeOrder, quotes, responses, document.getElementById('moreInfoNote').value.trim() || null);
+          setMessage('successBox', 'Your request for more information was sent to the contractor.');
+          await initPage();
+        } catch (err) {
+          setMessage('errorBox', err.message || 'Could not request more info.');
+        }
+      });
+
+      document.querySelectorAll('[data-switch-response]').forEach(button => button.addEventListener('click', async () => {
+        try {
+          await handleResolution('rejected_switched_contractor', lead, changeOrder, quotes, responses, button.dataset.switchResponse);
+          setMessage('successBox', 'You switched to another original bidder. The new verification window has started.');
+          window.location.href = '/app/homeowner-dashboard.html';
+        } catch (err) {
+          setMessage('errorBox', err.message || 'Could not switch contractors.');
+        }
+      }));
+    }
+
+    async function initPage() {
+      const user = await requireAuth('homeowner');
+      if (!user) return;
+      const leadId = getLeadId();
+      if (!leadId) throw new Error('Missing lead_id in the URL.');
+      const lead = await loadLead(user, leadId);
+      const changeOrder = await loadOpenChangeOrder(leadId);
+      if (!changeOrder) throw new Error('No open change order was found for this request.');
+      const [responses, quotes] = await Promise.all([
+        loadResponses(changeOrder.id),
+        loadQuotes(leadId),
+      ]);
+      const contractorIds = [...new Set([changeOrder.contractor_id, ...responses.map(item => item.responding_contractor_id), ...quotes.map(item => item.contractor_id)].filter(Boolean))];
+      const contractorNames = await loadContractorNames(contractorIds);
+      renderPage({ lead, changeOrder, responses, quotes, contractorNames });
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await db.auth.signOut();
+      window.location.href = '/app/homeowner-auth.html';
+    });
+
+    (async function init() {
+      try {
+        await initPage();
+      } catch (err) {
+        setMessage('errorBox', err.message || 'Could not load the change-order review page.');
+      }
+    })();
+  </script>
+</body>
+</html>

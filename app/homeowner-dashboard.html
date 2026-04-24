@@ -133,6 +133,7 @@
       list.innerHTML = (leads || []).map(lead => {
         const quoteCount = quoteMap.get(lead.id) || 0;
         const canViewQuotes = leadHasQuotes(lead.status, quoteCount);
+        const isChangeOrderOpen = lead.status === 'change_order_open';
         return `
           <article class="lead-row">
             <div class="lead-top">
@@ -143,6 +144,7 @@
               <span class="${badgeClass(lead.status)}">${formatStatus(lead.status)}</span>
             </div>
             <div class="lead-actions">
+              ${isChangeOrderOpen ? `<a class="btn btn-green" href="/app/change-order-review.html?lead_id=${lead.id}">Review Change Order</a>` : ''}
               <a class="btn ${canViewQuotes ? 'btn-green' : 'btn-light disabled'}" href="${canViewQuotes ? `/app/quotes.html?lead_id=${lead.id}` : '#'}">${canViewQuotes ? `View Quotes (${quoteCount})` : 'Waiting for quotes'}</a>
             </div>
           </article>`;

@@ -54,6 +54,74 @@ function buildLifecycleNotifications({ lead, newStatus, actorUserId = null }) {
   return notifications;
 }
 
-const NotificationsQueue = { buildNotificationRecord, buildLifecycleNotifications, mapLifecycleEventType };
+function buildChangeOrderSubmissionNotifications({ lead, changeOrder, competingContractorIds = [] }) {
+  const notifications = [];
+  if (lead?.homeowner_id) {
+    notifications.push(buildNotificationRecord({
+      userId: lead.homeowner_id,
+      leadId: lead.id,
+      changeOrderId: changeOrder?.id || null,
+      channel: 'portal',
+      eventType: 'change_order_submitted',
+      subject: 'Change order requires your review',
+      body: 'Your selected contractor submitted a change order for this project.',
+      payload: {
+        revised_price: changeOrder?.revised_price ?? null,
+        response_window_expires: changeOrder?.response_window_expires ?? null,
+      },
+    }));
+  }
+  for (const contractorId of competingContractorIds) {
+    notifications.push(buildNotificationRecord({
+      userId: contractorId,
+      leadId: lead?.id || null,
+      changeOrderId: changeOrder?.id || null,
+      channel: 'portal',
+      eventType: 'change_order_response_window_open',
+      subject: 'Competing response window is open',
+      body: 'A homeowner project is open for a competing change-order response.',
+      payload: {
+        response_window_expires: changeOrder?.response_window_expires ?? null,
+      },
+    }));
+  }
+  return notifications;
+}
+
+function buildChangeOrderResponseNotifications({ lead, changeOrder, response }) {
+  const notifications = [];
+  if (lead?.homeowner_id) {
+    notifications.push(buildNotificationRecord({
+      userId: lead.homeowner_id,
+      leadId: lead.id,
+      changeOrderId: changeOrder?.id || null,
+      channel: 'portal',
+      eventType: 'change_order_response_received',
+      subject: 'A competing contractor responded',
+      body: 'A competing bidder submitted an alternative response to your open change order.',
+      payload: {
+        response_id: response?.id || null,
+        responding_contractor_id: response?.responding_contractor_id || null,
+        response_type: response?.response_type || null,
+        alternative_price: response?.alternative_price ?? null,
+      },
+    }));
+  }
+  return notifications;
+}
+
+const NotificationsQueue = {
+  buildChangeOrderResponseNotifications,
+  buildChangeOrderSubmissionNotifications,
+  buildNotificationRecord,
+  buildLifecycleNotifications,
+  mapLifecycleEventType,
+};
 if (typeof window !== 'undefined') window.NotificationsQueue = NotificationsQueue;
-export { buildNotificationRecord, buildLifecycleNotifications, mapLifecycleEventType };
+export {
+  buildChangeOrderResponseNotifications,
+  buildChangeOrderSubmissionNotifications,
+  buildNotificationRecord,
+  buildLifecycleNotifications,
+  mapLifecycleEventType,
+};

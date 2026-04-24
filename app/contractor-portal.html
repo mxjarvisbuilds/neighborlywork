@@ -8,6 +8,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script type="module" src="draft-quote-generator.mjs"></script>
+  <script type="module" src="change-order-workflow.mjs"></script>
+  <script type="module" src="notifications-queue.mjs"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
     :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
@@ -40,6 +42,7 @@
         <button class="tab" data-screen="quote">Submit Quote</button>
         <button class="tab" data-screen="profile">Profile</button>
         <button class="tab" data-screen="pricing">Pricing Profile</button>
+        <button class="tab" data-screen="changeOrders">Change Orders</button>
         <button class="tab" data-screen="billing">Fee Terms</button>
       </div>
       <div class="side-note">Blind quote system. Homeowners can compare all quotes, but contractors never see each other's pricing.</div>
@@ -206,6 +209,99 @@
         </div>
       </section>
 
+      <section class="screen" id="changeOrdersScreen">
+        <div class="grid" style="grid-template-columns:1.05fr .95fr;">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h2>Submit a change order</h2>
+                <p>Use this when a homeowner has selected you and onsite findings change the scope or price.</p>
+              </div>
+            </div>
+            <div class="summary" id="changeOrderSummary">Select a won lead in pending verification to submit a change order.</div>
+            <form id="changeOrderForm" class="profile-grid" style="margin-top:16px;">
+              <div class="field">
+                <label>Won lead</label>
+                <select id="changeOrderLeadSelect">
+                  <option value="">Select lead</option>
+                </select>
+              </div>
+              <div class="field"><label>Original selected quote</label><input id="changeOrderOriginalPrice" type="text" readonly></div>
+              <div class="field"><label>Revised total price ($)</label><input id="changeOrderRevisedPrice" type="number" min="0" step="0.01" required></div>
+              <div class="field">
+                <label>Reason category</label>
+                <select id="changeOrderReasonCategory" required>
+                  <option value="">Select</option>
+                  <option value="equipment_change">Equipment change</option>
+                  <option value="additional_work_required">Additional work required</option>
+                  <option value="access_issues">Access issues</option>
+                  <option value="code_compliance">Code compliance</option>
+                  <option value="homeowner_request_upgrade">Homeowner-requested upgrade</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Need type</label>
+                <select id="changeOrderNeedType" required>
+                  <option value="">Select</option>
+                  <option value="necessary">Necessary</option>
+                  <option value="recommended">Recommended</option>
+                  <option value="optional_upgrade">Optional upgrade</option>
+                </select>
+              </div>
+              <div class="field" style="grid-column:1 / -1;">
+                <label>Scope explanation</label>
+                <textarea id="changeOrderReasonDescription" placeholder="Explain what changed onsite and why the revised amount is justified." required></textarea>
+              </div>
+              <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;">
+                <button class="btn btn-orange" type="submit">Submit Change Order</button>
+              </div>
+            </form>
+          </div>
+          <div style="display:grid;gap:16px;">
+            <div class="card">
+              <div class="section-title">
+                <div>
+                  <h2>Competing response</h2>
+                  <p>Answer another contractor’s change order if you originally bid the job and the response window is still open.</p>
+                </div>
+              </div>
+              <div class="summary" id="competingChangeOrderSummary">Open competing change orders you can answer will appear here.</div>
+              <form id="changeOrderResponseForm" class="profile-grid" style="margin-top:16px;">
+                <div class="field">
+                  <label>Open change order</label>
+                  <select id="competingChangeOrderSelect">
+                    <option value="">Select open change order</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Your response</label>
+                  <select id="competingResponseType" required>
+                    <option value="">Select</option>
+                    <option value="would_match">Would match</option>
+                    <option value="would_do_for_less">Would do for less</option>
+                    <option value="agree_necessary">Agree necessary</option>
+                    <option value="flag_as_upsell">Flag as upsell</option>
+                  </select>
+                </div>
+                <div class="field"><label>Alternative total price ($)</label><input id="competingAlternativePrice" type="number" min="0" step="0.01"></div>
+                <div class="field" style="grid-column:1 / -1;">
+                  <label>Response notes</label>
+                  <textarea id="competingResponseNotes" placeholder="Explain your response and any alternative pricing or scope call-out."></textarea>
+                </div>
+                <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;">
+                  <button class="btn btn-green" type="submit">Submit Response</button>
+                </div>
+              </form>
+            </div>
+            <div class="card">
+              <div class="section-title"><div><h2>Open activity</h2><p>Monitor submitted change orders and competing opportunities.</p></div></div>
+              <div class="summary" id="changeOrderActivityList">No change-order activity yet.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="screen" id="billingScreen">
         <div class="card">
           <div class="section-title">
@@ -237,6 +333,7 @@
       quote: document.getElementById('quoteScreen'),
       profile: document.getElementById('profileScreen'),
       pricing: document.getElementById('pricingScreen'),
+      changeOrders: document.getElementById('changeOrdersScreen'),
       billing: document.getElementById('billingScreen')
     };
     const state = {
@@ -249,7 +346,10 @@
       leadMap: new Map(),
       selectedLead: null,
       selectedDraft: null,
-      quoteLeadIds: new Set()
+      quoteLeadIds: new Set(),
+      portalQuotes: [],
+      changeOrders: [],
+      changeOrderResponses: []
     };
 
     function showScreen(name) {
@@ -501,6 +601,78 @@
       });
     }
 
+    function getSelectedQuoteForLead(leadId) {
+      return state.portalQuotes.find(quote => quote.lead_id === leadId && quote.contractor_id === state.user?.id);
+    }
+
+    function getOwnedOpenChangeOrderForLead(leadId) {
+      return state.changeOrders.find(changeOrder => changeOrder.lead_id === leadId && changeOrder.contractor_id === state.user?.id && !changeOrder.resolved_at);
+    }
+
+    function getOpenWonLeadsEligibleForChangeOrder() {
+      return state.leads.filter(lead => lead.selected_contractor_id === state.user?.id && lead.status === 'pending_verification' && getSelectedQuoteForLead(lead.id) && !getOwnedOpenChangeOrderForLead(lead.id));
+    }
+
+    function getCompetingOpenChangeOrders() {
+      return state.changeOrders.filter(changeOrder => changeOrder.contractor_id !== state.user?.id && !changeOrder.resolved_at);
+    }
+
+    function getResponseForChangeOrder(changeOrderId) {
+      return state.changeOrderResponses.find(response => response.change_order_id === changeOrderId && response.responding_contractor_id === state.user?.id);
+    }
+
+    function updateChangeOrderLeadSummary() {
+      const leadId = document.getElementById('changeOrderLeadSelect').value;
+      const lead = state.leadMap.get(leadId);
+      const quote = getSelectedQuoteForLead(leadId);
+      document.getElementById('changeOrderOriginalPrice').value = quote ? formatCurrency(quote.price_total ?? quote.total_price ?? 0) : '';
+      const summary = document.getElementById('changeOrderSummary');
+      if (!lead || !quote) {
+        summary.innerHTML = '<strong>Ready for submission</strong><div class="small-note">Select a won lead in pending verification to submit a change order.</div>';
+        return;
+      }
+      summary.innerHTML = `<strong>${firstName(lead.homeowner_name || 'Homeowner')} · ${lead.service_type || 'HVAC Request'}</strong><div class="small-note">Original selected quote: ${formatCurrency(quote.price_total ?? quote.total_price ?? 0)} · Status: ${formatLeadStatus(lead.status)}</div>`;
+    }
+
+    function renderChangeOrders() {
+      const submissionLeads = getOpenWonLeadsEligibleForChangeOrder();
+      const submissionSelect = document.getElementById('changeOrderLeadSelect');
+      const submissionValue = submissionSelect.value;
+      submissionSelect.innerHTML = '<option value="">Select lead</option>' + submissionLeads.map(lead => `<option value="${lead.id}">${firstName(lead.homeowner_name || 'Homeowner')} · ${lead.service_type || 'HVAC Request'} · ${lead.zip_code || '—'}</option>`).join('');
+      if (submissionLeads.some(lead => lead.id === submissionValue)) submissionSelect.value = submissionValue;
+      updateChangeOrderLeadSummary();
+
+      const competingOrders = getCompetingOpenChangeOrders().filter(changeOrder => !getResponseForChangeOrder(changeOrder.id));
+      const responseSelect = document.getElementById('competingChangeOrderSelect');
+      const responseValue = responseSelect.value;
+      responseSelect.innerHTML = '<option value="">Select open change order</option>' + competingOrders.map(changeOrder => {
+        const lead = state.leadMap.get(changeOrder.lead_id);
+        return `<option value="${changeOrder.id}">${firstName(lead?.homeowner_name || 'Homeowner')} · ${lead?.service_type || 'HVAC Request'} · expires ${formatDate(changeOrder.response_window_expires)}</option>`;
+      }).join('');
+      if (competingOrders.some(changeOrder => changeOrder.id === responseValue)) responseSelect.value = responseValue;
+
+      const competingSummary = document.getElementById('competingChangeOrderSummary');
+      competingSummary.innerHTML = competingOrders.length
+        ? `<strong>${competingOrders.length} open opportunity${competingOrders.length === 1 ? '' : 'ies'}</strong><div class="small-note">Choose one below to submit your competing response before the response window closes.</div>`
+        : '<strong>No open competing change orders</strong><div class="small-note">When a selected contractor opens a change order on a lead you originally bid, it will appear here if you are eligible to respond.</div>';
+
+      const owned = state.changeOrders.filter(changeOrder => changeOrder.contractor_id === state.user?.id);
+      const responded = state.changeOrderResponses.filter(response => response.responding_contractor_id === state.user?.id);
+      const activity = [];
+      owned.forEach(changeOrder => {
+        const lead = state.leadMap.get(changeOrder.lead_id);
+        activity.push(`<div style="padding:12px 0;border-top:1px solid rgba(0,0,0,.06);"><strong>Submitted</strong> · ${firstName(lead?.homeowner_name || 'Homeowner')} · ${formatCurrency(changeOrder.revised_price)}<div class="small-note">Homeowner response: ${String(changeOrder.homeowner_response || 'pending').replace(/_/g, ' ')} · Window closes ${formatDate(changeOrder.response_window_expires)}</div></div>`);
+      });
+      responded.forEach(response => {
+        const changeOrder = state.changeOrders.find(item => item.id === response.change_order_id);
+        const lead = state.leadMap.get(changeOrder?.lead_id);
+        activity.push(`<div style="padding:12px 0;border-top:1px solid rgba(0,0,0,.06);"><strong>Responded</strong> · ${firstName(lead?.homeowner_name || 'Homeowner')} · ${String(response.response_type || '').replace(/_/g, ' ')}<div class="small-note">Submitted ${formatDate(response.submitted_at)}${response.alternative_price ? ` · Alternative total ${formatCurrency(response.alternative_price)}` : ''}</div></div>`);
+      });
+      document.getElementById('changeOrderActivityList').innerHTML = activity.length
+        ? activity.join('')
+        : 'No change-order activity yet.';
+    }
+
     async function loadPortal() {
       const user = await getCurrentUser();
       if (!user) {
@@ -555,8 +727,8 @@
 
       const { data: leads, error: leadsError } = await db
         .from('leads')
-        .select('id, homeowner_id, service_type, zip_code, address, home_size_sqft, urgency_flag, created_at, status, selected_contractor_id')
-        .in('status', ['matched_to_contractors', 'quotes_submitted'])
+        .select('id, homeowner_id, service_type, zip_code, address, home_size_sqft, urgency_flag, created_at, status, selected_contractor_id, matched_contractors')
+        .in('status', ['matched_to_contractors', 'quotes_submitted', 'pending_verification', 'change_order_open'])
         .in('zip_code', serviceZips)
         .in('service_type', services)
         .order('urgency_flag', { ascending: false })
@@ -573,9 +745,18 @@
       state.leads = (leads || []).map(lead => ({ ...lead, homeowner_name: homeownerMap.get(lead.homeowner_id) || 'Homeowner' }));
       state.leadMap = new Map(state.leads.map(lead => [lead.id, lead]));
 
-      const { data: quotes, error: quotesError } = await db.from('quotes').select('id, lead_id, status').eq('contractor_id', user.id);
+      const { data: quotes, error: quotesError } = await db.from('quotes').select('id, lead_id, contractor_id, status, price_total, total_price, submitted_at').eq('contractor_id', user.id);
       if (quotesError) throw quotesError;
-      state.quoteLeadIds = new Set((quotes || []).map(q => q.lead_id));
+      state.portalQuotes = quotes || [];
+      state.quoteLeadIds = new Set(state.portalQuotes.map(q => q.lead_id));
+
+      const { data: changeOrders, error: changeOrdersError } = await db.from('change_orders').select('*').order('submitted_at', { ascending: false });
+      if (changeOrdersError) throw changeOrdersError;
+      state.changeOrders = changeOrders || [];
+
+      const { data: changeOrderResponses, error: changeOrderResponsesError } = await db.from('change_order_responses').select('*').order('submitted_at', { ascending: false });
+      if (changeOrderResponsesError) throw changeOrderResponsesError;
+      state.changeOrderResponses = changeOrderResponses || [];
 
       const jobsWon = contractor.total_jobs_won || 0;
       document.getElementById('newLeadsCount').textContent = state.leads.filter(l => l.status === 'matched_to_contractors' && !state.quoteLeadIds.has(l.id)).length;
@@ -584,6 +765,7 @@
       document.getElementById('feesOwedCount').textContent = formatCurrency(jobsWon * 800);
 
       renderLeadRows();
+      renderChangeOrders();
     }
 
     document.getElementById('quoteForm').addEventListener('submit', async (e) => {
@@ -710,6 +892,110 @@
       }
     });
 
+    document.getElementById('changeOrderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const leadId = document.getElementById('changeOrderLeadSelect').value;
+        const lead = state.leadMap.get(leadId);
+        const quote = getSelectedQuoteForLead(leadId);
+        if (!lead || !quote) throw new Error('Select a won lead with an active selected quote first.');
+        if (!window.ChangeOrderWorkflow) throw new Error('Change-order helpers are not ready yet.');
+
+        const submissionPlan = window.ChangeOrderWorkflow.buildChangeOrderSubmission({
+          lead,
+          quote,
+          contractorId: state.user.id,
+          revisedPrice: document.getElementById('changeOrderRevisedPrice').value,
+          reasonCategory: document.getElementById('changeOrderReasonCategory').value,
+          reasonDescription: document.getElementById('changeOrderReasonDescription').value.trim(),
+          needType: document.getElementById('changeOrderNeedType').value,
+          submittedAt: new Date().toISOString(),
+          createdBy: state.user.id,
+        });
+
+        const { data: insertedChangeOrder, error: changeOrderError } = await db.from('change_orders').insert(submissionPlan.changeOrder).select('*').single();
+        if (changeOrderError) throw changeOrderError;
+
+        const quoteUpdate = submissionPlan.quoteUpdates[0];
+        if (quoteUpdate) {
+          const { error: quoteError } = await db.from('quotes').update({ status: quoteUpdate.status, superseded_by_change_order_id: insertedChangeOrder.id }).eq('id', quoteUpdate.quoteId);
+          if (quoteError) throw quoteError;
+        }
+
+        await transitionLeadStatus({
+          leadId: submissionPlan.leadTransition.leadId,
+          newStatus: submissionPlan.leadTransition.newStatus,
+          reason: submissionPlan.leadTransition.reason,
+          metadata: { ...submissionPlan.leadTransition.metadata, change_order_id: insertedChangeOrder.id },
+        });
+
+        const competingContractorIds = (lead.matched_contractors || []).filter(id => id && id !== state.user.id);
+        const notifications = window.NotificationsQueue?.buildChangeOrderSubmissionNotifications
+          ? window.NotificationsQueue.buildChangeOrderSubmissionNotifications({
+              lead,
+              changeOrder: insertedChangeOrder,
+              competingContractorIds,
+            })
+          : [];
+        if (notifications.length) {
+          const { error: notificationError } = await db.from('notifications').insert(notifications);
+          if (notificationError) throw notificationError;
+        }
+
+        document.getElementById('changeOrderForm').reset();
+        setMessage('portalSuccess', 'Change order submitted. Homeowner review and competing bidder response window are now open.');
+        await loadPortal();
+        showScreen('changeOrders');
+      } catch (err) {
+        setMessage('portalError', err.message || 'Could not submit the change order.');
+      }
+    });
+
+    document.getElementById('changeOrderResponseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const changeOrderId = document.getElementById('competingChangeOrderSelect').value;
+        const changeOrder = state.changeOrders.find(item => item.id === changeOrderId);
+        if (!changeOrder) throw new Error('Select an open competing change order first.');
+        const responderQuote = getSelectedQuoteForLead(changeOrder.lead_id) || state.portalQuotes.find(quote => quote.lead_id === changeOrder.lead_id && quote.contractor_id === state.user.id);
+        if (!responderQuote) throw new Error('You need an original quote on this lead to respond.');
+        if (!window.ChangeOrderWorkflow) throw new Error('Change-order helpers are not ready yet.');
+
+        const responsePlan = window.ChangeOrderWorkflow.buildCompetingBidderResponse({
+          changeOrder,
+          responderQuote,
+          responseType: document.getElementById('competingResponseType').value,
+          alternativePrice: document.getElementById('competingAlternativePrice').value || null,
+          responseNotes: document.getElementById('competingResponseNotes').value.trim() || null,
+          submittedAt: new Date().toISOString(),
+        });
+
+        const { data: insertedResponse, error: responseError } = await db.from('change_order_responses').insert(responsePlan).select('*').single();
+        if (responseError) throw responseError;
+
+        const lead = state.leadMap.get(changeOrder.lead_id);
+        const notifications = window.NotificationsQueue?.buildChangeOrderResponseNotifications
+          ? window.NotificationsQueue.buildChangeOrderResponseNotifications({
+              lead,
+              changeOrder,
+              response: insertedResponse,
+            })
+          : [];
+        if (notifications.length) {
+          const { error: notificationError } = await db.from('notifications').insert(notifications);
+          if (notificationError) throw notificationError;
+        }
+
+        document.getElementById('changeOrderResponseForm').reset();
+        setMessage('portalSuccess', 'Competing response submitted for homeowner review.');
+        await loadPortal();
+        showScreen('changeOrders');
+      } catch (err) {
+        setMessage('portalError', err.message || 'Could not submit the competing response.');
+      }
+    });
+
+    document.getElementById('changeOrderLeadSelect').addEventListener('change', updateChangeOrderLeadSummary);
     tabs.forEach(tab => tab.addEventListener('click', () => showScreen(tab.dataset.screen)));
     ['equipmentCost','laborCost','additionalCost'].forEach(id => document.getElementById(id).addEventListener('input', updateTotalPrice));
     document.getElementById('installTime').addEventListener('change', updateQuoteTimingDisplay);

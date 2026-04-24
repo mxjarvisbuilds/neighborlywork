@@ -106,7 +106,7 @@
   </div>
 
   <script>
-    const state = { leads: [], homeowners: new Map(), contractors: new Map(), quotes: [], selectedLeadId: null };
+    const state = { leads: [], homeowners: new Map(), contractors: new Map(), quotes: [], changeOrders: [], changeOrderResponses: [], selectedLeadId: null };
 
     function setMessage(id, text) {
       ['errorBox','noticeBox'].forEach(mid => {
@@ -206,17 +206,23 @@
       const user = await requireAdmin();
       if (!user) return;
 
-      const [{ data: leads, error: leadError }, { data: quotes, error: quoteError }, { data: contractors, error: contractorError }] = await Promise.all([
+      const [{ data: leads, error: leadError }, { data: quotes, error: quoteError }, { data: contractors, error: contractorError }, { data: changeOrders, error: changeOrdersError }, { data: changeOrderResponses, error: changeOrderResponsesError }] = await Promise.all([
         db.from('leads').select('*').order('created_at', { ascending: false }),
         db.from('quotes').select('*').order('submitted_at', { ascending: false }),
-        db.from('contractors').select('id, business_name')
+        db.from('contractors').select('id, business_name'),
+        db.from('change_orders').select('*').order('submitted_at', { ascending: false }),
+        db.from('change_order_responses').select('*').order('submitted_at', { ascending: false })
       ]);
       if (leadError) throw leadError;
       if (quoteError) throw quoteError;
       if (contractorError) throw contractorError;
+      if (changeOrdersError) throw changeOrdersError;
+      if (changeOrderResponsesError) throw changeOrderResponsesError;
 
       state.leads = leads || [];
       state.quotes = quotes || [];
+      state.changeOrders = changeOrders || [];
+      state.changeOrderResponses = changeOrderResponses || [];
       state.contractors = new Map((contractors || []).map(c => [c.id, c.business_name || 'Contractor']));
 
       const homeownerIds = [...new Set(state.leads.map(lead => lead.homeowner_id).filter(Boolean))];
@@ -292,6 +298,9 @@
       if (!lead) return;
       const homeowner = state.homeowners.get(lead.homeowner_id);
       const leadQuotes = state.quotes.filter(q => q.lead_id === lead.id);
+      const leadChangeOrders = state.changeOrders.filter(changeOrder => changeOrder.lead_id === lead.id);
+      const leadChangeOrderIds = new Set(leadChangeOrders.map(changeOrder => changeOrder.id));
+      const leadChangeOrderResponses = state.changeOrderResponses.filter(response => leadChangeOrderIds.has(response.change_order_id));
       const matchedNames = (lead.matched_contractors || []).map(id => state.contractors.get(id) || id);
       const selectedName = lead.selected_contractor_id ? (state.contractors.get(lead.selected_contractor_id) || lead.selected_contractor_id) : '—';
       const lifecycleActions = window.LeadLifecycleActions?.getLeadLifecycleActions ? window.LeadLifecycleActions.getLeadLifecycleActions(lead) : [];
@@ -357,6 +366,18 @@
               <h3>Submitted quotes</h3>
               <div class="mini-list">
                 ${leadQuotes.length ? leadQuotes.map(quote => `<div class="mini-row"><strong>${state.contractors.get(quote.contractor_id) || 'Contractor'}</strong>Total: $${Number(quote.price_total || quote.total_price || 0).toLocaleString()}<br>Status: ${quote.status || 'submitted'}<br>Submitted: ${formatDate(quote.submitted_at)}</div>`).join('') : '<div class="mini-row">No quotes submitted yet.</div>'}
+              </div>
+            </div>
+            <div class="list-box">
+              <h3>Change orders</h3>
+              <div class="mini-list">
+                ${leadChangeOrders.length ? leadChangeOrders.map(changeOrder => `<div class="mini-row"><strong>${state.contractors.get(changeOrder.contractor_id) || 'Contractor'}</strong>Original: $${Number(changeOrder.original_price || 0).toLocaleString()} · Revised: $${Number(changeOrder.revised_price || 0).toLocaleString()}<br>Reason: ${String(changeOrder.reason_category || '').replace(/_/g, ' ')} · Need: ${String(changeOrder.is_upsell_or_necessary || '').replace(/_/g, ' ')}<br>Homeowner response: ${String(changeOrder.homeowner_response || 'pending').replace(/_/g, ' ')}<br>Window expires: ${formatDateTime(changeOrder.response_window_expires)}</div>`).join('') : '<div class="mini-row">No change orders recorded for this lead.</div>'}
+              </div>
+            </div>
+            <div class="list-box">
+              <h3>Competing responses</h3>
+              <div class="mini-list">
+                ${leadChangeOrderResponses.length ? leadChangeOrderResponses.map(response => `<div class="mini-row"><strong>${state.contractors.get(response.responding_contractor_id) || 'Contractor'}</strong>Response: ${String(response.response_type || '').replace(/_/g, ' ')}${response.alternative_price ? ` · Alt total: $${Number(response.alternative_price).toLocaleString()}` : ''}<br>Submitted: ${formatDateTime(response.submitted_at)}<br>${response.response_notes || 'No response notes provided.'}</div>`).join('') : '<div class="mini-row">No competing bidder responses yet.</div>'}
               </div>
             </div>
           </div>

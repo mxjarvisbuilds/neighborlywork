@@ -1,6 +1,6 @@
 # Deferred Lane — Section 4 Full Change-Order Workflow
 
-_Status: deferred from current Section 5/6 execution lane, but **required before launch**._
+_Status: implemented on 2026-04-24; shipped app workflow is now in place and remains **required before launch validation**._
 
 ## Why this is deferred
 Rocky shipped the lead lifecycle/status-control path for `change_order_open`, but the repo still does **not** contain the full Section 4 operational workflow for:
@@ -28,15 +28,19 @@ Before launch, NeighborlyWork must support the full change-order flow end to end
 6. Notifications are created for all involved parties.
 7. `lead_status_history` and quote-side effects remain consistent.
 
-## Current shipped fallback
-Current shipped state only provides:
-- founder/admin ability to move a lead into `change_order_open`
-- founder/admin ability to move `change_order_open -> confirmed`
-- no contractor-authored `change_orders` workflow yet
-- no competitor response workflow yet
-- no homeowner response UI yet
+## Shipped implementation
+Current shipped state now provides:
+- contractor-portal change-order submission for selected leads in `pending_verification`
+- selected quote supersede on change-order submission
+- 48-hour competing bidder response workflow in the contractor portal
+- dedicated homeowner change-order review page with:
+  - accept
+  - reject and switch to a competing original bidder
+  - request more info
+- founder/admin visibility into lead-level change orders and competing responses in the lead inbox
+- notification queue inserts for submission, response-window open, response received, request-more-info, and final lead transition outcomes
 
-This is good enough for internal lifecycle control while building Sections 5 and 6, but **not good enough for launch**.
+Live-site/browser validation is still deferred until Netlify is unpaused, so this section is implemented but not yet browser-validated on the public deployment.
 
 ## Implementation targets
 - `app/contractor-portal.html`
