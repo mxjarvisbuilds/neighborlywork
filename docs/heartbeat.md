@@ -23,3 +23,4 @@
 [2026-04-23 22:03] — CHECKPOINT 1.6: live RLS verification passed with impersonated homeowner/contractor/admin fixtures (10/10 checks green) — next: CHECKPOINT 2.1: define brand ratings methodology + source rubric
 [2026-04-23 22:03] — CHECKPOINT 2.1: brand ratings methodology + source rubric documented in `docs/brand-ratings-methodology-v1.md` — next: CHECKPOINT 2.2: score first 6 launch brands
 [2026-04-23 22:03] — CHECKPOINT 2.2: first 6 launch brand ratings drafted in `docs/brand-ratings-seed-batch-1.md` (Carrier, Bryant, Trane, American Standard, Lennox, Rheem) — next: CHECKPOINT 2.3: score next 6 launch brands
+[2026-04-23 22:03] — CHECKPOINT 2.3: second 6 launch brand ratings drafted in `docs/brand-ratings-seed-batch-2.md` (Ruud, Goodman, Amana, Daikin, York, Coleman) — next: CHECKPOINT 2.4: score final launch batch + expansion brands
