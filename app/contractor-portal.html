@@ -38,6 +38,7 @@
         <button class="tab active" data-screen="dashboard">Dashboard</button>
         <button class="tab" data-screen="quote">Submit Quote</button>
         <button class="tab" data-screen="profile">Profile</button>
+        <button class="tab" data-screen="pricing">Pricing Profile</button>
         <button class="tab" data-screen="billing">Fee Terms</button>
       </div>
       <div class="side-note">Blind quote system. Homeowners can compare all quotes, but contractors never see each other's pricing.</div>
@@ -175,6 +176,31 @@
         </div>
       </section>
 
+      <section class="screen" id="pricingScreen">
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h2>Pricing profile</h2>
+              <p>Set your rule inputs for future draft quote generation and profile completeness.</p>
+            </div>
+          </div>
+          <div class="summary" id="pricingProfileSummary">Pricing profile status will load here.</div>
+          <form id="pricingProfileForm" class="profile-grid" style="margin-top:16px;">
+            <div class="field"><label>Base labor rate ($)</label><input id="baseLaborRate" type="number" min="0" step="0.01" required></div>
+            <div class="field"><label>Default warranty (years)</label><input id="defaultWarrantyOffered" type="number" min="0" step="1" placeholder="10"></div>
+            <div class="field"><label>Default install timeline (days)</label><input id="defaultInstallTimelineDays" type="number" min="0" step="1" placeholder="2"></div>
+            <div class="field"><label>Profile completeness</label><input id="pricingProfileCompleteDisplay" type="text" readonly></div>
+            <div class="field" style="grid-column:1 / -1;"><label>Brand markups JSON</label><textarea id="brandMarkupsJson" placeholder='{"Carrier": 1200, "Trane": 1500}'></textarea></div>
+            <div class="field" style="grid-column:1 / -1;"><label>Service area fees JSON</label><textarea id="serviceAreaFeesJson" placeholder='{"95814": 0, "95630": 250}'></textarea></div>
+            <div class="field" style="grid-column:1 / -1;"><label>Markup preferences JSON</label><textarea id="markupPreferencesJson" placeholder='{"target_margin_pct": 22, "permit_buffer": 350}'></textarea></div>
+            <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+              <div class="small-note">Use valid JSON objects for pricing rules. This profile is contractor-owned and will power future draft quote generation.</div>
+              <button class="btn btn-green" type="submit">Save Pricing Profile</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
       <section class="screen" id="billingScreen">
         <div class="card">
           <div class="section-title">
@@ -205,12 +231,14 @@
       dashboard: document.getElementById('dashboardScreen'),
       quote: document.getElementById('quoteScreen'),
       profile: document.getElementById('profileScreen'),
+      pricing: document.getElementById('pricingScreen'),
       billing: document.getElementById('billingScreen')
     };
     const state = {
       user: null,
       profile: null,
       contractor: null,
+      pricingProfile: null,
       leads: [],
       leadMap: new Map(),
       selectedLead: null,
@@ -273,6 +301,30 @@
       document.getElementById('totalPriceDisplay').textContent = formatCurrency(totalPrice());
     }
 
+    function formatJsonForTextarea(value) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) return '{}';
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return '{}';
+      }
+    }
+
+    function parseJsonObject(id, fallback = {}) {
+      const raw = document.getElementById(id).value.trim();
+      if (!raw) return fallback;
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        throw new Error(`Invalid JSON in ${id}.`);
+      }
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error(`${id} must be a JSON object.`);
+      }
+      return parsed;
+    }
+
     function populateProfileForm() {
       document.getElementById('profileName').value = state.profile?.full_name || '';
       document.getElementById('profileBusiness').value = state.contractor?.business_name || '';
@@ -285,13 +337,34 @@
       });
     }
 
+    function populatePricingProfileForm() {
+      const profile = state.pricingProfile || {};
+      document.getElementById('baseLaborRate').value = profile.base_labor_rate ?? '';
+      document.getElementById('defaultWarrantyOffered').value = profile.default_warranty_offered ?? '';
+      document.getElementById('defaultInstallTimelineDays').value = profile.default_install_timeline_days ?? '';
+      document.getElementById('brandMarkupsJson').value = formatJsonForTextarea(profile.brand_markups);
+      document.getElementById('serviceAreaFeesJson').value = formatJsonForTextarea(profile.service_area_fees);
+      document.getElementById('markupPreferencesJson').value = formatJsonForTextarea(profile.markup_preferences);
+      document.getElementById('pricingProfileCompleteDisplay').value = state.contractor?.pricing_profile_complete ? 'Complete' : 'Incomplete';
+    }
+
     function renderContractorSummary() {
       const summary = document.getElementById('contractorSummary');
+      const pricingStatus = state.contractor?.pricing_profile_complete ? 'Complete' : 'Incomplete';
       summary.innerHTML = `
         <strong>${state.contractor?.business_name || 'Business name missing'}</strong>
         Status: ${state.contractor?.status || 'pending'}<br>
         ZIPs: ${(state.contractor?.service_zips || []).join(', ') || 'None set'}<br>
-        Services: ${(state.contractor?.services || []).join(', ') || 'None set'}
+        Services: ${(state.contractor?.services || []).join(', ') || 'None set'}<br>
+        Pricing profile: ${pricingStatus}
+      `;
+
+      const pricingSummary = document.getElementById('pricingProfileSummary');
+      pricingSummary.innerHTML = `
+        <strong>${pricingStatus === 'Complete' ? 'Pricing profile ready' : 'Pricing profile incomplete'}</strong>
+        Base labor rate: ${state.pricingProfile?.base_labor_rate !== undefined && state.pricingProfile?.base_labor_rate !== null ? formatCurrency(state.pricingProfile.base_labor_rate) : 'Not set'}<br>
+        Default warranty: ${state.pricingProfile?.default_warranty_offered ?? 'Not set'}<br>
+        Default install timeline: ${state.pricingProfile?.default_install_timeline_days ?? 'Not set'} day(s)
       `;
     }
 
@@ -350,7 +423,17 @@
       const { data: contractor, error: contractorError } = await db.from('contractors').select('*').eq('id', user.id).single();
       if (contractorError) throw contractorError;
       state.contractor = contractor;
+
+      const { data: pricingProfile, error: pricingProfileError } = await db
+        .from('contractor_pricing_profiles')
+        .select('*')
+        .eq('contractor_id', user.id)
+        .maybeSingle();
+      if (pricingProfileError) throw pricingProfileError;
+      state.pricingProfile = pricingProfile || null;
+
       populateProfileForm();
+      populatePricingProfileForm();
       renderContractorSummary();
 
       if (contractor.status === 'pending') {
@@ -470,6 +553,36 @@
         await loadPortal();
       } catch (err) {
         setMessage('portalError', err.message || 'Could not save profile.');
+      }
+    });
+
+    document.getElementById('pricingProfileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const baseLaborRate = Number(document.getElementById('baseLaborRate').value || 0);
+        const defaultWarrantyRaw = document.getElementById('defaultWarrantyOffered').value.trim();
+        const defaultTimelineRaw = document.getElementById('defaultInstallTimelineDays').value.trim();
+        const brandMarkups = parseJsonObject('brandMarkupsJson');
+        const serviceAreaFees = parseJsonObject('serviceAreaFeesJson');
+        const markupPreferences = parseJsonObject('markupPreferencesJson');
+
+        const { data, error } = await db.rpc('upsert_contractor_pricing_profile', {
+          p_base_labor_rate: baseLaborRate,
+          p_brand_markups: brandMarkups,
+          p_service_area_fees: serviceAreaFees,
+          p_default_warranty_offered: defaultWarrantyRaw ? Number(defaultWarrantyRaw) : null,
+          p_default_install_timeline_days: defaultTimelineRaw ? Number(defaultTimelineRaw) : null,
+          p_markup_preferences: markupPreferences,
+          p_contractor_id: state.user.id
+        });
+        if (error) throw error;
+
+        state.pricingProfile = data;
+        await loadPortal();
+        showScreen('pricing');
+        setMessage('portalSuccess', 'Pricing profile saved.');
+      } catch (err) {
+        setMessage('portalError', err.message || 'Could not save pricing profile.');
       }
     });
 
