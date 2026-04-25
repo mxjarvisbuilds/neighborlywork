@@ -6,6 +6,7 @@ loadLocalSecrets();
 
 const TEST_KEY = process.env.STRIPE_TEST_SECRET_KEY || '';
 const CONTRACTOR_ID = process.argv.find(arg => arg.startsWith('--contractor-id='))?.split('=')[1] || '';
+const TEST_PAYMENT_METHOD = process.argv.find(arg => arg.startsWith('--payment-method='))?.split('=')[1] || 'pm_card_visa';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://uuaofdponevqwbfzwxtp.supabase.co';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -55,26 +56,19 @@ async function main() {
   if (!TEST_KEY) throw new Error('STRIPE_TEST_SECRET_KEY is required.');
   if (!SUPABASE_SERVICE_ROLE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required.');
   if (!CONTRACTOR_ID) throw new Error('--contractor-id=<uuid> is required.');
+  if (!TEST_PAYMENT_METHOD.startsWith('pm_')) throw new Error('--payment-method must be a Stripe payment method id, for example pm_card_visa');
 
   const customer = await stripePost('customers', {
     description: `NeighborlyWork fixture contractor ${CONTRACTOR_ID}`,
   });
 
-  const paymentMethod = await stripePost('payment_methods', {
-    type: 'card',
-    'card[number]': '4242424242424242',
-    'card[exp_month]': '12',
-    'card[exp_year]': '2030',
-    'card[cvc]': '123',
-  });
-
-  await stripePost(`payment_methods/${paymentMethod.id}/attach`, {
+  await stripePost(`payment_methods/${TEST_PAYMENT_METHOD}/attach`, {
     customer: customer.id,
   });
 
   await patchContractor({
     stripe_customer_id: customer.id,
-    stripe_payment_method_id: paymentMethod.id,
+    stripe_payment_method_id: TEST_PAYMENT_METHOD,
     payment_authorized: true,
     frozen_at: null,
     frozen_reason: null,
@@ -83,7 +77,7 @@ async function main() {
   console.log(JSON.stringify({
     contractorId: CONTRACTOR_ID,
     stripeCustomerId: customer.id,
-    stripePaymentMethodId: paymentMethod.id,
+    stripePaymentMethodId: TEST_PAYMENT_METHOD,
   }, null, 2));
 }
 

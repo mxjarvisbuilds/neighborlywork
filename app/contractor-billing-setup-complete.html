@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Billing Setup Complete | NeighborlyWork</title>
+  <meta name="description" content="Finalize contractor Stripe billing authorization in test mode." />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+    :root{--green:#1a5c3a;--off:#f5f5f7;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:'DM Sans',system-ui,sans-serif;background:var(--off);color:var(--text);display:grid;place-items:center;min-height:100vh;padding:24px}
+    .card{max-width:720px;width:100%;background:#fff;border-radius:28px;box-shadow:var(--shadow);padding:32px}
+    h1{margin:0 0 10px;font-family:'Outfit',sans-serif;letter-spacing:-.04em;font-size:clamp(2rem,4vw,3rem)}
+    p{color:var(--muted);line-height:1.65}
+    .message{border-radius:16px;padding:14px 16px;margin-top:16px;font-size:.95rem;line-height:1.5;display:none}
+    .message.show{display:block}.message.error{background:#fff1ed;color:#8a2e18}.message.success{background:#eef7f0;color:#1a5c3a}.message.notice{background:#eef5ef;color:#1a5c3a}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:16px;padding:13px 16px;font-weight:800;cursor:pointer;font-size:.95rem;text-decoration:none}.btn-green{background:var(--green);color:#fff}.btn-light{background:#fff;color:var(--text);border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Finishing billing setup…</h1>
+    <p>NeighborlyWork is saving your Stripe test-mode billing authorization. No charge is created during this step.</p>
+    <div class="message notice show" id="statusMessage">Waiting for Stripe return details…</div>
+    <div class="actions">
+      <a class="btn btn-light" href="/app/contractor-portal.html">Back to contractor portal</a>
+    </div>
+  </main>
+
+  <script>
+    function setStatus(type, text) {
+      const el = document.getElementById('statusMessage');
+      el.textContent = text;
+      el.className = `message show ${type}`;
+    }
+
+    async function finalizeBillingSetup() {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id');
+      if (!sessionId) {
+        setStatus('error', 'Stripe did not return a session ID. Go back to the contractor portal and try billing setup again.');
+        return;
+      }
+
+      setStatus('notice', 'Confirming your Stripe setup with NeighborlyWork…');
+      try {
+        const { data: sessionData } = await db.auth.getSession();
+        const accessToken = sessionData?.session?.access_token;
+        if (!accessToken) throw new Error('Contractor session missing. Sign in again to continue billing setup.');
+        let data;
+        if (['127.0.0.1', 'localhost'].includes(window.location.hostname)) {
+          const response = await fetch('http://127.0.0.1:8787/contractor-billing-setup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+              action: 'finalizeCheckout',
+              checkoutSessionId: sessionId,
+            }),
+          });
+          data = await response.json();
+          if (!response.ok || !data?.ok) throw new Error(data?.error || 'NeighborlyWork could not finalize billing setup.');
+        } else {
+          const result = await db.functions.invoke('contractor-billing-setup', {
+            body: {
+              action: 'finalizeCheckout',
+              checkoutSessionId: sessionId,
+            }
+          });
+          if (result.error) throw result.error;
+          data = result.data;
+          if (!data?.ok) throw new Error(data?.error || 'NeighborlyWork could not finalize billing setup.');
+        }
+        setStatus('success', 'Billing authorization saved. Your contractor profile now has a Stripe customer, a saved payment method, and payment authorization enabled. Redirecting back to the portal…');
+        setTimeout(() => {
+          window.location.href = '/app/contractor-portal.html?billing_setup=success';
+        }, 1800);
+      } catch (err) {
+        setStatus('error', err.message || 'NeighborlyWork could not finalize billing setup.');
+      }
+    }
+
+    finalizeBillingSetup();
+  </script>
+</body>
+</html>

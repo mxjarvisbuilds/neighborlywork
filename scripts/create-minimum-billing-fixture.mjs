@@ -10,6 +10,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://uuaofdponevqwbfzwxtp.s
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const PREPARE_CYCLE = process.argv.includes('--prepare-cycle');
 const USE_EXISTING_STRIPE_IDS = process.argv.includes('--use-existing-stripe');
+const EXISTING_CONTRACTOR_ID = process.argv.find(arg => arg.startsWith('--contractor-id='))?.split('=')[1] || '';
 
 function headers() {
   return {
@@ -46,35 +47,37 @@ async function main() {
   if (!SUPABASE_SERVICE_ROLE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required.');
 
   const stamp = Date.now();
-  const contractorId = randomUUID();
+  const contractorId = EXISTING_CONTRACTOR_ID || randomUUID();
   const homeownerId = randomUUID();
   const leadId = randomUUID();
   const baseZip = '95825';
   const serviceType = 'AC Installation';
 
-  await insert('users', [{
-    id: contractorId,
-    email: `contractor+${stamp}@neighborlywork.test`,
-    full_name: 'Fixture Contractor',
-    phone: '+15555550101',
-    role: 'contractor',
-  }]);
+  if (!EXISTING_CONTRACTOR_ID) {
+    await insert('users', [{
+      id: contractorId,
+      email: `contractor+${stamp}@neighborlywork.test`,
+      full_name: 'Fixture Contractor',
+      phone: '+155****0101',
+      role: 'contractor',
+    }]);
 
-  await insert('contractors', [{
-    id: contractorId,
-    business_name: 'Fixture HVAC Co',
-    license_number: `TEST-${stamp}`,
-    insured: true,
-    service_zips: [baseZip],
-    services: [serviceType],
-    status: 'approved',
-    payment_authorized: false,
-    ...(USE_EXISTING_STRIPE_IDS ? {
-      stripe_customer_id: process.env.STRIPE_TEST_CUSTOMER_ID || null,
-      stripe_payment_method_id: process.env.STRIPE_TEST_PAYMENT_METHOD_ID || null,
-      payment_authorized: Boolean(process.env.STRIPE_TEST_CUSTOMER_ID && process.env.STRIPE_TEST_PAYMENT_METHOD_ID),
-    } : {}),
-  }]);
+    await insert('contractors', [{
+      id: contractorId,
+      business_name: 'Fixture HVAC Co',
+      license_number: `TEST-${stamp}`,
+      insured: true,
+      service_zips: [baseZip],
+      services: [serviceType],
+      status: 'approved',
+      payment_authorized: false,
+      ...(USE_EXISTING_STRIPE_IDS ? {
+        stripe_customer_id: process.env.STRIPE_TEST_CUSTOMER_ID || null,
+        stripe_payment_method_id: process.env.STRIPE_TEST_PAYMENT_METHOD_ID || null,
+        payment_authorized: Boolean(process.env.STRIPE_TEST_CUSTOMER_ID && process.env.STRIPE_TEST_PAYMENT_METHOD_ID),
+      } : {}),
+    }]);
+  }
 
   await insert('users', [{
     id: homeownerId,
@@ -90,6 +93,7 @@ async function main() {
     status: 'cleared',
     billing_status: 'ready_for_cycle',
     service_type: serviceType,
+    timeline: 'asap',
     zip_code: baseZip,
     address: '123 Fixture St, Sacramento, CA 95825',
     matched_contractors: [contractorId],
