@@ -32,8 +32,16 @@ test('buildCheckoutSessionRequest creates setup-mode Stripe checkout request wit
   assert.equal(request.form['setup_intent_data[metadata][contractor_id]'], 'contractor-1');
 });
 
-test('validateStripeSetupSession rejects incomplete or cross-contractor sessions', () => {
+test('validateStripeSetupSession rejects incomplete, metadata-missing, or cross-contractor sessions', () => {
   assert.throws(() => validateStripeSetupSession({ session: { status: 'open' }, contractorId: 'contractor-1' }), /not complete/i);
+  assert.throws(() => validateStripeSetupSession({
+    contractorId: 'contractor-1',
+    session: {
+      status: 'complete',
+      customer: 'cus_test_123',
+      setup_intent: { payment_method: 'pm_test_123' },
+    },
+  }), /missing contractor metadata/i);
   assert.throws(() => validateStripeSetupSession({
     contractorId: 'contractor-1',
     session: {

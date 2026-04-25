@@ -29,7 +29,10 @@ function validateStripeSetupSession({ session, contractorId }) {
     throw new Error('Stripe setup session is not complete yet.');
   }
   const metadataContractorId = session?.metadata?.contractor_id || session?.setup_intent?.metadata?.contractor_id || '';
-  if (metadataContractorId && metadataContractorId !== contractorId) {
+  if (!metadataContractorId) {
+    throw new Error('Stripe setup session missing contractor metadata.');
+  }
+  if (metadataContractorId !== contractorId) {
     throw new Error('Stripe setup session belongs to a different contractor.');
   }
 }

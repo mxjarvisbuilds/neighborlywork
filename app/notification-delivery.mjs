@@ -47,6 +47,15 @@ function buildSmsDeliveryRequest({ notification, user, env }) {
   };
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function buildEmailDeliveryRequest({ notification, user, env }) {
   if (!user?.email) throw new Error('Recipient email is required for email delivery.');
   if (!env?.RESEND_API_KEY || !env?.RESEND_FROM_EMAIL) {
@@ -64,7 +73,7 @@ function buildEmailDeliveryRequest({ notification, user, env }) {
       from: env.RESEND_FROM_EMAIL,
       to: user.email,
       subject: notification.subject || 'NeighborlyWork update',
-      html: `<p>Hello ${user.full_name || 'there'},</p><p>${notification.body}</p>`,
+      html: `<p>Hello ${escapeHtml(user.full_name || 'there')},</p><p>${escapeHtml(notification.body)}</p>`,
     },
   };
 }
@@ -104,6 +113,7 @@ function buildNotificationDeliveryFailureUpdate({ notification, failureReason, n
 const NotificationDelivery = {
   MAX_NOTIFICATION_DELIVERY_ATTEMPTS,
   buildEmailDeliveryRequest,
+  escapeHtml,
   buildNotificationDeliveryFailureUpdate,
   buildNotificationDeliverySuccessUpdate,
   buildSmsDeliveryRequest,
@@ -118,6 +128,7 @@ if (typeof window !== 'undefined') {
 export {
   MAX_NOTIFICATION_DELIVERY_ATTEMPTS,
   buildEmailDeliveryRequest,
+  escapeHtml,
   buildNotificationDeliveryFailureUpdate,
   buildNotificationDeliverySuccessUpdate,
   buildSmsDeliveryRequest,

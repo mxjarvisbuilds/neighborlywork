@@ -1,16 +1,31 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+const ALLOWED_ORIGINS = new Set([
+  'https://neighborlywork.com',
+  'https://www.neighborlywork.com',
+  'http://127.0.0.1:8000',
+  'http://localhost:8000',
+]);
+
+function resolveCorsOrigin(req: Request) {
+  const origin = String(req.headers.get('origin') || '').replace(/\/$/, '');
+  return ALLOWED_ORIGINS.has(origin) ? origin : 'https://neighborlywork.com';
+}
+
+function corsHeaders(req: Request) {
+  return {
+    'Access-Control-Allow-Origin': resolveCorsOrigin(req),
+    'Vary': 'Origin',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
 
 type JsonMap = Record<string, unknown>;
 
-function json(body: JsonMap, status = 200) {
+function json(req: Request, body: JsonMap, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      ...corsHeaders,
+      ...corsHeaders(req),
       'Content-Type': 'application/json',
     },
   });
@@ -57,7 +72,10 @@ function validateStripeSetupSession(session: any, contractorId: string) {
     throw new Error('Stripe setup session is not complete yet.');
   }
   const metadataContractorId = session?.metadata?.contractor_id || session?.setup_intent?.metadata?.contractor_id || '';
-  if (metadataContractorId && metadataContractorId !== contractorId) {
+  if (!metadataContractorId) {
+    throw new Error('Stripe setup session missing contractor metadata.');
+  }
+  if (metadataContractorId !== contractorId) {
     throw new Error('Stripe setup session belongs to a different contractor.');
   }
 }
@@ -152,8 +170,8 @@ async function createCustomerIfNeeded(contractor: JsonMap, contractorId: string)
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST') return json({ ok: false, error: 'Method not allowed.' }, 405);
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) });
+  if (req.method !== 'POST') return json(req, { ok: false, error: 'Method not allowed.' }, 405);
 
   try {
     const supabaseUrl = requiredEnv('SUPABASE_URL');
@@ -177,7 +195,7 @@ Deno.serve(async (req) => {
           origin: body?.origin || req.headers.get('origin'),
         })),
       });
-      return json({ ok: true, checkoutUrl: session.url, customerId });
+      return json(req, { ok: true, checkoutUrl: session.url });
     }
 
     if (action === 'finalizeCheckout') {
@@ -190,17 +208,15 @@ Deno.serve(async (req) => {
         body: formEncode({ 'invoice_settings[default_payment_method]': contractorUpdate.stripe_payment_method_id }),
       });
       await patchContractor(serviceRoleKey, supabaseUrl, user.id, contractorUpdate);
-      return json({
+      return json(req, {
         ok: true,
         contractorId: user.id,
-        stripeCustomerId: contractorUpdate.stripe_customer_id,
-        stripePaymentMethodId: contractorUpdate.stripe_payment_method_id,
         paymentAuthorized: true,
       });
     }
 
-    return json({ ok: false, error: 'Unsupported action.' }, 400);
+    return json(req, { ok: false, error: 'Unsupported action.' }, 400);
   } catch (error) {
-    return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 400);
+    return json(req, { ok: false, error: error instanceof Error ? error.message : String(error) }, 400);
   }
 });

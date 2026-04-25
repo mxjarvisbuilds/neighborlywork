@@ -393,6 +393,15 @@
       return (fullName || 'Homeowner').split(' ')[0];
     }
 
+    function escapeHtml(value = '') {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function extractCity(address) {
       if (!address) return '—';
       const parts = address.split(',').map(s => s.trim()).filter(Boolean);
@@ -558,10 +567,10 @@
       const summary = document.getElementById('contractorSummary');
       const pricingStatus = state.contractor?.pricing_profile_complete ? 'Complete' : 'Incomplete';
       summary.innerHTML = `
-        <strong>${state.contractor?.business_name || 'Business name missing'}</strong>
-        Status: ${state.contractor?.status || 'pending'}<br>
-        ZIPs: ${(state.contractor?.service_zips || []).join(', ') || 'None set'}<br>
-        Services: ${(state.contractor?.services || []).join(', ') || 'None set'}<br>
+        <strong>${escapeHtml(state.contractor?.business_name || 'Business name missing')}</strong>
+        Status: ${escapeHtml(state.contractor?.status || 'pending')}<br>
+        ZIPs: ${escapeHtml((state.contractor?.service_zips || []).join(', ') || 'None set')}<br>
+        Services: ${escapeHtml((state.contractor?.services || []).join(', ') || 'None set')}<br>
         Pricing profile: ${pricingStatus}
       `;
 
@@ -593,7 +602,7 @@
       if (frozen) {
         target.innerHTML = `
           <strong>Billing profile frozen</strong>
-          <div class="small-note">Frozen at ${formatDate(contractor.frozen_at)}. Reason: ${contractor.frozen_reason || 'No reason recorded'}.</div>
+          <div class="small-note">Frozen at ${formatDate(contractor.frozen_at)}. Reason: ${escapeHtml(contractor.frozen_reason || 'No reason recorded')}.</div>
           <div class="small-note">Save a new test-mode payment method to clear the freeze and restore billing readiness.</div>
         `;
         return;
@@ -601,8 +610,7 @@
       if (ready) {
         target.innerHTML = `
           <strong>Billing authorized</strong>
-          <div class="small-note">Stripe customer saved: ${contractor.stripe_customer_id}</div>
-          <div class="small-note">Default payment method saved: ${contractor.stripe_payment_method_id}</div>
+          <div class="small-note">Payment method saved with Stripe.</div>
           <div class="small-note">NeighborlyWork can bill only after a completed install creates a billing cycle. No charge happens during setup.</div>
         `;
         return;
@@ -656,8 +664,8 @@
       state.selectedDraft = null;
       const lead = state.selectedLead;
       document.getElementById('leadSummary').innerHTML = `
-        <strong>${firstName(lead.homeowner_name || 'Homeowner')} · ${lead.service_type || 'HVAC Request'}</strong>
-        ${extractCity(lead.address)} · ${lead.zip_code || '—'} · ${lead.home_size_sqft || 'Home size unknown'}
+        <strong>${escapeHtml(firstName(lead.homeowner_name || 'Homeowner'))} · ${escapeHtml(lead.service_type || 'HVAC Request')}</strong>
+        ${escapeHtml(extractCity(lead.address))} · ${escapeHtml(lead.zip_code || '—')} · ${escapeHtml(lead.home_size_sqft || 'Home size unknown')}
       `;
       showScreen('quote');
       maybeGenerateDraftQuote();

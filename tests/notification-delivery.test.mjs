@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   MAX_NOTIFICATION_DELIVERY_ATTEMPTS,
   buildEmailDeliveryRequest,
+  escapeHtml,
   buildNotificationDeliveryFailureUpdate,
   buildNotificationDeliverySuccessUpdate,
   buildSmsDeliveryRequest,
@@ -82,6 +83,22 @@ test('buildEmailDeliveryRequest produces a Resend send-email request for email n
   assert.equal(request.json.from, 'ops@neighborlywork.com');
   assert.equal(request.json.subject, 'Billing cycle pending');
   assert.match(request.json.html, /ACME HVAC/);
+});
+
+test('buildEmailDeliveryRequest escapes user-controlled HTML fields', () => {
+  const request = buildEmailDeliveryRequest({
+    notification: { id: 'notif-1', subject: 'Unsafe input', body: '<img src=x onerror=alert(1)>' },
+    user: { email: 'contractor@example.com', full_name: '<b>Bad Name</b>' },
+    env: {
+      RESEND_API_KEY: 're_123',
+      RESEND_FROM_EMAIL: 'ops@neighborlywork.com',
+    },
+  });
+
+  assert.equal(escapeHtml('<b>Bad Name</b>'), '&lt;b&gt;Bad Name&lt;/b&gt;');
+  assert.doesNotMatch(request.json.html, /<img/);
+  assert.doesNotMatch(request.json.html, /<b>Bad Name<\/b>/);
+  assert.match(request.json.html, /&lt;img src=x onerror=alert\(1\)&gt;/);
 });
 
 test('buildNotificationDeliverySuccessUpdate marks notifications sent with provider metadata', () => {
