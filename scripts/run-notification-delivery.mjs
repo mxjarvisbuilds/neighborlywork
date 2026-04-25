@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { loadLocalSecrets } from './load-local-secrets.mjs';
 import {
   buildEmailDeliveryRequest,
   buildNotificationDeliveryFailureUpdate,
@@ -8,6 +9,8 @@ import {
   resolveDeliveryProviders,
   shouldAttemptNotificationDelivery,
 } from '../app/notification-delivery.mjs';
+
+loadLocalSecrets();
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://uuaofdponevqwbfzwxtp.supabase.co';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';

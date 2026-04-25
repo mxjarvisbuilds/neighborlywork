@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { loadLocalSecrets } from './load-local-secrets.mjs';
 import {
   buildBillingChargeFailurePlan,
   buildBillingChargeSuccessPlan,
@@ -7,9 +8,11 @@ import {
   shouldAttemptBillingCycleCharge,
 } from '../app/billing-charge-execution.mjs';
 
+loadLocalSecrets();
+
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://uuaofdponevqwbfzwxtp.supabase.co';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
+const STRIPE_SECRET_KEY = process.env.STRIPE_TEST_SECRET_KEY || process.env.STRIPE_SECRET_KEY || '';
 const DRY_RUN = process.argv.includes('--dry-run');
 const LIMIT_ARG = process.argv.find(arg => arg.startsWith('--limit='));
 const LIMIT = LIMIT_ARG ? Number(LIMIT_ARG.split('=')[1]) : null;
