@@ -39,10 +39,18 @@
 ## 2. Environment variables needed
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (required for local billing + notification runner scripts)
+- `STRIPE_SECRET_KEY` (required for live billing charge execution)
+- `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` (required for SMS delivery)
+- `RESEND_API_KEY` / `RESEND_FROM_EMAIL` (required for email delivery)
 
-Current project values are stored in:
+Current client-side project values are stored in:
 - `supabase-config.js`
 - `app/supabase-config.js`
+
+Local operator scripts added in this repo:
+- `scripts/run-billing-cycle-charges.mjs`
+- `scripts/run-notification-delivery.mjs`
 
 ## 3. How to deploy to Netlify
 1. Push the NeighborlyWork project to GitHub.
@@ -79,6 +87,8 @@ Current project values are stored in:
 - `app/messages.html` assumes selected contractor exists on a lead before messaging is allowed
 - `additionalServices` from intake is currently stored inside `additional_notes`, not a dedicated structured column
 - Google auth is not enabled yet
+- Local Section 6 billing runner and Section 5 notification dispatcher now exist, but live execution is blocked until `SUPABASE_SERVICE_ROLE_KEY` is configured locally
+- Live SMS/email delivery also requires complete provider credentials (`TWILIO_ACCOUNT_SID` + `TWILIO_FROM_NUMBER`, `RESEND_FROM_EMAIL`) before the dispatcher can send
 - Some older root files and older `/app` pages are deprecated but still present in the repo
 
 ## 7. Next features for v2
