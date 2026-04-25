@@ -1,0 +1,14 @@
+# NeighborlyWork legacy-route redirects
+# Keep old public URLs from serving stale standalone pages after cleanup.
+/start.html                 /index.html                          301
+/homepage-draft.html        /index.html                          301
+/logo-preview.html          /index.html                          301
+/homeowner-intake.html      /app/homeowner-intake.html           301
+/contractor-portal.html     /app/contractor-portal.html          301
+/lead-inbox.html            /app/lead-inbox.html                 301
+/founder-dashboard.html     /app/founder-dashboard.html          301
+/app/get-quotes.html        /app/homeowner-intake.html           301
+/app/pricing.html           /index.html#contractor               301
+/app/contractors.html       /app/contractor-auth.html            301
+/app/test-community.html    /index.html                          301
+/app/test-pro.html          /index.html                          301
