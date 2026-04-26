@@ -54,6 +54,10 @@
       return (name || '?').split(' ').map(part => part[0]).join('').slice(0,2).toUpperCase();
     }
 
+    function escapeHtml(value = '') {
+      return String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    }
+
     function formatTime(value) {
       if (!value) return '';
       return new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
@@ -127,15 +131,15 @@
         <article class="conversation ${state.active?.leadId === conv.leadId ? 'active' : ''}" data-lead="${conv.leadId}">
           <div class="row">
             <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-              <span class="avatar">${initials(conv.otherName)}</span>
+              <span class="avatar">${escapeHtml(initials(conv.otherName))}</span>
               <div style="min-width:0;">
-                <div class="name">${conv.otherName}</div>
-                <div class="meta">${conv.serviceType || 'HVAC'}</div>
+                <div class="name">${escapeHtml(conv.otherName)}</div>
+                <div class="meta">${escapeHtml(conv.serviceType || 'HVAC')}</div>
               </div>
             </div>
             ${conv.unread ? `<span class="unread">${conv.unread}</span>` : ''}
           </div>
-          <div class="preview">${conv.last ? conv.last.message_text.slice(0, 72) : 'No messages yet'}</div>
+          <div class="preview">${escapeHtml(conv.last ? conv.last.message_text.slice(0, 72) : 'No messages yet')}</div>
         </article>`).join('');
       list.querySelectorAll('.conversation').forEach(el => el.addEventListener('click', () => openConversation(el.dataset.lead)));
     }
@@ -168,7 +172,7 @@
         return `
           <div class="bubble-wrap ${sent ? 'sent' : 'received'}">
             <div class="bubble ${sent ? 'sent' : 'received'}">
-              <div>${msg.message_text}</div>
+              <div>${escapeHtml(msg.message_text)}</div>
               <div class="time">${formatTime(msg.sent_at)}</div>
             </div>
           </div>`;

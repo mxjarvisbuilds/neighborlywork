@@ -74,6 +74,10 @@
       return formatLeadStatus(status || 'new');
     }
 
+    function escapeHtml(value = '') {
+      return String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    }
+
     function formatDate(value) {
       try {
         return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -138,14 +142,14 @@
           <article class="lead-row">
             <div class="lead-top">
               <div>
-                <div class="lead-title">${lead.service_type || 'HVAC Request'}</div>
+                <div class="lead-title">${escapeHtml(lead.service_type || 'HVAC Request')}</div>
                 <div class="lead-meta">Submitted ${formatDate(lead.created_at)}${lead.status === 'pending_verification' && lead.verification_window_expires ? ` · Verify by ${window.LeadVerification?.formatVerificationWindow ? window.LeadVerification.formatVerificationWindow(lead.verification_window_expires) : formatDate(lead.verification_window_expires)}` : ''}</div>
               </div>
               <span class="${badgeClass(lead.status)}">${formatStatus(lead.status)}</span>
             </div>
             <div class="lead-actions">
-              ${isChangeOrderOpen ? `<a class="btn btn-green" href="/app/change-order-review.html?lead_id=${lead.id}">Review Change Order</a>` : ''}
-              <a class="btn ${canViewQuotes ? 'btn-green' : 'btn-light disabled'}" href="${canViewQuotes ? `/app/quotes.html?lead_id=${lead.id}` : '#'}">${canViewQuotes ? `View Quotes (${quoteCount})` : 'Waiting for quotes'}</a>
+              ${isChangeOrderOpen ? `<a class="btn btn-green" href="/app/change-order-review.html?lead_id=${encodeURIComponent(lead.id)}">Review Change Order</a>` : ''}
+              <a class="btn ${canViewQuotes ? 'btn-green' : 'btn-light disabled'}" href="${canViewQuotes ? `/app/quotes.html?lead_id=${encodeURIComponent(lead.id)}` : '#'}">${canViewQuotes ? `View Quotes (${quoteCount})` : 'Waiting for quotes'}</a>
             </div>
           </article>`;
       }).join('');

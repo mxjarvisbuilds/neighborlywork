@@ -128,11 +128,15 @@
       return `<span class="badge ${meta.badge}">${meta.label}</span>`;
     }
 
+    function escapeHtml(value = '') {
+      return String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    }
+
     function display(value) {
-      if (Array.isArray(value)) return value.length ? value.join(', ') : '—';
+      if (Array.isArray(value)) return value.length ? escapeHtml(value.join(', ')) : '—';
       if (value === true) return 'Yes';
       if (value === false) return 'No';
-      return value || '—';
+      return value ? escapeHtml(value) : '—';
     }
 
     function formatDateTime(value) {
@@ -250,7 +254,7 @@
       document.getElementById('urgentLeadsCount').textContent = state.leads.filter(l => l.urgency_flag).length;
 
       const services = [...new Set(state.leads.map(l => l.service_type).filter(Boolean))].sort();
-      document.getElementById('serviceFilter').innerHTML = '<option value="all">All services</option>' + services.map(service => `<option value="${service}">${service}</option>`).join('');
+      document.getElementById('serviceFilter').innerHTML = '<option value="all">All services</option>' + services.map(service => `<option value="${escapeHtml(service)}">${escapeHtml(service)}</option>`).join('');
 
       renderTable();
       if (state.leads.length) renderDetails(state.selectedLeadId || state.leads[0].id);
@@ -277,8 +281,8 @@
       tbody.innerHTML = rows.map(lead => {
         const homeowner = state.homeowners.get(lead.homeowner_id);
         return `
-          <tr class="lead-row" data-lead-id="${lead.id}">
-            <td>${homeowner?.full_name || homeowner?.email || 'Unknown'}</td>
+          <tr class="lead-row" data-lead-id="${escapeHtml(lead.id)}">
+            <td>${escapeHtml(homeowner?.full_name || homeowner?.email || 'Unknown')}</td>
             <td>${display(lead.service_type)}</td>
             <td>${display(lead.zip_code)}</td>
             <td>${display(lead.address)}</td>
@@ -359,19 +363,19 @@
             <div class="list-box">
               <h3>Matched contractors</h3>
               <div class="mini-list">
-                ${matchedNames.length ? matchedNames.map(name => `<div class="mini-row"><strong>${name}</strong></div>`).join('') : '<div class="mini-row">No contractors matched yet.</div>'}
+                ${matchedNames.length ? matchedNames.map(name => `<div class="mini-row"><strong>${escapeHtml(name)}</strong></div>`).join('') : '<div class="mini-row">No contractors matched yet.</div>'}
               </div>
             </div>
             <div class="list-box">
               <h3>Submitted quotes</h3>
               <div class="mini-list">
-                ${leadQuotes.length ? leadQuotes.map(quote => `<div class="mini-row"><strong>${state.contractors.get(quote.contractor_id) || 'Contractor'}</strong>Total: $${Number(quote.price_total || quote.total_price || 0).toLocaleString()}<br>Status: ${quote.status || 'submitted'}<br>Submitted: ${formatDate(quote.submitted_at)}</div>`).join('') : '<div class="mini-row">No quotes submitted yet.</div>'}
+                ${leadQuotes.length ? leadQuotes.map(quote => `<div class="mini-row"><strong>${escapeHtml(state.contractors.get(quote.contractor_id) || 'Contractor')}</strong>Total: $${Number(quote.price_total || quote.total_price || 0).toLocaleString()}<br>Status: ${escapeHtml(quote.status || 'submitted')}<br>Submitted: ${formatDate(quote.submitted_at)}</div>`).join('') : '<div class="mini-row">No quotes submitted yet.</div>'}
               </div>
             </div>
             <div class="list-box">
               <h3>Change orders</h3>
               <div class="mini-list">
-                ${leadChangeOrders.length ? leadChangeOrders.map(changeOrder => `<div class="mini-row"><strong>${state.contractors.get(changeOrder.contractor_id) || 'Contractor'}</strong>Original: $${Number(changeOrder.original_price || 0).toLocaleString()} · Revised: $${Number(changeOrder.revised_price || 0).toLocaleString()}<br>Reason: ${String(changeOrder.reason_category || '').replace(/_/g, ' ')} · Need: ${String(changeOrder.is_upsell_or_necessary || '').replace(/_/g, ' ')}<br>Homeowner response: ${String(changeOrder.homeowner_response || 'pending').replace(/_/g, ' ')}<br>Window expires: ${formatDateTime(changeOrder.response_window_expires)}</div>`).join('') : '<div class="mini-row">No change orders recorded for this lead.</div>'}
+                ${leadChangeOrders.length ? leadChangeOrders.map(changeOrder => `<div class="mini-row"><strong>${escapeHtml(state.contractors.get(changeOrder.contractor_id) || 'Contractor')}</strong>Original: $${Number(changeOrder.original_price || 0).toLocaleString()} · Revised: $${Number(changeOrder.revised_price || 0).toLocaleString()}<br>Reason: ${escapeHtml(String(changeOrder.reason_category || '').replace(/_/g, ' '))} · Need: ${escapeHtml(String(changeOrder.is_upsell_or_necessary || '').replace(/_/g, ' '))}<br>Homeowner response: ${escapeHtml(String(changeOrder.homeowner_response || 'pending').replace(/_/g, ' '))}<br>Window expires: ${formatDateTime(changeOrder.response_window_expires)}</div>`).join('') : '<div class="mini-row">No change orders recorded for this lead.</div>'}
               </div>
             </div>
             <div class="list-box">

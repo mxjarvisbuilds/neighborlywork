@@ -56,6 +56,10 @@
       target.classList.add('show');
     }
 
+    function escapeHtml(value = '') {
+      return String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    }
+
     function formatCurrency(value) {
       return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(value || 0));
     }
@@ -222,12 +226,12 @@
             const contractorName = contractorNames.get(response.responding_contractor_id) || 'Competing contractor';
             return `
               <div class="response-item">
-                <strong>${contractorName}</strong>
-                <div class="meta">Response: ${String(response.response_type || '').replace(/_/g, ' ')}${response.alternative_price ? ` · Alternative total ${formatCurrency(response.alternative_price)}` : ''}</div>
+                <strong>${escapeHtml(contractorName)}</strong>
+                <div class="meta">Response: ${escapeHtml(String(response.response_type || '').replace(/_/g, ' '))}${response.alternative_price ? ` · Alternative total ${formatCurrency(response.alternative_price)}` : ''}</div>
                 <div class="meta">Submitted ${formatDateTime(response.submitted_at)}</div>
-                <div style="margin-top:8px;">${response.response_notes || 'No additional notes provided.'}</div>
+                <div style="margin-top:8px;">${escapeHtml(response.response_notes || 'No additional notes provided.')}</div>
                 <div class="actions">
-                  <button class="btn btn-light" type="button" data-switch-response="${response.id}">Reject & Switch to This Contractor</button>
+                  <button class="btn btn-light" type="button" data-switch-response="${escapeHtml(response.id)}">Reject & Switch to This Contractor</button>
                 </div>
               </div>`;
           }).join('')
@@ -237,13 +241,13 @@
         <section class="card">
           <div class="section-title"><div><h2>Submitted change order</h2><p>Review why the scope changed and the revised commercial terms.</p></div></div>
           <div class="summary">
-            <strong>${selectedContractorName}</strong>
+            <strong>${escapeHtml(selectedContractorName)}</strong>
             <div class="small">Original total: ${formatCurrency(changeOrder.original_price)} · Revised total: ${formatCurrency(changeOrder.revised_price)} · Difference: ${formatCurrency(changeOrder.price_difference)}</div>
             <div class="small">Submitted ${formatDateTime(changeOrder.submitted_at)} · Response window closes ${formatDateTime(changeOrder.response_window_expires)}</div>
           </div>
-          <div class="field"><label>Reason category</label><div>${String(changeOrder.reason_category || '').replace(/_/g, ' ')}</div></div>
-          <div class="field"><label>Need type</label><div>${String(changeOrder.is_upsell_or_necessary || '').replace(/_/g, ' ')}</div></div>
-          <div class="field"><label>Contractor explanation</label><div>${changeOrder.reason_description || '—'}</div></div>
+          <div class="field"><label>Reason category</label><div>${escapeHtml(String(changeOrder.reason_category || '').replace(/_/g, ' '))}</div></div>
+          <div class="field"><label>Need type</label><div>${escapeHtml(String(changeOrder.is_upsell_or_necessary || '').replace(/_/g, ' '))}</div></div>
+          <div class="field"><label>Contractor explanation</label><div>${escapeHtml(changeOrder.reason_description || '—')}</div></div>
           <div class="actions">
             <button class="btn btn-green" type="button" id="acceptBtn">Accept Change Order</button>
             <button class="btn btn-light" type="button" id="requestInfoBtn">Request More Info</button>

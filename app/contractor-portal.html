@@ -458,7 +458,7 @@
     function renderDraftQuoteSummary(message, isReady = false) {
       const el = document.getElementById('draftQuoteSummary');
       if (!isReady) {
-        el.innerHTML = `<strong>Draft quote not ready</strong><div class="small-note">${message}</div>`;
+        el.innerHTML = `<strong>Draft quote not ready</strong><div class="small-note">${escapeHtml(message)}</div>`;
         return;
       }
       el.innerHTML = message;
@@ -483,7 +483,7 @@
       updateQuoteTimingDisplay();
       renderDraftQuoteSummary(`
         <strong>Draft generated</strong>
-        Recommended brand: ${draft.equipment_brand || '—'}<br>
+        Recommended brand: ${escapeHtml(draft.equipment_brand || '—')}<br>
         Estimated size: ${draft.system_size_tons || '—'} ton(s)<br>
         Warranty: ${draft.warranty_years || '—'} year(s)<br>
         Total: ${formatCurrency(draft.price_total)}
@@ -682,14 +682,14 @@
         const won = lead.selected_contractor_id === state.user.id;
         return `
           <tr>
-            <td>${firstName(lead.homeowner_name || 'Homeowner')}</td>
-            <td>${lead.service_type || '—'}</td>
-            <td>${extractCity(lead.address)} / ${lead.zip_code || '—'}</td>
-            <td>${lead.home_size_sqft || '—'}</td>
+            <td>${escapeHtml(firstName(lead.homeowner_name || 'Homeowner'))}</td>
+            <td>${escapeHtml(lead.service_type || '—')}</td>
+            <td>${escapeHtml(extractCity(lead.address))} / ${escapeHtml(lead.zip_code || '—')}</td>
+            <td>${escapeHtml(lead.home_size_sqft || '—')}</td>
             <td>${lead.urgency_flag ? '<span class="badge badge-urgent">Urgent</span>' : 'Standard'}</td>
             <td>${formatDate(lead.created_at)}</td>
             <td>${won ? '<span class="badge badge-won">Won</span>' : alreadyQuoted ? '<span class="badge badge-quoted">Quoted</span>' : statusBadge(lead.status)}</td>
-            <td>${won ? '<span class="badge badge-won">Won</span>' : alreadyQuoted ? '<span class="badge badge-quoted">Quoted</span>' : `<button class="btn btn-orange" type="button" data-lead="${lead.id}">Submit Quote</button>`}</td>
+            <td>${won ? '<span class="badge badge-won">Won</span>' : alreadyQuoted ? '<span class="badge badge-quoted">Quoted</span>' : `<button class="btn btn-orange" type="button" data-lead="${escapeHtml(lead.id)}">Submit Quote</button>`}</td>
           </tr>`;
       }).join('');
       tbody.querySelectorAll('button[data-lead]').forEach(btn => {
@@ -727,14 +727,14 @@
         summary.innerHTML = '<strong>Ready for submission</strong><div class="small-note">Select a won lead in pending verification to submit a change order.</div>';
         return;
       }
-      summary.innerHTML = `<strong>${firstName(lead.homeowner_name || 'Homeowner')} · ${lead.service_type || 'HVAC Request'}</strong><div class="small-note">Original selected quote: ${formatCurrency(quote.price_total ?? quote.total_price ?? 0)} · Status: ${formatLeadStatus(lead.status)}</div>`;
+      summary.innerHTML = `<strong>${escapeHtml(firstName(lead.homeowner_name || 'Homeowner'))} · ${escapeHtml(lead.service_type || 'HVAC Request')}</strong><div class="small-note">Original selected quote: ${formatCurrency(quote.price_total ?? quote.total_price ?? 0)} · Status: ${escapeHtml(formatLeadStatus(lead.status))}</div>`;
     }
 
     function renderChangeOrders() {
       const submissionLeads = getOpenWonLeadsEligibleForChangeOrder();
       const submissionSelect = document.getElementById('changeOrderLeadSelect');
       const submissionValue = submissionSelect.value;
-      submissionSelect.innerHTML = '<option value="">Select lead</option>' + submissionLeads.map(lead => `<option value="${lead.id}">${firstName(lead.homeowner_name || 'Homeowner')} · ${lead.service_type || 'HVAC Request'} · ${lead.zip_code || '—'}</option>`).join('');
+      submissionSelect.innerHTML = '<option value="">Select lead</option>' + submissionLeads.map(lead => `<option value="${escapeHtml(lead.id)}">${escapeHtml(firstName(lead.homeowner_name || 'Homeowner'))} · ${escapeHtml(lead.service_type || 'HVAC Request')} · ${escapeHtml(lead.zip_code || '—')}</option>`).join('');
       if (submissionLeads.some(lead => lead.id === submissionValue)) submissionSelect.value = submissionValue;
       updateChangeOrderLeadSummary();
 
@@ -743,7 +743,7 @@
       const responseValue = responseSelect.value;
       responseSelect.innerHTML = '<option value="">Select open change order</option>' + competingOrders.map(changeOrder => {
         const lead = state.leadMap.get(changeOrder.lead_id);
-        return `<option value="${changeOrder.id}">${firstName(lead?.homeowner_name || 'Homeowner')} · ${lead?.service_type || 'HVAC Request'} · expires ${formatDate(changeOrder.response_window_expires)}</option>`;
+        return `<option value="${escapeHtml(changeOrder.id)}">${escapeHtml(firstName(lead?.homeowner_name || 'Homeowner'))} · ${escapeHtml(lead?.service_type || 'HVAC Request')} · expires ${formatDate(changeOrder.response_window_expires)}</option>`;
       }).join('');
       if (competingOrders.some(changeOrder => changeOrder.id === responseValue)) responseSelect.value = responseValue;
 
@@ -757,12 +757,12 @@
       const activity = [];
       owned.forEach(changeOrder => {
         const lead = state.leadMap.get(changeOrder.lead_id);
-        activity.push(`<div style="padding:12px 0;border-top:1px solid rgba(0,0,0,.06);"><strong>Submitted</strong> · ${firstName(lead?.homeowner_name || 'Homeowner')} · ${formatCurrency(changeOrder.revised_price)}<div class="small-note">Homeowner response: ${String(changeOrder.homeowner_response || 'pending').replace(/_/g, ' ')} · Window closes ${formatDate(changeOrder.response_window_expires)}</div></div>`);
+        activity.push(`<div style="padding:12px 0;border-top:1px solid rgba(0,0,0,.06);"><strong>Submitted</strong> · ${escapeHtml(firstName(lead?.homeowner_name || 'Homeowner'))} · ${formatCurrency(changeOrder.revised_price)}<div class="small-note">Homeowner response: ${escapeHtml(String(changeOrder.homeowner_response || 'pending').replace(/_/g, ' '))} · Window closes ${formatDate(changeOrder.response_window_expires)}</div></div>`);
       });
       responded.forEach(response => {
         const changeOrder = state.changeOrders.find(item => item.id === response.change_order_id);
         const lead = state.leadMap.get(changeOrder?.lead_id);
-        activity.push(`<div style="padding:12px 0;border-top:1px solid rgba(0,0,0,.06);"><strong>Responded</strong> · ${firstName(lead?.homeowner_name || 'Homeowner')} · ${String(response.response_type || '').replace(/_/g, ' ')}<div class="small-note">Submitted ${formatDate(response.submitted_at)}${response.alternative_price ? ` · Alternative total ${formatCurrency(response.alternative_price)}` : ''}</div></div>`);
+        activity.push(`<div style="padding:12px 0;border-top:1px solid rgba(0,0,0,.06);"><strong>Responded</strong> · ${escapeHtml(firstName(lead?.homeowner_name || 'Homeowner'))} · ${escapeHtml(String(response.response_type || '').replace(/_/g, ' '))}<div class="small-note">Submitted ${formatDate(response.submitted_at)}${response.alternative_price ? ` · Alternative total ${formatCurrency(response.alternative_price)}` : ''}</div></div>`);
       });
       document.getElementById('changeOrderActivityList').innerHTML = activity.length
         ? activity.join('')
