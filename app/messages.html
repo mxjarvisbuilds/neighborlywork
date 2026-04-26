@@ -22,7 +22,7 @@
     <aside class="sidebar">
       <div class="brand"><span class="mark"></span>NeighborlyWork</div>
       <div style="margin-bottom:14px;"><a href="/app/homeowner-dashboard.html" id="backLink" style="color:var(--green);font-weight:800;text-decoration:none;">← Back</a></div>
-      <div class="search"><input id="searchInput" type="text" placeholder="Search conversations"></div>
+      <div class="search"><input id="searchInput" type="text" placeholder="Search conversations" aria-label="Search conversations"></div>
       <div class="conversation-list" id="conversationList"></div>
     </aside>
     <section class="chat">
@@ -35,7 +35,7 @@
         <div class="empty">Only leads with a selected contractor can be messaged.</div>
       </div>
       <form class="panel composer" id="composerForm">
-        <input id="messageInput" type="text" placeholder="Write a message" maxlength="1000" />
+        <input id="messageInput" type="text" placeholder="Write a message" maxlength="1000"  aria-label="Message">
         <button class="btn btn-green" type="submit">Send</button>
       </form>
     </section>

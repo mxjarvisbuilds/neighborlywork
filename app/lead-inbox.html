@@ -59,7 +59,7 @@
       </section>
 
       <div class="filters">
-        <select id="statusFilter">
+        <select id="statusFilter" aria-label="Status filter">
           <option value="all">All statuses</option>
           <option value="new">New</option>
           <option value="matched_to_contractors">Matched</option>
@@ -74,8 +74,8 @@
           <option value="cleared">Cleared</option>
           <option value="cancelled">Cancelled</option>
         </select>
-        <input id="zipFilter" type="text" maxlength="5" placeholder="ZIP code">
-        <select id="serviceFilter">
+        <input id="zipFilter" type="text" maxlength="5" placeholder="ZIP code" aria-label="ZIP code filter">
+        <select id="serviceFilter" aria-label="Service filter">
           <option value="all">All services</option>
         </select>
       </div>

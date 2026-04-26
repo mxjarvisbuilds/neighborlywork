@@ -50,8 +50,8 @@
           <div class="error" id="loginError"></div>
           <div class="success" id="loginSuccess"></div>
           <form class="form" id="loginForm">
-            <div class="field"><label>Email address</label><input id="loginEmail" type="email" placeholder="you@company.com" required></div>
-            <div class="field"><label>Password</label><div class="password-wrap"><input id="loginPass" type="password" placeholder="Your password" required><button class="toggle" type="button" data-toggle="loginPass">Show</button></div></div>
+            <div class="field"><label>Email address</label><input id="loginEmail" type="email" placeholder="you@company.com" required aria-label="Email address"></div>
+            <div class="field"><label>Password</label><div class="password-wrap"><input id="loginPass" type="password" placeholder="Your password" required aria-label="Password"><button class="toggle" type="button" data-toggle="loginPass">Show</button></div></div>
             <button class="btn btn-green" type="submit">Log In →</button>
           </form>
           <div class="link-row"><button class="link" type="button" onclick="openScreen('apply')">Create an account</button></div>
@@ -144,14 +144,14 @@
             <h2>Create your account</h2>
             <p class="small">Add your business details and confirm the agreement terms to finish your application.</p>
             <form class="form" id="signupForm">
-              <div class="field"><label>First name</label><input id="firstName" type="text" placeholder="Carlos" required></div>
-              <div class="field"><label>Last name</label><input id="lastName" type="text" placeholder="Mendez" required></div>
-              <div class="field"><label>Business name</label><input id="businessName" type="text" placeholder="Arctic Air HVAC" required></div>
-              <div class="field"><label>Email address</label><input id="signupEmail" type="email" placeholder="you@company.com" required></div>
-              <div class="field"><label>Phone number</label><input id="phone" type="tel" placeholder="(555) 555-5555" required></div>
-              <div class="field"><label>Password</label><div class="password-wrap"><input id="signupPass" type="password" placeholder="Create password" required><button class="toggle" type="button" data-toggle="signupPass">Show</button></div></div>
-              <div class="field"><label>License number</label><input id="licenseNumber" type="text" placeholder="CAC123456 or leave blank if pending"></div>
-              <div class="field"><label>Service ZIP codes</label><input id="serviceZips" type="text" placeholder="95825, 95661, 95630"></div>
+              <div class="field"><label>First name</label><input id="firstName" type="text" placeholder="Carlos" required aria-label="First name"></div>
+              <div class="field"><label>Last name</label><input id="lastName" type="text" placeholder="Mendez" required aria-label="Last name"></div>
+              <div class="field"><label>Business name</label><input id="businessName" type="text" placeholder="Arctic Air HVAC" required aria-label="Business name"></div>
+              <div class="field"><label>Email address</label><input id="signupEmail" type="email" placeholder="you@company.com" required aria-label="Email address"></div>
+              <div class="field"><label>Phone number</label><input id="phone" type="tel" placeholder="(555) 555-5555" required aria-label="Phone number"></div>
+              <div class="field"><label>Password</label><div class="password-wrap"><input id="signupPass" type="password" placeholder="Create password" required aria-label="Password"><button class="toggle" type="button" data-toggle="signupPass">Show</button></div></div>
+              <div class="field"><label>License number</label><input id="licenseNumber" type="text" placeholder="CAC123456 or leave blank if pending" aria-label="CSLB license number"></div>
+              <div class="field"><label>Service ZIP codes</label><input id="serviceZips" type="text" placeholder="95825, 95661, 95630" aria-label="Service ZIP codes"></div>
               <div class="field">
                 <label>Services you offer</label>
                 <div class="checkbox-grid">

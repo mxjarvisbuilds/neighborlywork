@@ -884,7 +884,7 @@ footer {
  <h1>Get 3 free HVAC quotes.<br><em>Compare and save.</em></h1>
  <p class="hero-sub">Submit once. Three vetted local contractors compete for your job. You pick the best price.</p>
  <div class="zip-row">
- <input class="zip-input" type="text" placeholder="Enter your ZIP code" maxlength="5" id="hero-zip" oninput="this.value=this.value.replace(/\D/g,'')">
+ <input class="zip-input" type="text" placeholder="Enter your ZIP code" maxlength="5" id="hero-zip" oninput="this.value=this.value.replace(/\D/g,'')" aria-label="ZIP code">
  <button class="btn-primary" onclick="startWithZip()">Get quotes →</button>
  </div>
  <div class="trust-pills">
@@ -1029,7 +1029,7 @@ footer {
  <div class="form-row">
  <div class="form-group">
  <label class="form-label">First name</label>
- <input class="form-input" type="text" placeholder="Maria" id="hw-fname">
+ <input class="form-input" type="text" placeholder="Maria" id="hw-fname" aria-label="First name">
  </div>
  <div class="form-group">
  <label class="form-label">Last name</label>
@@ -1038,12 +1038,12 @@ footer {
  </div>
  <div class="form-group">
  <label class="form-label">Email address</label>
- <input class="form-input" type="email" placeholder="maria@email.com" id="hw-email">
+ <input class="form-input" type="email" placeholder="maria@email.com" id="hw-email" aria-label="Email address">
  </div>
  <div class="form-group">
  <label class="form-label">Password</label>
  <div class="password-wrap">
- <input class="form-input" type="password" placeholder="Create a password" id="hw-pw">
+ <input class="form-input" type="password" placeholder="Create a password" id="hw-pw" aria-label="Password">
  <button class="toggle-pw" onclick="togglePassword('hw-pw', this)">Show</button>
  </div>
  </div>
@@ -1098,7 +1098,7 @@ footer {
  <p class="modal-sub">Helps contractors give you an accurate quote.</p>
  <div class="form-group">
  <label class="form-label">ZIP code</label>
- <input class="form-input" type="text" placeholder="95825" id="hw-zip-modal" maxlength="5" oninput="this.value=this.value.replace(/\D/g,'')">
+ <input class="form-input" type="text" placeholder="95825" id="hw-zip-modal" maxlength="5" oninput="this.value=this.value.replace(/\D/g,'')" aria-label="ZIP code">
  </div>
  <div class="form-group">
  <label class="form-label">Home size</label>
@@ -1173,7 +1173,7 @@ footer {
  <div class="form-group">
  <label class="form-label">Password</label>
  <div class="password-wrap">
- <input class="form-input" type="password" placeholder="Your password" id="si-pw">
+ <input class="form-input" type="password" placeholder="Your password" id="si-pw" aria-label="Password">
  <button class="toggle-pw" onclick="togglePassword('si-pw', this)">Show</button>
  </div>
  </div>

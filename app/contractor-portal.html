@@ -118,21 +118,21 @@
             <div class="summary" id="leadSummary">Select a lead from the dashboard to begin.</div>
             <div class="summary" id="draftQuoteSummary" style="margin-top:12px;">Draft quote suggestions will appear here after you select a lead.</div>
             <form id="quoteForm" class="form-grid">
-              <div class="field"><label>Equipment brand</label><select id="equipmentBrand" required><option value="">Select brand</option><option value="Carrier">Carrier</option><option value="Trane">Trane</option><option value="Lennox">Lennox</option><option value="Rheem">Rheem</option><option value="Goodman">Goodman</option><option value="Daikin">Daikin</option><option value="Other">Other</option></select></div>
-              <div class="field"><label>Equipment model</label><input id="equipmentModel" type="text" placeholder="Model number"></div>
-              <div class="field"><label>SEER rating</label><select id="seerRating" required><option value="">Select</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18+</option></select></div>
-              <div class="field"><label>Warranty</label><select id="warrantyYears" required><option value="">Select</option><option value="5">5 years</option><option value="10">10 years</option><option value="12">12 years</option><option value="15">15 years</option></select></div>
-              <div class="field"><label>Tonnage</label><select id="tonnage"><option value="">Select</option><option value="1.5">1.5 ton</option><option value="2">2 ton</option><option value="2.5">2.5 ton</option><option value="3">3 ton</option><option value="4">4 ton</option><option value="5">5 ton</option></select></div>
-              <div class="field"><label>Install time</label><select id="installTime"><option value="">Select</option><option value="0">Same day</option><option value="1">1 day</option><option value="2">2 days</option><option value="3">3+ days</option></select></div>
-              <div class="field"><label>Equipment cost ($)</label><input id="equipmentCost" type="number" min="0" step="0.01" required></div>
-              <div class="field"><label>Labor cost ($)</label><input id="laborCost" type="number" min="0" step="0.01" required></div>
-              <div class="field"><label>Additional cost ($)</label><input id="additionalCost" type="number" min="0" step="0.01" value="0"></div>
-              <div class="field"><label>Available date</label><input id="availableDate" type="date"></div>
-              <div class="field"><label>Includes removal</label><select id="includesRemoval"><option value="true">Yes</option><option value="false">No</option></select></div>
-              <div class="field"><label>Permits included</label><select id="permitsIncluded"><option value="true">Yes</option><option value="false">No</option></select></div>
-              <div class="field"><label>Financing available</label><select id="financingAvailable"><option value="false">No</option><option value="true">Yes</option></select></div>
-              <div class="field"><label>Financing note</label><input id="financingNote" type="text" placeholder="Optional"></div>
-              <div class="field" style="grid-column:1 / -1;"><label>Note to homeowner</label><textarea id="noteToHomeowner" maxlength="300" placeholder="Share anything helpful about your quote."></textarea></div>
+              <div class="field"><label>Equipment brand</label><select id="equipmentBrand" required aria-label="Equipment brand"><option value="">Select brand</option><option value="Carrier">Carrier</option><option value="Trane">Trane</option><option value="Lennox">Lennox</option><option value="Rheem">Rheem</option><option value="Goodman">Goodman</option><option value="Daikin">Daikin</option><option value="Other">Other</option></select></div>
+              <div class="field"><label>Equipment model</label><input id="equipmentModel" type="text" placeholder="Model number" aria-label="Equipment model"></div>
+              <div class="field"><label>SEER rating</label><select id="seerRating" required aria-label="SEER2 rating"><option value="">Select</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18+</option></select></div>
+              <div class="field"><label>Warranty</label><select id="warrantyYears" required aria-label="Warranty years"><option value="">Select</option><option value="5">5 years</option><option value="10">10 years</option><option value="12">12 years</option><option value="15">15 years</option></select></div>
+              <div class="field"><label>Tonnage</label><select id="tonnage" aria-label="System size"><option value="">Select</option><option value="1.5">1.5 ton</option><option value="2">2 ton</option><option value="2.5">2.5 ton</option><option value="3">3 ton</option><option value="4">4 ton</option><option value="5">5 ton</option></select></div>
+              <div class="field"><label>Install time</label><select id="installTime" aria-label="Install timeline"><option value="">Select</option><option value="0">Same day</option><option value="1">1 day</option><option value="2">2 days</option><option value="3">3+ days</option></select></div>
+              <div class="field"><label>Equipment cost ($)</label><input id="equipmentCost" type="number" min="0" step="0.01" required aria-label="Equipment cost"></div>
+              <div class="field"><label>Labor cost ($)</label><input id="laborCost" type="number" min="0" step="0.01" required aria-label="Labor cost"></div>
+              <div class="field"><label>Additional cost ($)</label><input id="additionalCost" type="number" min="0" step="0.01" value="0" aria-label="Additional cost"></div>
+              <div class="field"><label>Available date</label><input id="availableDate" type="date" aria-label="Available date"></div>
+              <div class="field"><label>Includes removal</label><select id="includesRemoval" aria-label="Includes old-equipment removal"><option value="true">Yes</option><option value="false">No</option></select></div>
+              <div class="field"><label>Permits included</label><select id="permitsIncluded" aria-label="Permits included"><option value="true">Yes</option><option value="false">No</option></select></div>
+              <div class="field"><label>Financing available</label><select id="financingAvailable" aria-label="Financing available"><option value="false">No</option><option value="true">Yes</option></select></div>
+              <div class="field"><label>Financing note</label><input id="financingNote" type="text" placeholder="Optional" aria-label="Financing note"></div>
+              <div class="field" style="grid-column:1 / -1;"><label>Note to homeowner</label><textarea id="noteToHomeowner" maxlength="300" placeholder="Share anything helpful about your quote." aria-label="Note to homeowner"></textarea></div>
               <div class="money-row" style="grid-column:1 / -1;">
                 <div class="money"><div class="k">Total price</div><div class="v" id="totalPriceDisplay">$0</div></div>
                 <div class="money"><div class="k">Install timing</div><div class="v" id="quoteTimingDisplay">Ready to submit</div></div>
@@ -162,11 +162,11 @@
             </div>
           </div>
           <form id="profileForm" class="profile-grid">
-            <div class="field"><label>Full name</label><input id="profileName" type="text" required></div>
-            <div class="field"><label>Business name</label><input id="profileBusiness" type="text" required></div>
-            <div class="field"><label>Phone</label><input id="profilePhone" type="tel"></div>
-            <div class="field"><label>Service ZIP codes</label><input id="profileZips" type="text" placeholder="95825, 95661, 95630"></div>
-            <div class="field" style="grid-column:1 / -1;"><label>Bio</label><textarea id="profileBio" placeholder="Tell homeowners about your company."></textarea></div>
+            <div class="field"><label>Full name</label><input id="profileName" type="text" required aria-label="Profile name"></div>
+            <div class="field"><label>Business name</label><input id="profileBusiness" type="text" required aria-label="Business name"></div>
+            <div class="field"><label>Phone</label><input id="profilePhone" type="tel" aria-label="Business phone"></div>
+            <div class="field"><label>Service ZIP codes</label><input id="profileZips" type="text" placeholder="95825, 95661, 95630" aria-label="Service ZIP codes"></div>
+            <div class="field" style="grid-column:1 / -1;"><label>Bio</label><textarea id="profileBio" placeholder="Tell homeowners about your company." aria-label="Company bio"></textarea></div>
             <div class="field" style="grid-column:1 / -1;">
               <label>Services</label>
               <div class="checkbox-grid">
@@ -194,13 +194,13 @@
           </div>
           <div class="summary" id="pricingProfileSummary">Pricing profile status will load here.</div>
           <form id="pricingProfileForm" class="profile-grid" style="margin-top:16px;">
-            <div class="field"><label>Base labor rate ($)</label><input id="baseLaborRate" type="number" min="0" step="0.01" required></div>
-            <div class="field"><label>Default warranty (years)</label><input id="defaultWarrantyOffered" type="number" min="0" step="1" placeholder="10"></div>
-            <div class="field"><label>Default install timeline (days)</label><input id="defaultInstallTimelineDays" type="number" min="0" step="1" placeholder="2"></div>
-            <div class="field"><label>Profile completeness</label><input id="pricingProfileCompleteDisplay" type="text" readonly></div>
-            <div class="field" style="grid-column:1 / -1;"><label>Brand markups JSON</label><textarea id="brandMarkupsJson" placeholder='{"Carrier": 1200, "Trane": 1500}'></textarea></div>
-            <div class="field" style="grid-column:1 / -1;"><label>Service area fees JSON</label><textarea id="serviceAreaFeesJson" placeholder='{"95814": 0, "95630": 250}'></textarea></div>
-            <div class="field" style="grid-column:1 / -1;"><label>Markup preferences JSON</label><textarea id="markupPreferencesJson" placeholder='{"target_margin_pct": 22, "permit_buffer": 350}'></textarea></div>
+            <div class="field"><label>Base labor rate ($)</label><input id="baseLaborRate" type="number" min="0" step="0.01" required aria-label="Base labor rate"></div>
+            <div class="field"><label>Default warranty (years)</label><input id="defaultWarrantyOffered" type="number" min="0" step="1" placeholder="10" aria-label="Default warranty offered"></div>
+            <div class="field"><label>Default install timeline (days)</label><input id="defaultInstallTimelineDays" type="number" min="0" step="1" placeholder="2" aria-label="Default install timeline days"></div>
+            <div class="field"><label>Profile completeness</label><input id="pricingProfileCompleteDisplay" type="text" readonly aria-label="Pricing profile complete"></div>
+            <div class="field" style="grid-column:1 / -1;"><label>Brand markups JSON</label><textarea id="brandMarkupsJson" placeholder='{"Carrier": 1200, "Trane": 1500}' aria-label="Brand markups JSON"></textarea></div>
+            <div class="field" style="grid-column:1 / -1;"><label>Service area fees JSON</label><textarea id="serviceAreaFeesJson" placeholder='{"95814": 0, "95630": 250}' aria-label="Service area fees JSON"></textarea></div>
+            <div class="field" style="grid-column:1 / -1;"><label>Markup preferences JSON</label><textarea id="markupPreferencesJson" placeholder='{"target_margin_pct": 22, "permit_buffer": 350}' aria-label="Markup preferences JSON"></textarea></div>
             <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
               <div class="small-note">Use valid JSON objects for pricing rules. This profile is contractor-owned and will power future draft quote generation.</div>
               <button class="btn btn-green" type="submit">Save Pricing Profile</button>
@@ -222,15 +222,15 @@
             <form id="changeOrderForm" class="profile-grid" style="margin-top:16px;">
               <div class="field">
                 <label>Won lead</label>
-                <select id="changeOrderLeadSelect">
+                <select id="changeOrderLeadSelect" aria-label="Lead for change order">
                   <option value="">Select lead</option>
                 </select>
               </div>
-              <div class="field"><label>Original selected quote</label><input id="changeOrderOriginalPrice" type="text" readonly></div>
-              <div class="field"><label>Revised total price ($)</label><input id="changeOrderRevisedPrice" type="number" min="0" step="0.01" required></div>
+              <div class="field"><label>Original selected quote</label><input id="changeOrderOriginalPrice" type="text" readonly aria-label="Original price"></div>
+              <div class="field"><label>Revised total price ($)</label><input id="changeOrderRevisedPrice" type="number" min="0" step="0.01" required aria-label="Revised price"></div>
               <div class="field">
                 <label>Reason category</label>
-                <select id="changeOrderReasonCategory" required>
+                <select id="changeOrderReasonCategory" required aria-label="Reason category">
                   <option value="">Select</option>
                   <option value="equipment_change">Equipment change</option>
                   <option value="additional_work_required">Additional work required</option>
@@ -242,7 +242,7 @@
               </div>
               <div class="field">
                 <label>Need type</label>
-                <select id="changeOrderNeedType" required>
+                <select id="changeOrderNeedType" required aria-label="Need type">
                   <option value="">Select</option>
                   <option value="necessary">Necessary</option>
                   <option value="recommended">Recommended</option>
@@ -251,7 +251,7 @@
               </div>
               <div class="field" style="grid-column:1 / -1;">
                 <label>Scope explanation</label>
-                <textarea id="changeOrderReasonDescription" placeholder="Explain what changed onsite and why the revised amount is justified." required></textarea>
+                <textarea id="changeOrderReasonDescription" placeholder="Explain what changed onsite and why the revised amount is justified." required aria-label="Reason description"></textarea>
               </div>
               <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;">
                 <button class="btn btn-orange" type="submit">Submit Change Order</button>
@@ -270,13 +270,13 @@
               <form id="changeOrderResponseForm" class="profile-grid" style="margin-top:16px;">
                 <div class="field">
                   <label>Open change order</label>
-                  <select id="competingChangeOrderSelect">
+                  <select id="competingChangeOrderSelect" aria-label="Change order response">
                     <option value="">Select open change order</option>
                   </select>
                 </div>
                 <div class="field">
                   <label>Your response</label>
-                  <select id="competingResponseType" required>
+                  <select id="competingResponseType" required aria-label="Response type">
                     <option value="">Select</option>
                     <option value="would_match">Would match</option>
                     <option value="would_do_for_less">Would do for less</option>
@@ -284,10 +284,10 @@
                     <option value="flag_as_upsell">Flag as upsell</option>
                   </select>
                 </div>
-                <div class="field"><label>Alternative total price ($)</label><input id="competingAlternativePrice" type="number" min="0" step="0.01"></div>
+                <div class="field"><label>Alternative total price ($)</label><input id="competingAlternativePrice" type="number" min="0" step="0.01" aria-label="Alternative price"></div>
                 <div class="field" style="grid-column:1 / -1;">
                   <label>Response notes</label>
-                  <textarea id="competingResponseNotes" placeholder="Explain your response and any alternative pricing or scope call-out."></textarea>
+                  <textarea id="competingResponseNotes" placeholder="Explain your response and any alternative pricing or scope call-out." aria-label="Response notes"></textarea>
                 </div>
                 <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;">
                   <button class="btn btn-green" type="submit">Submit Response</button>
