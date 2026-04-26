@@ -7,6 +7,7 @@
   <meta name="description" content="Apply, log in, and manage HVAC quote leads with NeighborlyWork." />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script type="module" src="/app/abuse-guard.mjs"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
     :root{--green:#1a5c3a;--orange:#c8401a;--off:#f5f5f7;--white:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:rgba(0,0,0,.08);--shadow:0 18px 50px rgba(0,0,0,.08)}
@@ -144,6 +145,8 @@
             <h2>Create your account</h2>
             <p class="small">Add your business details and confirm the agreement terms to finish your application.</p>
             <form class="form" id="signupForm">
+              <input type="text" name="website_url" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">
+              <input type="hidden" name="form_started_at" value="">
               <div class="field"><label>First name</label><input id="firstName" type="text" placeholder="Carlos" required aria-label="First name"></div>
               <div class="field"><label>Last name</label><input id="lastName" type="text" placeholder="Mendez" required aria-label="Last name"></div>
               <div class="field"><label>Business name</label><input id="businessName" type="text" placeholder="Arctic Air HVAC" required aria-label="Business name"></div>
@@ -280,12 +283,27 @@
       }
     });
 
-    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    const signupForm = document.getElementById('signupForm');
+    signupForm.dataset.startedAt = String(Date.now());
+    const signupStartedAtField = signupForm.querySelector('[name="form_started_at"]');
+    if (signupStartedAtField) signupStartedAtField.value = signupForm.dataset.startedAt;
+    window.AbuseGuard?.markFormStarted(signupForm);
+
+    signupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       clearMessages();
       const form = e.currentTarget;
       form.classList.add('loading');
       try {
+        window.AbuseGuard?.assertHumanSubmission({
+          form,
+          storage: window.localStorage,
+          scope: 'contractor-signup',
+          identity: document.getElementById('signupEmail').value.trim() || 'anonymous',
+          limit: 3,
+          windowMs: 60 * 60 * 1000,
+        });
+
         const firstName = document.getElementById('firstName').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
         const businessName = document.getElementById('businessName').value.trim();
@@ -298,6 +316,13 @@
         if (!document.getElementById('signupLicenseConsent').checked || !document.getElementById('signupFeeConsent').checked || !document.getElementById('signupLegalConsent').checked) {
           throw new Error('You must agree to the contractor terms before creating your account.');
         }
+
+        window.AbuseGuard?.recordSubmissionAttempt({
+          storage: window.localStorage,
+          scope: 'contractor-signup',
+          identity: email || 'anonymous',
+          windowMs: 60 * 60 * 1000,
+        });
 
         const { data, error } = await db.auth.signUp({ email, password });
         if (error) throw error;

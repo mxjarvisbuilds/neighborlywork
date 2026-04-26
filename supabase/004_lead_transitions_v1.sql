@@ -23,6 +23,8 @@ declare
   v_matched_count integer := 0;
   v_distinct_matched_count integer := 0;
   v_selected_quote public.quotes%rowtype;
+  v_is_admin boolean := false;
+  v_jwt_role text := coalesce(current_setting('request.jwt.claim.role', true), '');
 begin
   select *
   into v_lead
@@ -36,6 +38,47 @@ begin
 
   if v_lead.status = p_new_status then
     raise exception 'Lead % is already in status %', p_lead_id, p_new_status;
+  end if;
+
+  select exists (
+    select 1
+    from public.users
+    where public.users.id = v_actor
+      and public.users.role = 'admin'
+  ) into v_is_admin;
+
+  if v_jwt_role <> 'service_role' and not v_is_admin then
+    if v_actor is null then
+      raise exception 'Authentication is required to transition lead status';
+    end if;
+
+    if p_new_status in ('install_scheduled', 'install_complete', 'disputed', 'cleared', 'cancelled') then
+      raise exception 'Admin authorization required for lead transition to %', p_new_status;
+    end if;
+
+    if p_new_status = 'matched_to_contractors' and v_lead.homeowner_id is distinct from v_actor then
+      raise exception 'Only the homeowner or admin can submit this lead for matching';
+    end if;
+
+    if p_new_status = 'confirmed' and not (v_lead.status = 'change_order_open' and v_lead.homeowner_id = v_actor) then
+      raise exception 'Only the homeowner can accept an open change order; other confirmed transitions require admin';
+    end if;
+
+    if p_new_status in ('homeowner_selected', 'pending_verification') and v_lead.homeowner_id is distinct from v_actor then
+      raise exception 'Only the homeowner or admin can select or verify a quote for this lead';
+    end if;
+
+    if p_new_status = 'quotes_submitted' and not exists (
+      select 1
+      from unnest(coalesce(v_lead.matched_contractors, '{}'::uuid[])) as contractor_id
+      where contractor_id = v_actor
+    ) then
+      raise exception 'Only a matched contractor or admin can mark quotes submitted for this lead';
+    end if;
+
+    if p_new_status = 'change_order_open' and v_lead.selected_contractor_id is distinct from v_actor then
+      raise exception 'Only the selected contractor or admin can open a change order for this lead';
+    end if;
   end if;
 
   v_allowed := (
