@@ -1,0 +1,12 @@
+# Netlify security headers for NeighborlyWork static/app pages
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# Keep PDFs embeddable/downloadable by browsers but prevent sniffing.
+/*.pdf
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

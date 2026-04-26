@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /app/founder-dashboard.html
+Disallow: /app/lead-inbox.html
+Disallow: /404.html
+Disallow: /500.html
+
+Sitemap: https://neighborlywork.com/sitemap.xml

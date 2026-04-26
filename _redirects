@@ -12,3 +12,7 @@
 /app/contractors.html       /app/contractor-auth.html            301
 /app/test-community.html    /index.html                          301
 /app/test-pro.html          /index.html                          301
+
+/_headers                  /_headers                           404
+/robots.txt                /robots.txt                         200
+/sitemap.xml               /sitemap.xml                        200
