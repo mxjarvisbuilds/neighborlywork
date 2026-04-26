@@ -5,6 +5,7 @@ import {
   MAX_NOTIFICATION_DELIVERY_ATTEMPTS,
   buildEmailDeliveryRequest,
   escapeHtml,
+  isAllowedSenderEmail,
   buildNotificationDeliveryFailureUpdate,
   buildNotificationDeliverySuccessUpdate,
   buildSmsDeliveryRequest,
@@ -16,13 +17,26 @@ test('resolveDeliveryProviders selects Twilio for SMS and Resend for email when 
   const providers = resolveDeliveryProviders({
     TWILIO_ACCOUNT_SID: 'sid',
     TWILIO_AUTH_TOKEN: 'token',
-    TWILIO_FROM_NUMBER: '+15551230000',
+    TWILIO_FROM_NUMBER: '+155****0000',
     RESEND_API_KEY: 're_123',
-    RESEND_FROM_EMAIL: 'ops@neighborlywork.com',
+    RESEND_FROM_EMAIL: 'NeighborlyWork <notifications@neighborlywork.com>',
   });
 
   assert.equal(providers.sms, 'twilio');
   assert.equal(providers.email, 'resend');
+});
+
+test('resolveDeliveryProviders refuses Resend when sender is not aligned to neighborlywork.com', () => {
+  assert.equal(isAllowedSenderEmail('NeighborlyWork <notifications@neighborlywork.com>'), true);
+  assert.equal(isAllowedSenderEmail('ops@neighborlywork.com'), true);
+  assert.equal(isAllowedSenderEmail('neighborlywork@gmail.com'), false);
+
+  const providers = resolveDeliveryProviders({
+    RESEND_API_KEY: 're_123',
+    RESEND_FROM_EMAIL: 'neighborlywork@gmail.com',
+  });
+
+  assert.equal(providers.email, null);
 });
 
 test('shouldAttemptNotificationDelivery only allows pending or retryable failed notifications scheduled for now or earlier', () => {
@@ -72,7 +86,9 @@ test('buildEmailDeliveryRequest produces a Resend send-email request for email n
     user: { email: 'contractor@example.com', full_name: 'ACME HVAC' },
     env: {
       RESEND_API_KEY: 're_123',
-      RESEND_FROM_EMAIL: 'ops@neighborlywork.com',
+      RESEND_FROM_EMAIL: 'NeighborlyWork <notifications@neighborlywork.com>',
+      RESEND_REPLY_TO_EMAIL: 'support@neighborlywork.com',
+      EMAIL_FOOTER_ADDRESS: 'Sacramento, CA',
     },
   });
 
@@ -80,9 +96,36 @@ test('buildEmailDeliveryRequest produces a Resend send-email request for email n
   assert.equal(request.method, 'POST');
   assert.equal(request.headers.Authorization, 'Bearer re_123');
   assert.equal(request.json.to, 'contractor@example.com');
-  assert.equal(request.json.from, 'ops@neighborlywork.com');
+  assert.equal(request.json.from, 'NeighborlyWork <notifications@neighborlywork.com>');
+  assert.equal(request.json.reply_to, 'support@neighborlywork.com');
+  assert.equal(request.json.headers['List-Unsubscribe'], '<mailto:support%40neighborlywork.com?subject=unsubscribe>');
   assert.equal(request.json.subject, 'Billing cycle pending');
+  assert.match(request.json.text, /A new billing cycle is ready\./);
+  assert.match(request.json.text, /Reply unsubscribe/);
   assert.match(request.json.html, /ACME HVAC/);
+});
+
+test('buildEmailDeliveryRequest rejects off-domain sender addresses before Resend send', () => {
+  assert.throws(() => buildEmailDeliveryRequest({
+    notification: { id: 'notif-1', subject: 'Bad sender', body: 'Body' },
+    user: { email: 'contractor@example.com', full_name: 'ACME HVAC' },
+    env: {
+      RESEND_API_KEY: 're_123',
+      RESEND_FROM_EMAIL: 'neighborlywork@gmail.com',
+    },
+  }), /RESEND_FROM_EMAIL must use neighborlywork\.com/);
+});
+
+test('buildEmailDeliveryRequest rejects off-domain reply-to addresses before Resend send', () => {
+  assert.throws(() => buildEmailDeliveryRequest({
+    notification: { id: 'notif-1', subject: 'Bad reply-to', body: 'Body' },
+    user: { email: 'contractor@example.com', full_name: 'ACME HVAC' },
+    env: {
+      RESEND_API_KEY: 're_123',
+      RESEND_FROM_EMAIL: 'NeighborlyWork <notifications@neighborlywork.com>',
+      RESEND_REPLY_TO_EMAIL: 'support@gmail.com',
+    },
+  }), /RESEND_REPLY_TO_EMAIL must use neighborlywork\.com/);
 });
 
 test('buildEmailDeliveryRequest escapes user-controlled HTML fields', () => {
@@ -91,7 +134,7 @@ test('buildEmailDeliveryRequest escapes user-controlled HTML fields', () => {
     user: { email: 'contractor@example.com', full_name: '<b>Bad Name</b>' },
     env: {
       RESEND_API_KEY: 're_123',
-      RESEND_FROM_EMAIL: 'ops@neighborlywork.com',
+      RESEND_FROM_EMAIL: 'NeighborlyWork <notifications@neighborlywork.com>',
     },
   });
 

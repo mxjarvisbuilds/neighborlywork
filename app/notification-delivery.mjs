@@ -1,5 +1,28 @@
 const MAX_NOTIFICATION_DELIVERY_ATTEMPTS = 3;
 const RETRY_DELAYS_MINUTES = [5, 15, 60];
+const REQUIRED_EMAIL_SENDER_DOMAIN = 'neighborlywork.com';
+
+function extractEmailAddress(value) {
+  const input = String(value || '').trim();
+  const bracketMatch = input.match(/<([^<>\s]+@[^<>\s]+)>/);
+  return bracketMatch ? bracketMatch[1].toLowerCase() : input.toLowerCase();
+}
+
+function isAllowedSenderEmail(value) {
+  const email = extractEmailAddress(value);
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) && email.endsWith(`@${REQUIRED_EMAIL_SENDER_DOMAIN}`);
+}
+
+function buildMailtoUnsubscribeHeader(replyTo) {
+  const email = extractEmailAddress(replyTo);
+  return `<mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent('unsubscribe')}>`;
+}
+
+function buildEmailFooter({ replyTo, address }) {
+  const safeReplyTo = replyTo || 'notifications@neighborlywork.com';
+  const safeAddress = address || 'Business mailing address pending before marketing launch.';
+  return `\n\n---\nYou are receiving this because you contacted NeighborlyWork or have an active NeighborlyWork contractor/homeowner request. Reply unsubscribe to opt out of non-transactional emails. NeighborlyWork, ${safeAddress}. Contact: ${safeReplyTo}`;
+}
 
 function addMinutes(iso, minutes) {
   const date = new Date(iso);
@@ -9,7 +32,7 @@ function addMinutes(iso, minutes) {
 
 function resolveDeliveryProviders(env = {}) {
   const sms = env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM_NUMBER ? 'twilio' : null;
-  const email = env.RESEND_API_KEY && env.RESEND_FROM_EMAIL ? 'resend' : null;
+  const email = env.RESEND_API_KEY && env.RESEND_FROM_EMAIL && isAllowedSenderEmail(env.RESEND_FROM_EMAIL) ? 'resend' : null;
   return { sms, email };
 }
 
@@ -61,6 +84,18 @@ function buildEmailDeliveryRequest({ notification, user, env }) {
   if (!env?.RESEND_API_KEY || !env?.RESEND_FROM_EMAIL) {
     throw new Error('Missing Resend configuration.');
   }
+  if (!isAllowedSenderEmail(env.RESEND_FROM_EMAIL)) {
+    throw new Error(`RESEND_FROM_EMAIL must use ${REQUIRED_EMAIL_SENDER_DOMAIN}.`);
+  }
+
+  const replyTo = env.RESEND_REPLY_TO_EMAIL || extractEmailAddress(env.RESEND_FROM_EMAIL);
+  if (!isAllowedSenderEmail(replyTo)) {
+    throw new Error(`RESEND_REPLY_TO_EMAIL must use ${REQUIRED_EMAIL_SENDER_DOMAIN}.`);
+  }
+  const footer = buildEmailFooter({ replyTo, address: env.EMAIL_FOOTER_ADDRESS });
+  const bodyText = String(notification.body || '');
+  const fullText = `${bodyText}${footer}`;
+
   return {
     provider: 'resend',
     url: 'https://api.resend.com/emails',
@@ -72,8 +107,13 @@ function buildEmailDeliveryRequest({ notification, user, env }) {
     json: {
       from: env.RESEND_FROM_EMAIL,
       to: user.email,
+      reply_to: replyTo,
       subject: notification.subject || 'NeighborlyWork update',
-      html: `<p>Hello ${escapeHtml(user.full_name || 'there')},</p><p>${escapeHtml(notification.body)}</p>`,
+      text: fullText,
+      html: `<p>Hello ${escapeHtml(user.full_name || 'there')},</p><p>${escapeHtml(bodyText)}</p><hr><p>${escapeHtml(footer.trim()).replace(/\n/g, '<br>')}</p>`,
+      headers: {
+        'List-Unsubscribe': buildMailtoUnsubscribeHeader(replyTo),
+      },
     },
   };
 }
@@ -112,8 +152,13 @@ function buildNotificationDeliveryFailureUpdate({ notification, failureReason, n
 
 const NotificationDelivery = {
   MAX_NOTIFICATION_DELIVERY_ATTEMPTS,
+  REQUIRED_EMAIL_SENDER_DOMAIN,
   buildEmailDeliveryRequest,
+  buildEmailFooter,
+  buildMailtoUnsubscribeHeader,
   escapeHtml,
+  extractEmailAddress,
+  isAllowedSenderEmail,
   buildNotificationDeliveryFailureUpdate,
   buildNotificationDeliverySuccessUpdate,
   buildSmsDeliveryRequest,
@@ -127,8 +172,13 @@ if (typeof window !== 'undefined') {
 
 export {
   MAX_NOTIFICATION_DELIVERY_ATTEMPTS,
+  REQUIRED_EMAIL_SENDER_DOMAIN,
   buildEmailDeliveryRequest,
+  buildEmailFooter,
+  buildMailtoUnsubscribeHeader,
   escapeHtml,
+  extractEmailAddress,
+  isAllowedSenderEmail,
   buildNotificationDeliveryFailureUpdate,
   buildNotificationDeliverySuccessUpdate,
   buildSmsDeliveryRequest,

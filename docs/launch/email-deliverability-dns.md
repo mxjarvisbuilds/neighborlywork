@@ -1,6 +1,8 @@
 # NeighborlyWork Email Deliverability DNS Checklist
 
-Current sender target: `notifications@neighborlywork.com` via Resend.
+Current sender target: `NeighborlyWork <notifications@neighborlywork.com>` via Resend.
+
+Code launch guardrail: `RESEND_FROM_EMAIL` must resolve to an `@neighborlywork.com` address. Use the canonical sender above unless there is a deliberate owned-domain reason to use another local part.
 
 ## Required Resend records captured from API
 
@@ -26,5 +28,15 @@ Move from `p=none` to stricter policy only after several days of clean mail flow
 ## Verification after DNS
 
 - Resend domain status should become verified.
-- `notifications@neighborlywork.com` should pass SPF alignment, DKIM signing, and DMARC policy evaluation.
-- Send one test notification to an owned inbox and inspect headers before customer-facing launch.
+- Confirm there is only one SPF TXT record at each hostname. If other mail providers are added later, merge SPF mechanisms into one record instead of creating duplicate SPF records.
+- `NeighborlyWork <notifications@neighborlywork.com>` should pass SPF alignment, DKIM signing, and DMARC policy evaluation.
+- Send one test notification to an owned inbox and inspect headers before customer-facing launch:
+  - SPF: pass/aligned for the Resend sending path.
+  - DKIM: pass for `neighborlywork.com` or the Resend-authenticated selector.
+  - DMARC: pass with aligned SPF or DKIM.
+  - From: `NeighborlyWork <notifications@neighborlywork.com>`.
+  - Reply-To present and monitored.
+  - List-Unsubscribe present.
+- Do not treat API credentials alone as launch readiness; DNS/authentication and received-header checks must pass.
+
+See also: `docs/launch/notification-readiness.md`.

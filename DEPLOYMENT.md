@@ -99,15 +99,17 @@ Current verified status: Stripe **test-mode** contractor billing authorization p
 
 ### Notification delivery
 
-Live SMS/email delivery is intentionally skipped until provider configuration is available:
+Live SMS/email delivery is intentionally skipped until provider configuration and deliverability gates are available:
 
 - `TWILIO_ACCOUNT_SID`
 - `TWILIO_AUTH_TOKEN`
 - `TWILIO_FROM_NUMBER`
 - `RESEND_API_KEY`
-- `RESEND_FROM_EMAIL`
+- `RESEND_FROM_EMAIL` — must resolve to an `@neighborlywork.com` sender; launch default is `NeighborlyWork <notifications@neighborlywork.com>`
+- `RESEND_REPLY_TO_EMAIL` — monitored reply/unsubscribe inbox
+- `EMAIL_FOOTER_ADDRESS` — required before marketing/cold-outreach sends
 
-Do not attempt Twilio/Resend validation without the required provider configuration.
+Do not attempt customer-facing Twilio/Resend validation without the required provider configuration. Do not treat Resend credentials alone as email launch readiness: Resend DNS verification, SPF/DKIM/DMARC alignment, reply-to handling, unsubscribe handling, and an owned-inbox header inspection must pass first. See `docs/launch/email-deliverability-dns.md` and `docs/launch/notification-readiness.md`.
 
 ## 4. Netlify deployment settings
 
@@ -160,9 +162,9 @@ Founder/admin flow:
 - Prepare-cycle controls remain visible.
 - Notification rows are queued by lifecycle actions where expected.
 
-Skipped until credentials/config are present:
+Skipped until credentials/config and deliverability gates are present:
 - Twilio live SMS delivery.
-- Resend live email delivery.
+- Resend live email delivery, including verified Resend DNS, SPF/DKIM/DMARC alignment, canonical `NeighborlyWork <notifications@neighborlywork.com>` sender, monitored reply-to/unsubscribe handling, and owned-inbox header inspection.
 - Any live-mode Stripe charge.
 
 ## 6. Latest verified offline state
@@ -178,7 +180,7 @@ Skipped until credentials/config are present:
 - Google auth is not enabled yet.
 - `additionalServices` from intake is still stored inside `additional_notes`, not a dedicated structured column.
 - `app/messages.html` requires a selected contractor before messaging is allowed.
-- Twilio/Resend delivery remains unverified without provider configuration.
+- Twilio/Resend delivery remains unverified without provider configuration and email deliverability gates: verified Resend DNS, SPF/DKIM/DMARC alignment, owned-domain sender, monitored reply-to/unsubscribe handling, and owned-inbox header inspection.
 - Live-mode billing must not run without explicit approval.
 
 ## 8. Next production steps
@@ -186,4 +188,4 @@ Skipped until credentials/config are present:
 1. Clear Netlify usage/billing limit so `neighborlywork.com` serves the app.
 2. Verify `_redirects` deploys and stale legacy URLs redirect.
 3. Run Section D and Section E production browser validation.
-4. Only after provider credentials/config are intentionally supplied, validate Twilio/Resend notification delivery.
+4. Only after provider credentials/config and email deliverability gates are intentionally supplied, validate Twilio/Resend notification delivery using `docs/launch/notification-readiness.md`.
