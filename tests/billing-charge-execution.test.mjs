@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import {
   MAX_BILLING_RETRIES,
@@ -20,6 +21,12 @@ test('shouldAttemptBillingCycleCharge only allows pending or due failed cycles w
 
   assert.equal(shouldAttemptBillingCycleCharge({
     cycle: { status: 'pending', retry_count: 0, next_retry_at: null },
+    contractor,
+    nowIso: '2026-05-15T12:00:00.000Z',
+  }), true);
+
+  assert.equal(shouldAttemptBillingCycleCharge({
+    cycle: { status: 'processing', retry_count: 0, next_retry_at: null },
     contractor,
     nowIso: '2026-05-15T12:00:00.000Z',
   }), true);
@@ -120,6 +127,19 @@ test('buildBillingChargeFailurePlan schedules retry before max retries and keeps
   assert.equal(result.leadUpdate.billing_status, 'in_cycle');
   assert.equal(result.contractorUpdate, null);
   assert.equal(result.notifications[0].event_type, 'billing_cycle_failed');
+});
+
+test('billing charge runner uses DB-side atomic claim RPC instead of client-side candidate scan', () => {
+  const schema = readFileSync(new URL('../supabase/001_backend_v1_schema.sql', import.meta.url), 'utf8');
+  const runner = readFileSync(new URL('../scripts/run-billing-cycle-charges.mjs', import.meta.url), 'utf8');
+
+  assert.match(schema, /create or replace function public\.claim_billing_cycle_for_charge\b/i);
+  assert.match(schema, /for update\s+skip locked/i);
+  assert.match(schema, /status\s*=\s*'processing'/i);
+  assert.match(schema, /processing_started_at/i);
+  assert.match(runner, /rest\/v1\/rpc\/\$\{functionName\}/);
+  assert.match(runner, /supabaseRpc\('claim_billing_cycle_for_charge'/);
+  assert.doesNotMatch(runner, /billing_cycles\?status=in\.\(pending,failed\)/);
 });
 
 test('buildBillingChargeFailurePlan freezes contractor and marks leads failed after final retry', () => {

@@ -1,7 +1,25 @@
+const DEFAULT_BILLING_SETUP_ORIGIN = 'http://127.0.0.1:8000';
+const BILLING_SETUP_ALLOWED_ORIGINS = new Set([
+  'https://neighborlywork.com',
+  'https://www.neighborlywork.com',
+  DEFAULT_BILLING_SETUP_ORIGIN,
+  'http://localhost:8000',
+]);
+
 function normalizeBillingSetupOrigin(rawOrigin) {
   const candidate = String(rawOrigin || '').trim();
-  if (!candidate) return 'http://127.0.0.1:8000';
-  return candidate.replace(/\/$/, '');
+  const fallbackOrCandidate = candidate || DEFAULT_BILLING_SETUP_ORIGIN;
+  let parsed;
+  try {
+    parsed = new URL(fallbackOrCandidate);
+  } catch {
+    throw new Error('Stripe Checkout return origin is not allowed.');
+  }
+  const normalized = parsed.origin.replace(/\/$/, '');
+  if (!BILLING_SETUP_ALLOWED_ORIGINS.has(normalized)) {
+    throw new Error('Stripe Checkout return origin is not allowed.');
+  }
+  return normalized;
 }
 
 function buildCheckoutSessionRequest({ customerId, contractorId, origin }) {

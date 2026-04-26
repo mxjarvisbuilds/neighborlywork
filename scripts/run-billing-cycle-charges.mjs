@@ -71,9 +71,25 @@ async function supabaseInsert(table, payload) {
   return text ? JSON.parse(text) : [];
 }
 
-async function fetchCandidateCycles() {
-  const limitClause = LIMIT ? `&limit=${LIMIT}` : '';
-  return supabaseGet(`billing_cycles?status=in.(pending,failed)&order=created_at.asc${limitClause}`);
+async function supabaseRpc(functionName, payload = {}) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+    method: 'POST',
+    headers: supabaseHeaders(),
+    body: JSON.stringify(payload),
+  });
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(`Supabase RPC ${functionName} failed (${response.status}): ${text}`);
+  }
+  return text ? JSON.parse(text) : [];
+}
+
+async function claimNextBillingCycleForCharge() {
+  const rows = await supabaseRpc('claim_billing_cycle_for_charge', {
+    p_now: new Date().toISOString(),
+    p_lock_minutes: 15,
+  });
+  return rows[0] || null;
 }
 
 async function fetchContractor(contractorId) {
@@ -182,14 +198,16 @@ async function processCycle(cycle) {
 
 async function main() {
   ensureEnv();
-  const cycles = await fetchCandidateCycles();
   const results = [];
-  for (const cycle of cycles) {
+  const maxCycles = LIMIT && Number.isFinite(LIMIT) && LIMIT > 0 ? LIMIT : Number.POSITIVE_INFINITY;
+  while (results.length < maxCycles) {
+    const cycle = await claimNextBillingCycleForCharge();
+    if (!cycle) break;
     results.push(await processCycle(cycle));
   }
   console.log(JSON.stringify({
     dryRun: DRY_RUN,
-    cycleCount: cycles.length,
+    cycleCount: results.length,
     results,
   }, null, 2));
 }

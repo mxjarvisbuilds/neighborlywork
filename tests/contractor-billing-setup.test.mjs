@@ -14,6 +14,28 @@ test('normalizeBillingSetupOrigin trims trailing slashes and falls back to local
   assert.equal(normalizeBillingSetupOrigin(null), 'http://127.0.0.1:8000');
 });
 
+test('normalizeBillingSetupOrigin rejects unapproved checkout return origins', () => {
+  assert.throws(
+    () => normalizeBillingSetupOrigin('https://evil.example/steal'),
+    /not allowed/i,
+  );
+  assert.throws(
+    () => normalizeBillingSetupOrigin('javascript:alert(1)'),
+    /not allowed/i,
+  );
+});
+
+test('buildCheckoutSessionRequest only accepts allowlisted return origins', () => {
+  assert.throws(
+    () => buildCheckoutSessionRequest({
+      customerId: 'cus_test_123',
+      contractorId: 'contractor-1',
+      origin: 'https://attacker.test',
+    }),
+    /not allowed/i,
+  );
+});
+
 test('buildCheckoutSessionRequest creates setup-mode Stripe checkout request with contractor metadata', () => {
   const request = buildCheckoutSessionRequest({
     customerId: 'cus_test_123',

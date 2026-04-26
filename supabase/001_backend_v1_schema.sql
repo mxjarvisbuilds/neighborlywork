@@ -129,6 +129,8 @@ create table if not exists public.billing_cycles (
   total_cleared_jobs integer not null default 0,
   total_amount_due numeric(12,2) not null default 0,
   status public.billing_cycle_status not null default 'pending',
+  processing_started_at timestamptz,
+  processing_expires_at timestamptz,
   stripe_charge_id text,
   charged_at timestamptz,
   retry_count integer not null default 0,
@@ -276,6 +278,10 @@ begin
 end $$;
 
 -- Existing table extensions --------------------------------------------------
+alter table public.billing_cycles
+  add column if not exists processing_started_at timestamptz,
+  add column if not exists processing_expires_at timestamptz;
+
 alter table public.contractors
   add column if not exists stripe_customer_id text,
   add column if not exists stripe_payment_method_id text,
@@ -532,6 +538,64 @@ create trigger trg_notifications_validate_owner_update
 before update on public.notifications
 for each row
 execute function public.validate_notification_owner_update();
+
+-- Billing charge claim RPC ---------------------------------------------------
+create or replace function public.claim_billing_cycle_for_charge(
+  p_now timestamptz default now(),
+  p_lock_minutes integer default 15
+)
+returns setof public.billing_cycles
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  claimed_id uuid;
+begin
+  with candidate as (
+    select bc.id
+    from public.billing_cycles bc
+    where (
+      bc.status = 'pending'
+      or (
+        bc.status = 'failed'
+        and (bc.next_retry_at is null or bc.next_retry_at <= p_now)
+      )
+      or (
+        bc.status = 'processing'
+        and bc.processing_expires_at is not null
+        and bc.processing_expires_at <= p_now
+      )
+    )
+    order by bc.created_at asc
+    for update skip locked
+    limit 1
+  ), updated as (
+    update public.billing_cycles bc
+    set
+      status = 'processing',
+      processing_started_at = p_now,
+      processing_expires_at = p_now + make_interval(mins => greatest(coalesce(p_lock_minutes, 15), 1)),
+      updated_at = p_now
+    from candidate
+    where bc.id = candidate.id
+    returning bc.id
+  )
+  select id into claimed_id from updated;
+
+  if claimed_id is null then
+    return;
+  end if;
+
+  return query
+  select *
+  from public.billing_cycles
+  where id = claimed_id;
+end;
+$$;
+
+create index if not exists idx_billing_cycles_charge_claimable
+on public.billing_cycles(status, next_retry_at, processing_expires_at, created_at);
 
 create index if not exists idx_leads_status_v1 on public.leads(status);
 create index if not exists idx_leads_selected_contractor on public.leads(selected_contractor_id);

@@ -17,7 +17,7 @@ function shouldAttemptBillingCycleCharge({ cycle, contractor, nowIso = new Date(
   if (!cycle || !contractor) return false;
   if (!hasStripeBillingProfile(contractor)) return false;
   const status = String(cycle.status || '').toLowerCase();
-  if (status === 'pending') return true;
+  if (status === 'pending' || status === 'processing') return true;
   if (status !== 'failed') return false;
   if ((cycle.retry_count || 0) >= MAX_BILLING_RETRIES) return false;
   if (!cycle.next_retry_at) return true;
